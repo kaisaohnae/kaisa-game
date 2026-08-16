@@ -1,5 +1,9 @@
+'use client';
+
 import Link from 'next/link';
-import {getGamesByLevel} from '@/games';
+import useEmblaCarousel from 'embla-carousel-react';
+import {WheelGesturesPlugin} from 'embla-carousel-wheel-gestures';
+import {getGamesByLevel, getLevelsDesc} from '@/games';
 import type {GameLevel, GameModule} from '@/games';
 
 const CARD_EMOJI: Record<string, string> = {
@@ -12,6 +16,16 @@ const CARD_EMOJI: Record<string, string> = {
   'shape-match': '⭐',
   'count-fruit': '🍎',
   'memory-cards': '🃏',
+  'maze-pad': '🗺️',
+  'pattern-copy': '✨',
+  'shadow-match': '🌑',
+  'number-study': '🔢',
+  'hangul-study': 'ㄱ',
+  'add-play': '➕',
+  'sub-play': '➖',
+  'pet-care': '🐣',
+  'hero-quest': '🗡️',
+  'magic-garden': '🌱',
 };
 
 function starsLabel(level: GameLevel) {
@@ -19,17 +33,27 @@ function starsLabel(level: GameLevel) {
 }
 
 function LevelRail({level, games}: {level: GameLevel; games: GameModule[]}) {
+  const [emblaRef] = useEmblaCarousel(
+    {
+      align: 'start',
+      dragFree: true,
+      containScroll: 'trimSnaps',
+      skipSnaps: false,
+    },
+    [WheelGesturesPlugin()],
+  );
+
+  if (games.length === 0) return null;
+
   return (
     <section className="game-portal__rail" aria-label={`난이도 ${starsLabel(level)}`}>
       <div className="game-portal__rail-head">
         <span className="game-portal__stars" aria-hidden="true">
           {starsLabel(level)}
         </span>
-        <span className="game-portal__rail-hint" aria-hidden="true">
-          ← 밀어서 고르기 →
-        </span>
       </div>
-      <div className="game-portal__scroller">
+
+      <div className="game-portal__viewport" ref={emblaRef}>
         <ul className="game-portal__track">
           {games.map((game) => (
             <li key={game.id} className="game-portal__slide">
@@ -53,8 +77,7 @@ function LevelRail({level, games}: {level: GameLevel; games: GameModule[]}) {
 }
 
 export default function GamePortal() {
-  const level1 = getGamesByLevel(1);
-  const level2 = getGamesByLevel(2);
+  const levels = getLevelsDesc();
 
   return (
     <main className="game-portal">
@@ -76,8 +99,9 @@ export default function GamePortal() {
       </header>
 
       <div className="game-portal__stage">
-        <LevelRail level={1} games={level1} />
-        <LevelRail level={2} games={level2} />
+        {levels.map((level) => (
+          <LevelRail key={level} level={level} games={getGamesByLevel(level)} />
+        ))}
       </div>
     </main>
   );

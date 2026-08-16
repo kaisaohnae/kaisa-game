@@ -1,7 +1,7 @@
 import type {ComponentType} from 'react';
 
-/** 1 = ★ (쉬운 터치), 2 = ★★ (조작·조금 더) */
-export type GameLevel = 1 | 2;
+/** ★ … ★★★★★★ */
+export type GameLevel = 1 | 2 | 3 | 4 | 5 | 6;
 
 export type GameMeta = {
   id: string;
