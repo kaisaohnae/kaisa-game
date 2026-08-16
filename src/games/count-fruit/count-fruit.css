@@ -1,0 +1,113 @@
+.count-fruit {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(14px, 3vh, 24px);
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 4px 0 12px;
+}
+
+.count-fruit__score {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: #fff;
+  border: 3px solid #ffe082;
+  box-shadow: 0 4px 0 #ffe0b2;
+  font-size: clamp(18px, 4vw, 24px);
+  font-weight: 800;
+  color: #ef6c00;
+}
+
+.count-fruit__message {
+  margin: 0;
+  font-family: var(--font-kids-display), var(--font-kids-body), sans-serif;
+  font-size: clamp(22px, 5vw, 30px);
+  font-weight: 700;
+  color: #5d4037;
+  text-align: center;
+}
+
+.count-fruit__tray {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  width: min(100%, 480px);
+  min-height: 120px;
+  padding: 18px;
+  border-radius: 28px;
+  background: #fff;
+  box-shadow:
+    0 0 0 4px rgba(165, 214, 130, 0.35),
+    0 12px 0 #c5e1a5;
+}
+
+.count-fruit__item {
+  font-size: clamp(40px, 10vw, 64px);
+  line-height: 1;
+}
+
+.count-fruit__options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  width: min(100%, 360px);
+}
+
+.count-fruit__btn {
+  min-height: var(--kids-touch);
+  border: 4px solid #fff;
+  border-radius: 24px;
+  background: linear-gradient(180deg, #fff 0%, #e3f2fd 100%);
+  box-shadow: 0 8px 0 #90caf9;
+  font-family: var(--font-kids-display), var(--font-kids-body), sans-serif;
+  font-size: clamp(28px, 7vw, 40px);
+  font-weight: 700;
+  color: #1565c0;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.count-fruit__btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 3px 0 #90caf9;
+}
+
+.count-fruit--ok .count-fruit__message {
+  color: #2e7d32;
+}
+
+.count-fruit--no .count-fruit__message {
+  color: #e64a19;
+}
+
+@media (orientation: landscape) and (min-height: 380px) {
+  .count-fruit {
+    flex-direction: row;
+    flex-wrap: wrap;
+    max-width: 1000px;
+    gap: 16px 24px;
+  }
+
+  .count-fruit__score,
+  .count-fruit__message {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .count-fruit__tray {
+    width: min(48vw, 460px);
+  }
+
+  .count-fruit__options {
+    width: min(36vw, 320px);
+  }
+}

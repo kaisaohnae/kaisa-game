@@ -1,0 +1,67 @@
+.game-page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding:
+    var(--kids-pad-top)
+    var(--kids-pad-right)
+    var(--kids-pad-bottom)
+    var(--kids-pad);
+}
+
+.game-page__header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 4px 0 8px;
+}
+
+.game-page__back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--kids-touch);
+  padding: 0 18px;
+  border-radius: 999px;
+  background: #fff;
+  border: 3px solid #ffcc80;
+  font-size: 16px;
+  font-weight: 800;
+  color: #ef6c00;
+  box-shadow: 0 4px 0 #ffe0b2;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.game-page__back:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #ffe0b2;
+}
+
+.game-page__title {
+  margin: 0;
+  font-family: var(--font-kids-display), var(--font-kids-body), sans-serif;
+  font-size: clamp(20px, 4.5vw, 32px);
+  font-weight: 700;
+  color: #5d4037;
+}
+
+.game-page__stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .game-page__header {
+    min-height: 52px;
+    padding-bottom: 4px;
+  }
+
+  .game-page__back {
+    min-height: 44px;
+  }
+}

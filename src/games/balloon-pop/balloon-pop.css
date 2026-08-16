@@ -1,0 +1,91 @@
+.balloon-pop {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  min-height: 0;
+  padding: 4px 0 8px;
+}
+
+.balloon-pop__bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: clamp(16px, 3.5vw, 22px);
+  font-weight: 800;
+  color: #ef6c00;
+  padding: 0 4px 8px;
+}
+
+.balloon-pop__help {
+  margin: 0 0 10px;
+  text-align: center;
+  font-family: var(--font-kids-display), var(--font-kids-body), sans-serif;
+  font-size: clamp(20px, 4.5vw, 28px);
+  font-weight: 700;
+  color: #5d4037;
+}
+
+.balloon-pop__sky {
+  position: relative;
+  flex: 1;
+  min-height: min(58vh, 520px);
+  border-radius: 32px;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.8), transparent 30%),
+    linear-gradient(180deg, #b3e5fc 0%, #e1f5fe 55%, #fff8e1 100%);
+  border: 4px solid #fff;
+  box-shadow: 0 10px 0 #81d4fa;
+  overflow: hidden;
+}
+
+.balloon-pop__balloon {
+  position: absolute;
+  bottom: 8%;
+  display: grid;
+  place-items: center;
+  border: 4px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.08);
+  font-size: 28px;
+  cursor: pointer;
+  touch-action: manipulation;
+  animation: balloonFloat 3.6s ease-in-out infinite;
+}
+
+.balloon-pop__balloon:active {
+  transform: scale(0.85);
+}
+
+@keyframes balloonFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-18px);
+  }
+}
+
+@media (min-width: 768px) {
+  .balloon-pop__sky {
+    min-height: min(62vh, 620px);
+  }
+
+  .balloon-pop__balloon {
+    font-size: 34px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .balloon-pop__sky {
+    min-height: 58vh;
+  }
+
+  .balloon-pop__help {
+    font-size: 18px;
+    margin-bottom: 6px;
+  }
+}

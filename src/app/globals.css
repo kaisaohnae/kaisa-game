@@ -1,0 +1,59 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  min-height: 100dvh;
+}
+
+body {
+  font-family: var(--font-kids-body), 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  color: #4a3b2f;
+  background-color: #fff3d9;
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(255, 143, 171, 0.35) 0 7%, transparent 8%),
+    radial-gradient(circle at 88% 14%, rgba(129, 212, 250, 0.4) 0 6%, transparent 7%),
+    radial-gradient(circle at 78% 78%, rgba(255, 213, 79, 0.45) 0 8%, transparent 9%),
+    radial-gradient(circle at 18% 82%, rgba(165, 214, 130, 0.4) 0 7%, transparent 8%),
+    radial-gradient(circle at 50% 110%, rgba(255, 183, 77, 0.25), transparent 45%),
+    linear-gradient(180deg, #fff8e8 0%, #ffe9c8 100%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  overscroll-behavior: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  touch-action: manipulation;
+}
+
+:root {
+  --kids-pad: max(16px, env(safe-area-inset-left));
+  --kids-pad-right: max(16px, env(safe-area-inset-right));
+  --kids-pad-top: max(12px, env(safe-area-inset-top));
+  --kids-pad-bottom: max(20px, env(safe-area-inset-bottom));
+  --kids-touch: 64px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --kids-pad: max(28px, env(safe-area-inset-left));
+    --kids-pad-right: max(28px, env(safe-area-inset-right));
+    --kids-pad-top: max(16px, env(safe-area-inset-top));
+    --kids-pad-bottom: max(28px, env(safe-area-inset-bottom));
+    --kids-touch: 88px;
+  }
+}

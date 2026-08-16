@@ -1,0 +1,110 @@
+.memory-cards {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 2.5vh, 20px);
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 4px 0 12px;
+}
+
+.memory-cards__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: min(100%, 360px);
+  font-size: clamp(16px, 3.5vw, 20px);
+  font-weight: 800;
+  color: #ef6c00;
+}
+
+.memory-cards__reset {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 3px solid #fff;
+  border-radius: 999px;
+  background: #ffcc80;
+  box-shadow: 0 4px 0 #ffb74d;
+  font-weight: 800;
+  color: #e65100;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.memory-cards__reset:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #ffb74d;
+}
+
+.memory-cards__message {
+  margin: 0;
+  font-family: var(--font-kids-display), var(--font-kids-body), sans-serif;
+  font-size: clamp(20px, 5vw, 28px);
+  font-weight: 700;
+  color: #5d4037;
+  text-align: center;
+}
+
+.memory-cards__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(10px, 2.5vw, 16px);
+  width: min(100%, 380px);
+}
+
+.memory-cards__card {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  min-width: var(--kids-touch);
+  min-height: var(--kids-touch);
+  border: 4px solid #fff;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #90caf9 0%, #42a5f5 100%);
+  box-shadow: 0 8px 0 #1e88e5;
+  font-size: clamp(28px, 8vw, 44px);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.memory-cards__card.is-open {
+  background: linear-gradient(180deg, #fff 0%, #fff8e1 100%);
+  box-shadow: 0 8px 0 #ffe082;
+}
+
+.memory-cards__card:active {
+  transform: translateY(3px);
+}
+
+.memory-cards--done .memory-cards__message {
+  color: #2e7d32;
+}
+
+@media (min-width: 768px) {
+  .memory-cards__grid {
+    width: min(100%, 460px);
+    gap: 18px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .memory-cards {
+    max-width: 720px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+  }
+
+  .memory-cards__bar,
+  .memory-cards__message {
+    width: 100%;
+  }
+
+  .memory-cards__grid {
+    width: min(50vw, 360px);
+  }
+}

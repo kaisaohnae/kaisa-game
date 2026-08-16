@@ -1,0 +1,115 @@
+.tap-order {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 3vh, 22px);
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 4px 0 12px;
+}
+
+.tap-order__score {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: #fff;
+  border: 3px solid #ffe082;
+  box-shadow: 0 4px 0 #ffe0b2;
+  font-size: clamp(18px, 4vw, 24px);
+  font-weight: 800;
+  color: #ef6c00;
+}
+
+.tap-order__help {
+  margin: 0;
+  font-family: var(--font-kids-display), var(--font-kids-body), sans-serif;
+  font-size: clamp(20px, 4.5vw, 28px);
+  font-weight: 700;
+  color: #5d4037;
+  text-align: center;
+}
+
+.tap-order__seq {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 999px;
+  background: #fff;
+  border: 4px solid #81d4fa;
+  box-shadow: 0 6px 0 #b3e5fc;
+}
+
+.tap-order__chip {
+  display: grid;
+  place-items: center;
+  width: clamp(52px, 14vw, 72px);
+  height: clamp(52px, 14vw, 72px);
+  border-radius: 50%;
+  background: #e3f2fd;
+  font-size: clamp(28px, 8vw, 40px);
+  opacity: 0.45;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.tap-order__chip--now {
+  opacity: 1;
+  transform: scale(1.12);
+  background: #fff59d;
+  box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.35);
+}
+
+.tap-order__chip--done {
+  opacity: 1;
+  background: #c8e6c9;
+}
+
+.tap-order__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.tap-order__btn {
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 24px;
+  background: #fff;
+  border: 4px solid #fff;
+  box-shadow: 0 8px 0 #ffcc80;
+  font-size: clamp(36px, 10vw, 52px);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tap-order__btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 4px 0 #ffcc80;
+}
+
+.tap-order--ok .tap-order__seq {
+  border-color: #81c784;
+}
+
+.tap-order--no .tap-order__seq {
+  animation: tapShake 0.4s ease;
+  border-color: #ef9a9a;
+}
+
+@keyframes tapShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-8px);
+  }
+  75% {
+    transform: translateX(8px);
+  }
+}

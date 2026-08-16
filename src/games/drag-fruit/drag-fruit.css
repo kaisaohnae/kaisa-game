@@ -1,0 +1,97 @@
+.drag-fruit {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 4px 0 12px;
+  gap: 10px;
+  touch-action: none;
+}
+
+.drag-fruit__score {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: #fff;
+  border: 3px solid #ffe082;
+  box-shadow: 0 4px 0 #ffe0b2;
+  font-size: clamp(18px, 4vw, 24px);
+  font-weight: 800;
+  color: #ef6c00;
+}
+
+.drag-fruit__help {
+  margin: 0;
+  font-family: var(--font-kids-display), var(--font-kids-body), sans-serif;
+  font-size: clamp(18px, 4vw, 26px);
+  font-weight: 700;
+  color: #5d4037;
+  text-align: center;
+}
+
+.drag-fruit__stage {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  min-height: 280px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, #e8f5e9 0%, #fff8e1 70%);
+  border: 4px solid #fff;
+  box-shadow: 0 10px 0 #c8e6c9;
+  overflow: hidden;
+}
+
+.drag-fruit__item {
+  position: absolute;
+  z-index: 2;
+  width: clamp(64px, 16vw, 88px);
+  height: clamp(64px, 16vw, 88px);
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 6px 0 rgba(121, 85, 72, 0.18);
+  font-size: clamp(36px, 10vw, 52px);
+  line-height: 1;
+  cursor: grab;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+}
+
+.drag-fruit__item--gone {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.drag-fruit__basket {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: clamp(120px, 34vw, 180px);
+  height: clamp(90px, 24vw, 130px);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 4px dashed #ffb74d;
+  font-size: clamp(52px, 14vw, 80px);
+}
+
+.drag-fruit__ghost {
+  position: fixed;
+  z-index: 60;
+  width: 72px;
+  height: 72px;
+  margin: -36px 0 0 -36px;
+  display: grid;
+  place-items: center;
+  font-size: 48px;
+  pointer-events: none;
+  filter: drop-shadow(0 8px 0 rgba(0, 0, 0, 0.12));
+}

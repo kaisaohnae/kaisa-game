@@ -1,0 +1,29 @@
+name: Deploy to GitHub Pages
+on:
+  push:
+    branches:
+      - master  # master 브랜치에 푸시될 때 실행
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code!
+        uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.11.1
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build project
+        run: npm run build
+      # - name: Add 404.html
+      #   run: echo '<meta http-equiv="refresh" content="0; URL=/">' > dist/404.html
+      - name: Add CNAME file
+        run: echo 'game.kaisa.co.kr' > out/CNAME  # CNAME 파일에 도메인 이름을 추가
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./out/
