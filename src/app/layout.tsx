@@ -15,8 +15,8 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: 'Kaisa Kids · 3–6세 놀이터',
-  description: '폰·태블릿에서 즐기는 3–6세 터치 놀이',
+  title: 'Kaisa Kids',
+  description: '폰·태블릿에서 즐기는 터치 놀이터',
   appleWebApp: {
     capable: true,
     title: 'Kaisa Kids',
