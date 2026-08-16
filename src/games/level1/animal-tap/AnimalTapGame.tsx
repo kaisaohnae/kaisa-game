@@ -3,6 +3,8 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import SuccessBurst from '@/games/shared/SuccessBurst';
 import ScoreHud from '@/games/shared/ScoreHud';
+import {choiceCount} from '@/games/shared/stage-scale';
+import {useWrongShake} from '@/games/shared/useWrongShake';
 import './animal-tap.css';
 
 type Animal = {id: string; name: string; emoji: string};
@@ -42,6 +44,7 @@ export default function AnimalTapGame() {
   const [message, setMessage] = useState('동물을 찾아 콕!');
   const [flash, setFlash] = useState<'ok' | 'no' | null>(null);
   const [seed, setSeed] = useState(1);
+  const {triggerWrong, shakeClass} = useWrongShake();
 
   useEffect(() => {
     setTarget(pick());
@@ -49,10 +52,14 @@ export default function AnimalTapGame() {
     setReady(true);
   }, []);
 
-  const choices = useMemo(
-    () => shuffle(ANIMALS, seed + target.id.length * 11),
-    [seed, target.id],
-  );
+  const choices = useMemo(() => {
+    const n = choiceCount(score, 3, 6);
+    const others = shuffle(
+      ANIMALS.filter((a) => a.id !== target.id),
+      seed,
+    ).slice(0, n - 1);
+    return shuffle([target, ...others], seed + 11);
+  }, [seed, target, score]);
 
   const nextRound = useCallback((currentId: string) => {
     setTarget(pick(currentId));
@@ -61,7 +68,7 @@ export default function AnimalTapGame() {
   }, []);
 
   const onPick = (animal: Animal) => {
-    if (!ready) return;
+    if (!ready || flash) return;
     if (animal.id === target.id) {
       setScore((n) => n + 1);
       setFlash('ok');
@@ -73,12 +80,13 @@ export default function AnimalTapGame() {
       return;
     }
     setFlash('no');
+    triggerWrong();
     setMessage('다시 찾아볼까?');
     window.setTimeout(() => setFlash(null), 450);
   };
 
   return (
-    <div className={`animal-tap${flash ? ` animal-tap--${flash}` : ''}`}>
+    <div className={`animal-tap${flash ? ` animal-tap--${flash}` : ''}${shakeClass}`}>
       <SuccessBurst show={flash === 'ok'} />
       <ScoreHud score={score} />
       <div className="animal-tap__prompt">

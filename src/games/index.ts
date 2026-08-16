@@ -6,13 +6,10 @@ import {CountFruitGame} from './level2/count-fruit';
 import {DragFruitGame} from './level2/drag-fruit';
 import {MemoryCardsGame} from './level2/memory-cards';
 import {MoveBuddyGame} from './level2/move-buddy';
-import {ShapeMatchGame} from './level2/shape-match';
 import {TapOrderGame} from './level2/tap-order';
 import {MazePadGame} from './level3/maze-pad';
 import {PatternCopyGame} from './level3/pattern-copy';
-import {ShadowMatchGame} from './level3/shadow-match';
 import {HangulStudyGame} from './level4/hangul-study';
-import {NumberStudyGame} from './level4/number-study';
 import {AddPlayGame} from './level5/add-play';
 import {SubPlayGame} from './level5/sub-play';
 import {HeroQuestGame} from './level6/hero-quest';
@@ -20,10 +17,8 @@ import {MagicGardenGame} from './level6/magic-garden';
 import {PetCareGame} from './level6/pet-care';
 
 /**
- * 난이도 재평가 (최대 ★★★)
- * ★   바로 콕 누르기·단순 짝맞추기
- * ★★  조작·세기·짧은 순서·키우기
- * ★★★ 기억·미로·연산·전투
+ * ★ 바로 콕 · ★★ 조작·학습 · ★★★ 기억·연산·전투
+ * (모양맞추기·그림자찾기·숫자공부는 중복으로 제외)
  */
 export const GAMES: GameModule[] = [
   {
@@ -46,20 +41,6 @@ export const GAMES: GameModule[] = [
     description: '하늘 풍선을 톡톡 터뜨려요',
     level: 1,
     Component: BalloonPopGame,
-  },
-  {
-    id: 'shape-match',
-    title: '모양 맞추기',
-    description: '동그라미 네모 세모를 찾아요',
-    level: 1,
-    Component: ShapeMatchGame,
-  },
-  {
-    id: 'shadow-match',
-    title: '그림자 찾기',
-    description: '그림자 주인을 맞춰요',
-    level: 1,
-    Component: ShadowMatchGame,
   },
   {
     id: 'drag-fruit',
@@ -88,13 +69,6 @@ export const GAMES: GameModule[] = [
     description: '과일을 세고 숫자를 골라요',
     level: 2,
     Component: CountFruitGame,
-  },
-  {
-    id: 'number-study',
-    title: '숫자 공부',
-    description: '같은 숫자를 찾아요',
-    level: 2,
-    Component: NumberStudyGame,
   },
   {
     id: 'hangul-study',
@@ -169,7 +143,6 @@ export function getGameIds() {
   return GAMES.map((game) => game.id);
 }
 
-/** ★★★ → ★ */
 export function getLevelsDesc(): GameLevel[] {
   return [3, 2, 1];
 }
