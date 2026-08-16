@@ -13,12 +13,12 @@ type ColorItem = {
 };
 
 const COLORS: ColorItem[] = [
-  {id: 'red', label: '빨강', value: '#ff6b6b', face: '?��'},
-  {id: 'orange', label: '주황', value: '#ff9f43', face: '?��'},
-  {id: 'yellow', label: '?�랑', value: '#ffd93d', face: '?��'},
-  {id: 'green', label: '초록', value: '#6bcb77', face: '?��'},
-  {id: 'blue', label: '?�랑', value: '#4d96ff', face: '?��'},
-  {id: 'purple', label: '보라', value: '#c77dff', face: '?��'},
+  {id: 'red', label: '빨강', value: '#ff6b6b', face: '❤️'},
+  {id: 'orange', label: '주황', value: '#ff9f43', face: '🧡'},
+  {id: 'yellow', label: '노랑', value: '#ffd93d', face: '💛'},
+  {id: 'green', label: '초록', value: '#6bcb77', face: '💚'},
+  {id: 'blue', label: '파랑', value: '#4d96ff', face: '💙'},
+  {id: 'purple', label: '보라', value: '#c77dff', face: '💜'},
 ];
 
 function pickTarget(excludeId?: string) {
@@ -44,7 +44,7 @@ export default function ColorTouchGame() {
   const [ready, setReady] = useState(false);
   const [target, setTarget] = useState<ColorItem>(COLORS[0]);
   const [score, setScore] = useState(0);
-  const [message, setMessage] = useState('???�깔??�? ?�러�?);
+  const [message, setMessage] = useState('이 색깔을 콜! 눌러바');
   const [flash, setFlash] = useState<'ok' | 'no' | null>(null);
   const [seed, setSeed] = useState(1);
 
@@ -62,7 +62,7 @@ export default function ColorTouchGame() {
   const nextRound = useCallback((currentId: string) => {
     setTarget(pickTarget(currentId));
     setSeed((n) => n + 1);
-    setMessage('???�깔??�? ?�러�?);
+    setMessage('이 색깔을 콜! 눌러바');
   }, []);
 
   const onPick = (color: ColorItem) => {
@@ -71,7 +71,7 @@ export default function ColorTouchGame() {
     if (color.id === target.id) {
       setScore((n) => n + 1);
       setFlash('ok');
-      setMessage('?��');
+      setMessage('🎉');
       window.setTimeout(() => {
         setFlash(null);
         nextRound(color.id);
@@ -80,7 +80,7 @@ export default function ColorTouchGame() {
     }
 
     setFlash('no');
-    setMessage('?�히, ?�시 ?�볼�?');
+    setMessage('히히, 다시 해볼까?');
     window.setTimeout(() => setFlash(null), 450);
   };
 
@@ -101,7 +101,7 @@ export default function ColorTouchGame() {
         <strong className="color-touch__label">{target.label}</strong>
       </div>
 
-      <div className="color-touch__grid" role="group" aria-label="?�깔 고르�?>
+      <div className="color-touch__grid" role="group" aria-label="색깔 고르기">
         {choices.map((color) => (
           <button
             key={color.id}

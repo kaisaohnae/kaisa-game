@@ -9,20 +9,8 @@
   max-width: 520px;
   margin: 0 auto;
   padding: 4px 0 12px;
-}
 
-.shadow-match__score {
-  display: inline-flex;
-  align-items: center;
-  min-height: 48px;
-  padding: 0 18px;
-  border-radius: 999px;
-  background: #fff;
-  border: 3px solid #ffe082;
-  box-shadow: 0 4px 0 #ffe0b2;
-  font-size: clamp(18px, 4vw, 24px);
-  font-weight: 800;
-  color: #ef6c00;
+  position: relative;
 }
 
 .shadow-match__help {
@@ -39,12 +27,16 @@
   width: clamp(120px, 32vw, 168px);
   height: clamp(120px, 32vw, 168px);
   border-radius: 32px;
-  background: #eceff1;
-  border: 4px solid #fff;
-  box-shadow: 0 10px 0 #cfd8dc;
+  background: #fff;
+  border: 4px solid #90a4ae;
+  box-shadow: 0 10px 0 #b0bec5;
   font-size: clamp(64px, 18vw, 96px);
+}
+
+.shadow-match__shadow > span {
   filter: grayscale(1) brightness(0);
-  opacity: 0.78;
+  opacity: 0.55;
+  line-height: 1;
 }
 
 .shadow-match__grid {

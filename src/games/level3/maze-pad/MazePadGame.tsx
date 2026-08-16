@@ -108,19 +108,37 @@ export default function MazePadGame() {
         )}
       </div>
 
-      <div className="maze-pad__controls">
-        <button type="button" className="maze-pad__btn maze-pad__btn--up" aria-label="위" onClick={() => tryMove(-1, 0)}>
+      <div className="maze-pad__controls" aria-label="방향키">
+        <button
+          type="button"
+          className="maze-pad__btn"
+          aria-label="위"
+          onClick={() => tryMove(-1, 0)}
+        >
           ↑
         </button>
-        <div className="maze-pad__mid">
-          <button type="button" className="maze-pad__btn" aria-label="왼쪽" onClick={() => tryMove(0, -1)}>
-            ←
-          </button>
-          <button type="button" className="maze-pad__btn" aria-label="오른쪽" onClick={() => tryMove(0, 1)}>
-            →
-          </button>
-        </div>
-        <button type="button" className="maze-pad__btn" aria-label="아래" onClick={() => tryMove(1, 0)}>
+        <button
+          type="button"
+          className="maze-pad__btn"
+          aria-label="왼쪽"
+          onClick={() => tryMove(0, -1)}
+        >
+          ←
+        </button>
+        <button
+          type="button"
+          className="maze-pad__btn"
+          aria-label="오른쪽"
+          onClick={() => tryMove(0, 1)}
+        >
+          →
+        </button>
+        <button
+          type="button"
+          className="maze-pad__btn"
+          aria-label="아래"
+          onClick={() => tryMove(1, 0)}
+        >
           ↓
         </button>
       </div>

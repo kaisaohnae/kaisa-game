@@ -19,7 +19,12 @@ import {HeroQuestGame} from './level6/hero-quest';
 import {MagicGardenGame} from './level6/magic-garden';
 import {PetCareGame} from './level6/pet-care';
 
-/** 새 게임 추가 시 level 폴더 + 여기만 등록 */
+/**
+ * 난이도 재평가 (최대 ★★★)
+ * ★   바로 콕 누르기·단순 짝맞추기
+ * ★★  조작·세기·짧은 순서·키우기
+ * ★★★ 기억·미로·연산·전투
+ */
 export const GAMES: GameModule[] = [
   {
     id: 'animal-tap',
@@ -43,18 +48,25 @@ export const GAMES: GameModule[] = [
     Component: BalloonPopGame,
   },
   {
+    id: 'shape-match',
+    title: '모양 맞추기',
+    description: '동그라미 네모 세모를 찾아요',
+    level: 1,
+    Component: ShapeMatchGame,
+  },
+  {
+    id: 'shadow-match',
+    title: '그림자 찾기',
+    description: '그림자 주인을 맞춰요',
+    level: 1,
+    Component: ShadowMatchGame,
+  },
+  {
     id: 'drag-fruit',
     title: '과일 담기',
     description: '과일을 바구니로 끌어 넣어요',
     level: 2,
     Component: DragFruitGame,
-  },
-  {
-    id: 'tap-order',
-    title: '순서 콕콕',
-    description: '보여준 순서대로 눌러요',
-    level: 2,
-    Component: TapOrderGame,
   },
   {
     id: 'move-buddy',
@@ -64,11 +76,11 @@ export const GAMES: GameModule[] = [
     Component: MoveBuddyGame,
   },
   {
-    id: 'shape-match',
-    title: '모양 맞추기',
-    description: '동그라미 네모 세모를 찾아요',
+    id: 'tap-order',
+    title: '순서 콕콕',
+    description: '보여준 순서대로 눌러요',
     level: 2,
-    Component: ShapeMatchGame,
+    Component: TapOrderGame,
   },
   {
     id: 'count-fruit',
@@ -78,10 +90,38 @@ export const GAMES: GameModule[] = [
     Component: CountFruitGame,
   },
   {
+    id: 'number-study',
+    title: '숫자 공부',
+    description: '같은 숫자를 찾아요',
+    level: 2,
+    Component: NumberStudyGame,
+  },
+  {
+    id: 'hangul-study',
+    title: '한글 공부',
+    description: '자음·모음을 찾아요',
+    level: 2,
+    Component: HangulStudyGame,
+  },
+  {
+    id: 'pet-care',
+    title: '펫 키우기',
+    description: '밥을 주고 키워봐요',
+    level: 2,
+    Component: PetCareGame,
+  },
+  {
+    id: 'magic-garden',
+    title: '마법 정원',
+    description: '심고 키우고 수확해요',
+    level: 2,
+    Component: MagicGardenGame,
+  },
+  {
     id: 'memory-cards',
     title: '짝꿍 찾기',
     description: '뒤집어서 같은 그림을 맞춰요',
-    level: 2,
+    level: 3,
     Component: MemoryCardsGame,
   },
   {
@@ -99,60 +139,25 @@ export const GAMES: GameModule[] = [
     Component: PatternCopyGame,
   },
   {
-    id: 'shadow-match',
-    title: '그림자 찾기',
-    description: '그림자 주인을 맞춰요',
-    level: 3,
-    Component: ShadowMatchGame,
-  },
-  {
-    id: 'number-study',
-    title: '숫자 공부',
-    description: '같은 숫자를 찾아요',
-    level: 4,
-    Component: NumberStudyGame,
-  },
-  {
-    id: 'hangul-study',
-    title: '한글 공부',
-    description: '자음·모음을 찾아요',
-    level: 4,
-    Component: HangulStudyGame,
-  },
-  {
     id: 'add-play',
     title: '덧셈 놀이',
     description: '더하기 답을 골라요',
-    level: 5,
+    level: 3,
     Component: AddPlayGame,
   },
   {
     id: 'sub-play',
     title: '뺄셈 놀이',
     description: '빼기 답을 골라요',
-    level: 5,
+    level: 3,
     Component: SubPlayGame,
-  },
-  {
-    id: 'pet-care',
-    title: '펫 키우기',
-    description: '밥을 주고 키워봐요',
-    level: 6,
-    Component: PetCareGame,
   },
   {
     id: 'hero-quest',
     title: '영웅 모험',
     description: '싸워서 레벨을 올려요',
-    level: 6,
+    level: 3,
     Component: HeroQuestGame,
-  },
-  {
-    id: 'magic-garden',
-    title: '마법 정원',
-    description: '심고 키우고 수확해요',
-    level: 6,
-    Component: MagicGardenGame,
   },
 ];
 
@@ -164,9 +169,9 @@ export function getGameIds() {
   return GAMES.map((game) => game.id);
 }
 
-/** ★★★★★★ → ★ */
+/** ★★★ → ★ */
 export function getLevelsDesc(): GameLevel[] {
-  return [6, 5, 4, 3, 2, 1];
+  return [3, 2, 1];
 }
 
 export function getGamesByLevel(level: GameLevel) {

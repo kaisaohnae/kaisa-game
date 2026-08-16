@@ -1,7 +1,7 @@
 import type {ComponentType} from 'react';
 
-/** ★ … ★★★★★★ */
-export type GameLevel = 1 | 2 | 3 | 4 | 5 | 6;
+/** 1 = ★ · 2 = ★★ · 3 = ★★★ (최대 3) */
+export type GameLevel = 1 | 2 | 3;
 
 export type GameMeta = {
   id: string;

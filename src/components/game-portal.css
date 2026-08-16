@@ -4,12 +4,11 @@
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  overflow-x: clip;
   padding:
     var(--kids-pad-top)
-    0
+    var(--kids-pad)
     var(--kids-pad-bottom)
-    0;
+    var(--kids-pad);
 }
 
 .game-portal__deco {
@@ -58,7 +57,7 @@
   position: relative;
   z-index: 1;
   flex: 0 0 auto;
-  padding: 20px var(--kids-pad) 8px;
+  padding: 20px 0 8px;
   text-align: center;
 }
 
@@ -91,70 +90,26 @@
   position: relative;
   z-index: 1;
   flex: 1 1 auto;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 8px 0 20px;
+  padding: 12px 0 24px;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
 }
 
-.game-portal__rail {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-height: 0;
-}
-
-.game-portal__rail-head {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 0 var(--kids-pad);
-}
-
-.game-portal__stars {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 36px;
-  padding: 0 14px;
-  border-radius: 999px;
-  background: #fff;
-  border: 3px solid #ffb74d;
-  color: #f9a825;
-  font-size: clamp(15px, 3.2vw, 20px);
-  font-weight: 700;
-  letter-spacing: 1px;
-  line-height: 1;
-  box-shadow: 0 4px 0 #ffe0b2;
-}
-
-/* Embla: 가로만 자르고, 상하 패딩으로 호버 들썩임 여유 */
-.game-portal__viewport {
-  overflow: hidden;
-  padding: 14px 0 18px;
-  margin: -6px 0;
-  cursor: grab;
-}
-
-.game-portal__viewport:active {
-  cursor: grabbing;
-}
-
-.game-portal__track {
+.game-portal__grid {
   list-style: none;
   margin: 0;
-  padding: 0 var(--kids-pad);
+  padding: 4px 0 8px;
   display: flex;
-  align-items: stretch;
-  gap: 14px;
-  touch-action: pan-y pinch-zoom;
+  flex-wrap: wrap;
+  column-gap: 14px;
+  row-gap: 24px;
 }
 
-.game-portal__slide {
-  flex: 0 0 auto;
-  width: min(78vw, 280px);
-  min-width: 0;
+.game-portal__item {
+  flex: 1 1 220px;
+  max-width: 100%;
+  min-width: min(100%, 220px);
 }
 
 .game-portal__card {
@@ -178,7 +133,6 @@
     box-shadow 0.18s ease;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
-  will-change: transform;
 }
 
 .game-portal__card:hover {
@@ -246,9 +200,22 @@
   font-weight: 800;
 }
 
-@media (min-width: 700px) {
-  .game-portal__slide {
-    width: min(42vw, 300px);
+@media (min-width: 600px) {
+  .game-portal__item {
+    flex: 1 1 calc(50% - 14px);
+    max-width: calc(50% - 7px);
+  }
+}
+
+@media (min-width: 900px) {
+  .game-portal__grid {
+    column-gap: 18px;
+    row-gap: 28px;
+  }
+
+  .game-portal__item {
+    flex: 1 1 calc(33.333% - 18px);
+    max-width: calc(33.333% - 12px);
   }
 
   .game-portal__card {
@@ -256,19 +223,16 @@
   }
 }
 
-@media (min-width: 1024px) {
-  .game-portal__slide {
-    width: 280px;
-  }
-
-  .game-portal__track {
-    gap: 18px;
+@media (min-width: 1100px) {
+  .game-portal__item {
+    flex: 1 1 calc(25% - 18px);
+    max-width: calc(25% - 14px);
   }
 }
 
 @media (orientation: landscape) and (max-height: 500px) {
   .game-portal__header {
-    padding: 8px var(--kids-pad) 4px;
+    padding: 8px 0 4px;
   }
 
   .game-portal__title {
@@ -285,11 +249,7 @@
   }
 
   .game-portal__stage {
-    gap: 6px;
-  }
-
-  .game-portal__slide {
-    width: min(46vw, 240px);
+    padding-top: 8px;
   }
 
   .game-portal__card {

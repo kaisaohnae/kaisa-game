@@ -9,20 +9,8 @@
   max-width: 720px;
   margin: 0 auto;
   padding: 4px 0 12px;
-}
 
-.count-fruit__score {
-  display: inline-flex;
-  align-items: center;
-  min-height: 48px;
-  padding: 0 18px;
-  border-radius: 999px;
-  background: #fff;
-  border: 3px solid #ffe082;
-  box-shadow: 0 4px 0 #ffe0b2;
-  font-size: clamp(18px, 4vw, 24px);
-  font-weight: 800;
-  color: #ef6c00;
+  position: relative;
 }
 
 .count-fruit__message {
@@ -96,7 +84,6 @@
     gap: 16px 24px;
   }
 
-  .count-fruit__score,
   .count-fruit__message {
     width: 100%;
     text-align: center;

@@ -7,16 +7,16 @@
   margin: 0 auto;
   min-height: 0;
   padding: 4px 0 8px;
+
+  position: relative;
 }
 
-.balloon-pop__bar {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
+.balloon-pop__round {
+  margin: 0 0 8px;
+  text-align: center;
   font-size: clamp(16px, 3.5vw, 22px);
   font-weight: 800;
-  color: #ef6c00;
-  padding: 0 4px 8px;
+  color: #8d6e63;
 }
 
 .balloon-pop__help {

@@ -16,7 +16,7 @@
 }
 
 .score-hud__label {
-  font-size: clamp(13px, 2.8vw, 16px);
+  font-size: clamp(15px, 3.2vw, 20px);
   font-weight: 800;
   color: #a1887f;
   letter-spacing: -0.02em;

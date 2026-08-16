@@ -14,7 +14,7 @@ type Balloon = {
   color: string;
 };
 
-const EMOJIS = ['?��', '?��', '?��', '?��', '?��', '?��'];
+const EMOJIS = ['🎈', '🔴', '🟡', '🔵', '🟢', '🟠'];
 const COLORS = ['#ff8a80', '#ffd54f', '#81d4fa', '#a5d6a7', '#ffcc80', '#ce93d8'];
 
 function makeBalloons(count: number, salt: number): Balloon[] {
@@ -36,7 +36,6 @@ function makeBalloons(count: number, salt: number): Balloon[] {
 export default function BalloonPopGame() {
   const [ready, setReady] = useState(false);
   const [balloons, setBalloons] = useState<Balloon[]>([]);
-  const [score, setScore] = useState(0);
   const [round, setRound] = useState(1);
   const [celebrate, setCelebrate] = useState(false);
 
@@ -67,16 +66,14 @@ export default function BalloonPopGame() {
       }
       return next;
     });
-    setScore((n) => n + 1);
   };
 
   return (
     <div className="balloon-pop">
       <SuccessBurst show={celebrate} />
-      <ScoreHud score={score} />
-      <p className="balloon-pop__round">라운드 {round}</p>
-      <p className="balloon-pop__help">?�선???? ?? ?�뜨?�요</p>
-      <div className="balloon-pop__sky" aria-label="?�선 ?�??>
+      <ScoreHud score={round} />
+      <p className="balloon-pop__help">풍선을 톡! 톡! 터뜨려요</p>
+      <div className="balloon-pop__sky" aria-label="풍선 놀이">
         {balloons.map((b) => (
           <button
             key={b.id}
@@ -89,7 +86,7 @@ export default function BalloonPopGame() {
               height: b.size,
               background: b.color,
             }}
-            aria-label="?�선 ?�뜨리기"
+            aria-label="풍선 터뜨리기"
             onClick={() => pop(b.id)}
           >
             <span aria-hidden="true">{b.emoji}</span>
