@@ -3,6 +3,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import SuccessBurst from '@/games/shared/SuccessBurst';
 import ScoreHud from '@/games/shared/ScoreHud';
+import {useWrongShake} from '@/games/shared/useWrongShake';
 import './pattern-copy.css';
 
 type Tone = {id: string; emoji: string; color: string};
@@ -30,7 +31,7 @@ export default function PatternCopyGame() {
   const [step, setStep] = useState(0);
   const [score, setScore] = useState(0);
   const [celebrate, setCelebrate] = useState(false);
-  const [shake, setShake] = useState(false);
+  const {triggerWrong, shakeClass} = useWrongShake();
 
   const startRound = useCallback((salt: number, len: number) => {
     const next = makePattern(salt, len);
@@ -75,9 +76,8 @@ export default function PatternCopyGame() {
   const onPick = (tone: Tone) => {
     if (phase !== 'play' || celebrate) return;
     if (tone.id !== pattern[step].id) {
-      setShake(true);
+      triggerWrong();
       window.setTimeout(() => {
-        setShake(false);
         startRound(Date.now() % 100000, Math.min(3 + Math.floor(score / 2), 5));
       }, 500);
       return;
@@ -97,7 +97,7 @@ export default function PatternCopyGame() {
   };
 
   return (
-    <div className={`pattern-copy${shake ? ' pattern-copy--shake' : ''}`}>
+    <div className={`pattern-copy${shakeClass}`}>
       <SuccessBurst show={celebrate} />
       <ScoreHud score={score} />
       <p className="pattern-copy__help">

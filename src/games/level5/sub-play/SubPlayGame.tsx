@@ -3,25 +3,29 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import SuccessBurst from '@/games/shared/SuccessBurst';
 import ScoreHud from '@/games/shared/ScoreHud';
+import {numberSpan} from '@/games/shared/stage-scale';
+import {useWrongShake} from '@/games/shared/useWrongShake';
 import './sub-play.css';
 
 type Q = {a: number; b: number; answer: number};
 
-function makeQ(): Q {
-  const a = 3 + Math.floor(Math.random() * 7);
-  const b = 1 + Math.floor(Math.random() * Math.min(a, 5));
+function makeQ(stage: number): Q {
+  const max = numberSpan(stage, 6);
+  const a = 2 + Math.floor(Math.random() * max);
+  const b = 1 + Math.floor(Math.random() * Math.min(a, Math.max(2, Math.floor(max / 2))));
   return {a, b, answer: a - b};
 }
 
-function choicesFor(answer: number, salt: number) {
+function choicesFor(answer: number, salt: number, stage: number) {
   const set = new Set<number>([answer]);
   let t = salt + 1;
   const rand = () => {
     t = (t * 1664525 + 1013904223) >>> 0;
     return t / 0xffffffff;
   };
-  while (set.size < 4) {
-    const n = Math.max(0, answer + Math.floor(rand() * 7) - 3);
+  const need = Math.min(5, 3 + Math.floor(stage / 3));
+  while (set.size < need) {
+    const n = Math.max(0, answer + Math.floor(rand() * 9) - 4);
     set.add(n);
   }
   const arr = [...set];
@@ -33,40 +37,45 @@ function choicesFor(answer: number, salt: number) {
 }
 
 export default function SubPlayGame() {
-  const [q, setQ] = useState<Q>(() => makeQ());
-  const [seed, setSeed] = useState(1);
   const [score, setScore] = useState(0);
+  const [q, setQ] = useState<Q>(() => makeQ(0));
+  const [seed, setSeed] = useState(1);
   const [celebrate, setCelebrate] = useState(false);
-  const [shake, setShake] = useState(false);
+  const {triggerWrong, shakeClass} = useWrongShake();
 
-  const next = useCallback(() => {
-    setQ(makeQ());
+  const next = useCallback((stage: number) => {
+    setQ(makeQ(stage));
     setSeed((n) => n + 1);
   }, []);
 
   useEffect(() => {
-    next();
+    next(0);
   }, [next]);
 
-  const choices = useMemo(() => choicesFor(q.answer, seed), [q.answer, seed]);
+  const choices = useMemo(
+    () => choicesFor(q.answer, seed, score),
+    [q.answer, seed, score],
+  );
 
   const onPick = (n: number) => {
     if (celebrate) return;
     if (n !== q.answer) {
-      setShake(true);
-      window.setTimeout(() => setShake(false), 400);
+      triggerWrong();
       return;
     }
     setCelebrate(true);
-    setScore((s) => s + 1);
-    window.setTimeout(() => {
-      setCelebrate(false);
-      next();
-    }, 850);
+    setScore((s) => {
+      const ns = s + 1;
+      window.setTimeout(() => {
+        setCelebrate(false);
+        next(ns);
+      }, 850);
+      return ns;
+    });
   };
 
   return (
-    <div className={`sub-play${shake ? ' sub-play--shake' : ''}`}>
+    <div className={`sub-play${shakeClass}`}>
       <SuccessBurst show={celebrate} />
       <ScoreHud score={score} />
       <p className="sub-play__help">빼기</p>

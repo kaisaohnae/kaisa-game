@@ -3,6 +3,8 @@
 import {useCallback, useEffect, useState} from 'react';
 import SuccessBurst from '@/games/shared/SuccessBurst';
 import ScoreHud from '@/games/shared/ScoreHud';
+import {sequenceLength} from '@/games/shared/stage-scale';
+import {useWrongShake} from '@/games/shared/useWrongShake';
 import './tap-order.css';
 
 type Animal = {id: string; emoji: string; name: string};
@@ -14,9 +16,15 @@ const POOL: Animal[] = [
   {id: 'rabbit', emoji: '🐰', name: '토끼'},
   {id: 'fox', emoji: '🦊', name: '여우'},
   {id: 'panda', emoji: '🐼', name: '팬더'},
+  {id: 'pig', emoji: '🐷', name: '돼지'},
+  {id: 'monkey', emoji: '🐵', name: '원숭이'},
+  {id: 'lion', emoji: '🦁', name: '사자'},
+  {id: 'tiger', emoji: '🐯', name: '호랑이'},
+  {id: 'cow', emoji: '🐮', name: '소'},
+  {id: 'chick', emoji: '🐤', name: '병아리'},
 ];
 
-function pickSequence(salt: number, length = 3): Animal[] {
+function pickSequence(salt: number, length: number): Animal[] {
   let t = salt + 1;
   const rand = () => {
     t = (t * 1664525 + 1013904223) >>> 0;
@@ -46,22 +54,24 @@ function shuffle<T>(items: T[], salt: number) {
 }
 
 export default function TapOrderGame() {
-  const [sequence, setSequence] = useState<Animal[]>(() => pickSequence(1));
+  const [sequence, setSequence] = useState<Animal[]>(() => pickSequence(1, 3));
   const [choices, setChoices] = useState<Animal[]>(() => shuffle(POOL, 1));
   const [step, setStep] = useState(0);
   const [score, setScore] = useState(0);
   const [flash, setFlash] = useState<'ok' | 'no' | null>(null);
   const [celebrate, setCelebrate] = useState(false);
+  const {triggerWrong, shakeClass} = useWrongShake();
 
-  const nextRound = useCallback((salt: number) => {
-    const seq = pickSequence(salt, 3);
+  const nextRound = useCallback((salt: number, stage: number) => {
+    const len = sequenceLength(stage, 3, 5);
+    const seq = pickSequence(salt, len);
     setSequence(seq);
     setChoices(shuffle(POOL, salt + 3));
     setStep(0);
   }, []);
 
   useEffect(() => {
-    nextRound(Date.now() % 100000);
+    nextRound(Date.now() % 100000, 0);
   }, [nextRound]);
 
   const onPick = (animal: Animal) => {
@@ -71,6 +81,7 @@ export default function TapOrderGame() {
 
     if (animal.id !== expected.id) {
       setFlash('no');
+      triggerWrong();
       window.setTimeout(() => {
         setFlash(null);
         setStep(0);
@@ -81,11 +92,14 @@ export default function TapOrderGame() {
     const nextStep = step + 1;
     if (nextStep >= sequence.length) {
       setCelebrate(true);
-      setScore((n) => n + 1);
-      window.setTimeout(() => {
-        setCelebrate(false);
-        nextRound(Date.now() % 100000);
-      }, 900);
+      setScore((n) => {
+        const ns = n + 1;
+        window.setTimeout(() => {
+          setCelebrate(false);
+          nextRound(Date.now() % 100000, ns);
+        }, 900);
+        return ns;
+      });
       return;
     }
 
@@ -95,7 +109,7 @@ export default function TapOrderGame() {
   };
 
   return (
-    <div className={`tap-order${flash ? ` tap-order--${flash}` : ''}`}>
+    <div className={`tap-order${flash ? ` tap-order--${flash}` : ''}${shakeClass}`}>
       <SuccessBurst show={celebrate} />
       <ScoreHud score={score} />
       <p className="tap-order__help">순서대로 콕! 콕! 콕!</p>

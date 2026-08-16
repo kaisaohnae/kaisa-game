@@ -3,6 +3,8 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import SuccessBurst from '@/games/shared/SuccessBurst';
 import ScoreHud from '@/games/shared/ScoreHud';
+import {choiceCount} from '@/games/shared/stage-scale';
+import {useWrongShake} from '@/games/shared/useWrongShake';
 import './color-touch.css';
 
 type ColorItem = {
@@ -13,12 +15,15 @@ type ColorItem = {
 };
 
 const COLORS: ColorItem[] = [
-  {id: 'red', label: '빨강', value: '#ff6b6b', face: '❤️'},
-  {id: 'orange', label: '주황', value: '#ff9f43', face: '🧡'},
-  {id: 'yellow', label: '노랑', value: '#ffd93d', face: '💛'},
-  {id: 'green', label: '초록', value: '#6bcb77', face: '💚'},
-  {id: 'blue', label: '파랑', value: '#4d96ff', face: '💙'},
-  {id: 'purple', label: '보라', value: '#c77dff', face: '💜'},
+  {id: 'red', label: '\uBE68\uAC15', value: '#ff6b6b', face: '\u2764\uFE0F'},
+  {id: 'orange', label: '\uC8FC\uD669', value: '#ff9f43', face: '\uD83E\uDDE1'},
+  {id: 'yellow', label: '\uB178\uB791', value: '#ffd93d', face: '\uD83D\uDC9B'},
+  {id: 'green', label: '\uCD08\uB85D', value: '#6bcb77', face: '\uD83D\uDC9A'},
+  {id: 'blue', label: '\uD30C\uB791', value: '#4d96ff', face: '\uD83D\uDC99'},
+  {id: 'purple', label: '\uBCF4\uB77C', value: '#c77dff', face: '\uD83D\uDC9C'},
+  {id: 'pink', label: '\uBD84\uD64D', value: '#ff8fab', face: '\uD83D\uDC96'},
+  {id: 'brown', label: '\uAC08\uC0C9', value: '#a1887f', face: '\uD83E\uDD0E'},
+  {id: 'sky', label: '\uD558\uB298', value: '#81d4fa', face: '\uD83D\uDCA7'},
 ];
 
 function pickTarget(excludeId?: string) {
@@ -40,13 +45,18 @@ function shuffle<T>(items: T[], salt: number) {
   return next;
 }
 
+const PROMPT = '\uC774 \uC0C9\uAE54\uC744 \uCF5C! \uB20C\uB7EC\uBC14';
+const RETRY = '\uD788\uD788, \uB2E4\uC2DC \uD574\uBCFC\uAE4C?';
+const PICK = '\uC0C9\uAE54 \uACE0\uB974\uAE30';
+
 export default function ColorTouchGame() {
   const [ready, setReady] = useState(false);
   const [target, setTarget] = useState<ColorItem>(COLORS[0]);
   const [score, setScore] = useState(0);
-  const [message, setMessage] = useState('이 색깔을 콜! 눌러바');
+  const [message, setMessage] = useState(PROMPT);
   const [flash, setFlash] = useState<'ok' | 'no' | null>(null);
   const [seed, setSeed] = useState(1);
+  const {triggerWrong, shakeClass} = useWrongShake();
 
   useEffect(() => {
     setTarget(pickTarget());
@@ -54,24 +64,28 @@ export default function ColorTouchGame() {
     setReady(true);
   }, []);
 
-  const choices = useMemo(
-    () => shuffle(COLORS, seed + target.id.length * 17),
-    [seed, target.id],
-  );
+  const choices = useMemo(() => {
+    const n = choiceCount(score, 6, 9);
+    const others = shuffle(
+      COLORS.filter((c) => c.id !== target.id),
+      seed,
+    ).slice(0, n - 1);
+    return shuffle([target, ...others], seed + 17);
+  }, [seed, target, score]);
 
   const nextRound = useCallback((currentId: string) => {
     setTarget(pickTarget(currentId));
     setSeed((n) => n + 1);
-    setMessage('이 색깔을 콜! 눌러바');
+    setMessage(PROMPT);
   }, []);
 
   const onPick = (color: ColorItem) => {
-    if (!ready) return;
+    if (!ready || flash) return;
 
     if (color.id === target.id) {
       setScore((n) => n + 1);
       setFlash('ok');
-      setMessage('🎉');
+      setMessage('\uD83C\uDF89');
       window.setTimeout(() => {
         setFlash(null);
         nextRound(color.id);
@@ -80,17 +94,18 @@ export default function ColorTouchGame() {
     }
 
     setFlash('no');
-    setMessage('히히, 다시 해볼까?');
+    triggerWrong();
+    setMessage(RETRY);
     window.setTimeout(() => setFlash(null), 450);
   };
 
   return (
-    <div className={`color-touch${flash ? ` color-touch--${flash}` : ''}`}>
+    <div className={`color-touch${flash ? ` color-touch--${flash}` : ''}${shakeClass}`}>
       <SuccessBurst show={flash === 'ok'} />
       <ScoreHud score={score} />
 
       <div className="color-touch__prompt">
-        <p className="color-touch__message">{message}</p>
+        <p className="color-touch__prompt-message color-touch__message">{message}</p>
         <div
           className="color-touch__sample"
           style={{background: target.value}}
@@ -101,7 +116,7 @@ export default function ColorTouchGame() {
         <strong className="color-touch__label">{target.label}</strong>
       </div>
 
-      <div className="color-touch__grid" role="group" aria-label="색깔 고르기">
+      <div className="color-touch__grid" role="group" aria-label={PICK}>
         {choices.map((color) => (
           <button
             key={color.id}

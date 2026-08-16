@@ -3,6 +3,8 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import SuccessBurst from '@/games/shared/SuccessBurst';
 import ScoreHud from '@/games/shared/ScoreHud';
+import {choiceCount} from '@/games/shared/stage-scale';
+import {useWrongShake} from '@/games/shared/useWrongShake';
 import './hangul-study.css';
 
 type Letter = {id: string; char: string; name: string};
@@ -17,9 +19,17 @@ const LETTERS: Letter[] = [
   {id: 's', char: 'ㅅ', name: '시옷'},
   {id: 'o', char: 'ㅇ', name: '이응'},
   {id: 'j', char: 'ㅈ', name: '지읒'},
+  {id: 'ch', char: 'ㅊ', name: '치읓'},
+  {id: 'k', char: 'ㅋ', name: '키읔'},
+  {id: 't', char: 'ㅌ', name: '티읕'},
+  {id: 'p', char: 'ㅍ', name: '피읖'},
+  {id: 'h', char: 'ㅎ', name: '히읗'},
   {id: 'a', char: 'ㅏ', name: '아'},
   {id: 'ya', char: 'ㅑ', name: '야'},
   {id: 'eo', char: 'ㅓ', name: '어'},
+  {id: 'yeo', char: 'ㅕ', name: '여'},
+  {id: 'o2', char: 'ㅗ', name: '오'},
+  {id: 'u', char: 'ㅜ', name: '우'},
 ];
 
 function pick(exclude?: string) {
@@ -46,7 +56,7 @@ export default function HangulStudyGame() {
   const [seed, setSeed] = useState(1);
   const [score, setScore] = useState(0);
   const [celebrate, setCelebrate] = useState(false);
-  const [shake, setShake] = useState(false);
+  const {triggerWrong, shakeClass} = useWrongShake();
 
   const next = useCallback((exclude?: string) => {
     setTarget(pick(exclude));
@@ -58,18 +68,18 @@ export default function HangulStudyGame() {
   }, [next]);
 
   const choices = useMemo(() => {
+    const n = choiceCount(score, 6, 12);
     const others = shuffle(
       LETTERS.filter((l) => l.id !== target.id),
       seed,
-    ).slice(0, 3);
+    ).slice(0, n - 1);
     return shuffle([target, ...others], seed + 5);
-  }, [seed, target]);
+  }, [seed, target, score]);
 
   const onPick = (letter: Letter) => {
     if (celebrate) return;
     if (letter.id !== target.id) {
-      setShake(true);
-      window.setTimeout(() => setShake(false), 400);
+      triggerWrong();
       return;
     }
     setCelebrate(true);
@@ -81,7 +91,7 @@ export default function HangulStudyGame() {
   };
 
   return (
-    <div className={`hangul-study${shake ? ' hangul-study--shake' : ''}`}>
+    <div className={`hangul-study${shakeClass}`}>
       <SuccessBurst show={celebrate} />
       <ScoreHud score={score} />
       <p className="hangul-study__help">같은 글자를 찾아요</p>

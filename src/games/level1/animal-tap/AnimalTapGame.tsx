@@ -16,6 +16,12 @@ const ANIMALS: Animal[] = [
   {id: 'bear', name: '곰', emoji: '🐻'},
   {id: 'frog', name: '개구리', emoji: '🐸'},
   {id: 'chick', name: '병아리', emoji: '🐤'},
+  {id: 'fox', name: '여우', emoji: '🦊'},
+  {id: 'panda', name: '팬더', emoji: '🐼'},
+  {id: 'pig', name: '돼지', emoji: '🐷'},
+  {id: 'monkey', name: '원숭이', emoji: '🐵'},
+  {id: 'cow', name: '소', emoji: '🐮'},
+  {id: 'lion', name: '사자', emoji: '🦁'},
 ];
 
 function pick(excludeId?: string) {
@@ -53,7 +59,7 @@ export default function AnimalTapGame() {
   }, []);
 
   const choices = useMemo(() => {
-    const n = choiceCount(score, 3, 6);
+    const n = choiceCount(score, 6, 12);
     const others = shuffle(
       ANIMALS.filter((a) => a.id !== target.id),
       seed,

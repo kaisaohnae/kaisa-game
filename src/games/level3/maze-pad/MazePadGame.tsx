@@ -3,6 +3,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import SuccessBurst from '@/games/shared/SuccessBurst';
 import ScoreHud from '@/games/shared/ScoreHud';
+import {useWrongShake} from '@/games/shared/useWrongShake';
 import './maze-pad.css';
 
 type Cell = {r: number; c: number};
@@ -45,6 +46,7 @@ export default function MazePadGame() {
   const [pos, setPos] = useState<Cell>({r: 0, c: 0});
   const [score, setScore] = useState(0);
   const [celebrate, setCelebrate] = useState(false);
+  const {triggerWrong, shakeClass} = useWrongShake();
 
   const maze = MAZES[mazeIndex % MAZES.length];
   const goal = goalOf(maze);
@@ -63,8 +65,10 @@ export default function MazePadGame() {
     if (celebrate) return;
     const nr = pos.r + dr;
     const nc = pos.c + dc;
-    if (nr < 0 || nc < 0 || nr >= ROWS || nc >= COLS) return;
-    if (maze[nr][nc] === 1) return;
+    if (nr < 0 || nc < 0 || nr >= ROWS || nc >= COLS || maze[nr][nc] === 1) {
+      triggerWrong();
+      return;
+    }
 
     const next = {r: nr, c: nc};
     setPos(next);
@@ -80,7 +84,7 @@ export default function MazePadGame() {
   };
 
   return (
-    <div className="maze-pad">
+    <div className={`maze-pad${shakeClass}`}>
       <SuccessBurst show={celebrate} />
       <ScoreHud score={score} />
       <p className="maze-pad__help">길을 따라 별로 가요</p>

@@ -9,13 +9,13 @@ type Fruit = {id: string; emoji: string; x: number; y: number};
 
 const EMOJIS = ['🍎', '🍌', '🍇', '🍊', '🍓', '🍑'];
 
-function makeFruits(salt: number): Fruit[] {
+function makeFruits(salt: number, stage: number): Fruit[] {
   let t = salt + 1;
   const rand = () => {
     t = (t * 1664525 + 1013904223) >>> 0;
     return t / 0xffffffff;
   };
-  const count = 3 + Math.floor(rand() * 2);
+  const count = Math.min(8, 3 + Math.floor(stage / 2) + Math.floor(rand() * 2));
   return Array.from({length: count}, (_, i) => ({
     id: `f-${salt}-${i}`,
     emoji: EMOJIS[Math.floor(rand() * EMOJIS.length)],
@@ -36,23 +36,29 @@ export default function DragFruitGame() {
   const basketRef = useRef<HTMLDivElement>(null);
   const dragIdRef = useRef<string | null>(null);
 
-  const startRound = useCallback((salt: number) => {
-    setFruits(makeFruits(salt));
+  const startRound = useCallback((salt: number, stage = 0) => {
+    setFruits(makeFruits(salt, stage));
   }, []);
 
   useEffect(() => {
-    startRound(Date.now() % 100000);
+    startRound(Date.now() % 100000, 0);
   }, [startRound]);
 
-  const finishIfEmpty = useCallback((next: Fruit[]) => {
-    if (next.length > 0) return;
-    setCelebrate(true);
-    window.setTimeout(() => {
-      setCelebrate(false);
-      setScore((n) => n + 1);
-      startRound(Date.now() % 100000);
-    }, 900);
-  }, [startRound]);
+  const finishIfEmpty = useCallback(
+    (next: Fruit[]) => {
+      if (next.length > 0) return;
+      setCelebrate(true);
+      window.setTimeout(() => {
+        setCelebrate(false);
+        setScore((n) => {
+          const ns = n + 1;
+          startRound(Date.now() % 100000, ns);
+          return ns;
+        });
+      }, 900);
+    },
+    [startRound],
+  );
 
   const dropAt = useCallback(
     (clientX: number, clientY: number) => {
