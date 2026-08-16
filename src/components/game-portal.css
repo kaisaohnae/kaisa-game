@@ -7,9 +7,9 @@
   overflow-x: hidden;
   padding:
     var(--kids-pad-top)
-    var(--kids-pad-right)
+    0
     var(--kids-pad-bottom)
-    var(--kids-pad);
+    0;
 }
 
 .game-portal__deco {
@@ -58,22 +58,8 @@
   position: relative;
   z-index: 1;
   flex: 0 0 auto;
-  padding: 20px 0 12px;
+  padding: 20px var(--kids-pad) 8px;
   text-align: center;
-}
-
-.game-portal__eyebrow {
-  display: inline-flex;
-  align-items: center;
-  min-height: 32px;
-  margin: 0 0 12px;
-  padding: 0 14px;
-  border-radius: 999px;
-  background: #fff;
-  border: 3px solid #ffb74d;
-  font-size: 14px;
-  font-weight: 800;
-  color: #ef6c00;
 }
 
 .game-portal__title {
@@ -106,21 +92,83 @@
   z-index: 1;
   flex: 1 1 auto;
   min-height: 0;
-  padding: 12px 0 24px;
   display: flex;
-  align-items: stretch;
+  flex-direction: column;
+  gap: 18px;
+  padding: 8px 0 20px;
 }
 
-.game-portal__list {
+.game-portal__rail {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+.game-portal__rail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 var(--kids-pad);
+}
+
+.game-portal__stars {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: #fff;
+  border: 3px solid #ffb74d;
+  color: #f9a825;
+  font-size: clamp(18px, 4vw, 24px);
+  letter-spacing: 2px;
+  box-shadow: 0 4px 0 #ffe0b2;
+}
+
+.game-portal__rail-hint {
+  font-size: 13px;
+  font-weight: 800;
+  color: #a1887f;
+  white-space: nowrap;
+}
+
+.game-portal__scroller {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  overscroll-behavior-x: contain;
+  padding: 4px var(--kids-pad) 12px;
+  scrollbar-width: thin;
+  scrollbar-color: #ffcc80 transparent;
+}
+
+.game-portal__scroller::-webkit-scrollbar {
+  height: 8px;
+}
+
+.game-portal__scroller::-webkit-scrollbar-thumb {
+  background: #ffcc80;
+  border-radius: 999px;
+}
+
+.game-portal__track {
   list-style: none;
-  margin: 0 auto;
-  padding: 0;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-  width: 100%;
-  max-width: 980px;
-  align-content: start;
+  margin: 0;
+  padding: 0 4px;
+  display: flex;
+  gap: 14px;
+  width: max-content;
+}
+
+.game-portal__slide {
+  flex: 0 0 auto;
+  width: min(78vw, 280px);
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
 }
 
 .game-portal__card {
@@ -129,7 +177,8 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 8px;
-  min-height: 180px;
+  height: 100%;
+  min-height: 200px;
   padding: 20px 18px 18px;
   border: 4px solid #fff;
   border-radius: 28px;
@@ -159,27 +208,28 @@
   line-height: 1;
 }
 
-.game-portal__age {
+.game-portal__level {
   display: inline-flex;
   align-items: center;
   min-height: 28px;
   padding: 0 12px;
   border-radius: 999px;
   background: #ffe082;
-  color: #f57f17;
-  font-size: 13px;
+  color: #f9a825;
+  font-size: 14px;
   font-weight: 800;
+  letter-spacing: 1px;
 }
 
 .game-portal__card strong {
   font-family: var(--font-kids-display), var(--font-kids-body), sans-serif;
-  font-size: clamp(24px, 5vw, 32px);
+  font-size: clamp(22px, 5vw, 28px);
   font-weight: 700;
   color: #5d4037;
 }
 
 .game-portal__desc {
-  font-size: clamp(15px, 3vw, 18px);
+  font-size: clamp(14px, 3vw, 17px);
   font-weight: 700;
   line-height: 1.4;
   color: #8d6e63;
@@ -200,30 +250,29 @@
   font-weight: 800;
 }
 
-/* 태블릿 세로/큰 폰 */
-@media (min-width: 600px) {
-  .game-portal__list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
+@media (min-width: 700px) {
+  .game-portal__slide {
+    width: min(42vw, 300px);
   }
 
   .game-portal__card {
     min-height: 220px;
-    padding: 24px 22px 20px;
   }
 }
 
-/* 태블릿 가로·큰 화면 */
-@media (min-width: 900px) {
-  .game-portal__list {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+@media (min-width: 1024px) {
+  .game-portal__slide {
+    width: 280px;
+  }
+
+  .game-portal__track {
+    gap: 18px;
   }
 }
 
-/* 폰 가로 모드 */
 @media (orientation: landscape) and (max-height: 500px) {
   .game-portal__header {
-    padding: 8px 0 4px;
+    padding: 8px var(--kids-pad) 4px;
   }
 
   .game-portal__title {
@@ -239,13 +288,16 @@
     display: none;
   }
 
-  .game-portal__list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+  .game-portal__stage {
+    gap: 10px;
+  }
+
+  .game-portal__slide {
+    width: min(46vw, 240px);
   }
 
   .game-portal__card {
-    min-height: 120px;
+    min-height: 140px;
     padding: 14px;
   }
 

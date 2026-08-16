@@ -1,6 +1,6 @@
 'use client';
 
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useRef, useState, type PointerEvent} from 'react';
 import SuccessBurst from '@/games/shared/SuccessBurst';
 import './drag-fruit.css';
 
@@ -79,19 +79,19 @@ export default function DragFruitGame() {
     [finishIfEmpty],
   );
 
-  const onPointerDown = (fruit: Fruit, e: React.PointerEvent) => {
+  const onPointerDown = (fruit: Fruit, e: PointerEvent<HTMLButtonElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId);
     dragIdRef.current = fruit.id;
     setDragging(fruit.id);
     setGhost({x: e.clientX, y: e.clientY, emoji: fruit.emoji});
   };
 
-  const onPointerMove = (e: React.PointerEvent) => {
+  const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
     if (!dragIdRef.current) return;
     setGhost((g) => (g ? {...g, x: e.clientX, y: e.clientY} : g));
   };
 
-  const onPointerUp = (e: React.PointerEvent) => {
+  const onPointerUp = (e: PointerEvent<HTMLDivElement>) => {
     dropAt(e.clientX, e.clientY);
   };
 

@@ -39,18 +39,16 @@ export default function MoveBuddyGame() {
 
   const move = (dir: -1 | 1) => {
     if (celebrate) return;
-    setBuddy((col) => {
-      const next = Math.max(0, Math.min(COLS - 1, col + dir));
-      if (next === spot.col) {
-        setCelebrate(true);
-        setScore((n) => n + 1);
-        window.setTimeout(() => {
-          setCelebrate(false);
-          respawn(next);
-        }, 850);
-      }
-      return next;
-    });
+    const next = Math.max(0, Math.min(COLS - 1, buddy + dir));
+    setBuddy(next);
+    if (next === spot.col) {
+      setCelebrate(true);
+      setScore((n) => n + 1);
+      window.setTimeout(() => {
+        setCelebrate(false);
+        respawn(next);
+      }, 850);
+    }
   };
 
   return (
