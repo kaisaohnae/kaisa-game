@@ -1,9 +1,9 @@
 1:"$Sreact.fragment"
-2:I[22016,["/_next/static/chunks/05-c3ty_6dwfk.js","/_next/static/chunks/14mrh2-p_w84d.js","/_next/static/chunks/17wfm-bjq45es.js"],""]
-3:I[64814,["/_next/static/chunks/05-c3ty_6dwfk.js","/_next/static/chunks/14mrh2-p_w84d.js","/_next/static/chunks/17wfm-bjq45es.js"],"default"]
+2:I[22016,["/_next/static/chunks/05-c3ty_6dwfk.js","/_next/static/chunks/14mrh2-p_w84d.js","/_next/static/chunks/1ekoppim5rxkr.js"],""]
+3:I[83778,["/_next/static/chunks/05-c3ty_6dwfk.js","/_next/static/chunks/14mrh2-p_w84d.js","/_next/static/chunks/1ekoppim5rxkr.js"],"default"]
 4:I[97367,["/_next/static/chunks/05-c3ty_6dwfk.js","/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
 5:"$Sreact.suspense"
-:HL["/_next/static/chunks/0-t09p1-3lq7x.css","style"]
+:HL["/_next/static/chunks/1mqgso9_myy83.css","style"]
 :HL["/_next/static/chunks/12ps68nzni0a8.css","style"]
-0:{"rsc":["$","$1","c",{"children":[["$","main",null,{"className":"game-page","children":[["$","header",null,{"className":"game-page__header","children":[["$","$L2",null,{"href":"/","className":"game-page__back","children":"🏠 처음으로"}],["$","h1",null,{"className":"game-page__title","children":"짝꿍 찾기"}]]}],["$","section",null,{"className":"game-page__stage","children":["$","$L3",null,{}]}]]}],[["$","link","0",{"rel":"stylesheet","href":"/_next/static/chunks/0-t09p1-3lq7x.css","precedence":"next"}],["$","link","1",{"rel":"stylesheet","href":"/_next/static/chunks/12ps68nzni0a8.css","precedence":"next"}],["$","script","script-0",{"src":"/_next/static/chunks/17wfm-bjq45es.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"RmR-a4AQB8Qn9szJp35ZZ"}
+0:{"rsc":["$","$1","c",{"children":[["$","main",null,{"className":"game-page","children":[["$","header",null,{"className":"game-page__header","children":[["$","$L2",null,{"href":"/","className":"game-page__back","children":"🏠 처음으로"}],["$","h1",null,{"className":"game-page__title","children":"짝꿍 찾기"}]]}],["$","section",null,{"className":"game-page__stage","children":["$","$L3",null,{}]}]]}],[["$","link","0",{"rel":"stylesheet","href":"/_next/static/chunks/1mqgso9_myy83.css","precedence":"next"}],["$","link","1",{"rel":"stylesheet","href":"/_next/static/chunks/12ps68nzni0a8.css","precedence":"next"}],["$","script","script-0",{"src":"/_next/static/chunks/1ekoppim5rxkr.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"qjgOdHzkVPgM4wQgQ60d8"}
 6:null
