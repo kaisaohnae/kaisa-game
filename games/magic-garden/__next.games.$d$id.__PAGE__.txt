@@ -1,9 +1,9 @@
 1:"$Sreact.fragment"
-2:I[22016,["/_next/static/chunks/05-c3ty_6dwfk.js","/_next/static/chunks/14mrh2-p_w84d.js","/_next/static/chunks/18afa9a5p2-nw.js"],""]
-3:I[15975,["/_next/static/chunks/05-c3ty_6dwfk.js","/_next/static/chunks/14mrh2-p_w84d.js","/_next/static/chunks/18afa9a5p2-nw.js"],"default"]
+2:I[22016,["/_next/static/chunks/05-c3ty_6dwfk.js","/_next/static/chunks/14mrh2-p_w84d.js","/_next/static/chunks/1o0yhylk2q8ad.js"],""]
+3:I[15975,["/_next/static/chunks/05-c3ty_6dwfk.js","/_next/static/chunks/14mrh2-p_w84d.js","/_next/static/chunks/1o0yhylk2q8ad.js"],"default"]
 4:I[97367,["/_next/static/chunks/05-c3ty_6dwfk.js","/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
 5:"$Sreact.suspense"
-:HL["/_next/static/chunks/0qylzxfcv4rl-.css","style"]
+:HL["/_next/static/chunks/1myw227rf4cbn.css","style"]
 :HL["/_next/static/chunks/12ps68nzni0a8.css","style"]
-0:{"rsc":["$","$1","c",{"children":[["$","main",null,{"className":"game-page","children":[["$","header",null,{"className":"game-page__header","children":[["$","$L2",null,{"href":"/","className":"game-page__back","children":"🏠 처음으로"}],["$","h1",null,{"className":"game-page__title","children":"마법 정원"}]]}],["$","section",null,{"className":"game-page__stage","children":["$","$L3",null,{}]}]]}],[["$","link","0",{"rel":"stylesheet","href":"/_next/static/chunks/0qylzxfcv4rl-.css","precedence":"next"}],["$","link","1",{"rel":"stylesheet","href":"/_next/static/chunks/12ps68nzni0a8.css","precedence":"next"}],["$","script","script-0",{"src":"/_next/static/chunks/18afa9a5p2-nw.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"3pohRC8LqAUhKCtUhaLTm"}
+0:{"rsc":["$","$1","c",{"children":[["$","main",null,{"className":"game-page","children":[["$","header",null,{"className":"game-page__header","children":[["$","$L2",null,{"href":"/","className":"game-page__back","children":"🏠 처음으로"}],["$","h1",null,{"className":"game-page__title","children":"마법 정원"}]]}],["$","section",null,{"className":"game-page__stage","children":["$","$L3",null,{}]}]]}],[["$","link","0",{"rel":"stylesheet","href":"/_next/static/chunks/1myw227rf4cbn.css","precedence":"next"}],["$","link","1",{"rel":"stylesheet","href":"/_next/static/chunks/12ps68nzni0a8.css","precedence":"next"}],["$","script","script-0",{"src":"/_next/static/chunks/1o0yhylk2q8ad.js","async":true}]],["$","$L4",null,{"children":["$","$5",null,{"name":"Next.MetadataOutlet","children":"$@6"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"0xp241ftSwKAsdYMnlJMC"}
 6:null
