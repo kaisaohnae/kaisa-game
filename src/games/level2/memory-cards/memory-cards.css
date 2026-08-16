@@ -68,7 +68,7 @@
   border-radius: 22px;
   background: linear-gradient(180deg, #90caf9 0%, #42a5f5 100%);
   box-shadow: 0 8px 0 #1e88e5;
-  font-size: clamp(28px, 8vw, 44px);
+  font-size: clamp(40px, 11vw, 64px);
   cursor: pointer;
   touch-action: manipulation;
 }

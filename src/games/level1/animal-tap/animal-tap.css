@@ -37,7 +37,7 @@
 }
 
 .animal-tap__sample {
-  font-size: clamp(56px, 16vw, 88px);
+  font-size: clamp(72px, 20vw, 112px);
   line-height: 1;
 }
 
@@ -65,7 +65,7 @@
   border-radius: 28px;
   background: linear-gradient(180deg, #fff 0%, #fff8e8 100%);
   box-shadow: 0 8px 0 #ffe0b2;
-  font-size: clamp(34px, 9vw, 52px);
+  font-size: clamp(44px, 11vw, 68px);
   cursor: pointer;
   touch-action: manipulation;
 }

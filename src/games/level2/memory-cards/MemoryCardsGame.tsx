@@ -1,6 +1,8 @@
 'use client';
 
 import {useEffect, useState} from 'react';
+import {KidsIcon} from '@/components/kids-icon';
+import type {KidsIconId} from '@/assets/kids-icons';
 import ScoreHud from '@/games/shared/ScoreHud';
 import {useWrongShake} from '@/games/shared/useWrongShake';
 import './memory-cards.css';
@@ -8,16 +10,16 @@ import './memory-cards.css';
 type Card = {
   id: number;
   pairId: string;
-  emoji: string;
+  icon: KidsIconId;
 };
 
-const ALL_PAIRS = [
-  {pairId: 'a', emoji: '🐶'},
-  {pairId: 'b', emoji: '🐱'},
-  {pairId: 'c', emoji: '🐰'},
-  {pairId: 'd', emoji: '🐻'},
-  {pairId: 'e', emoji: '🦊'},
-  {pairId: 'f', emoji: '🐼'},
+const ALL_PAIRS: {pairId: string; icon: KidsIconId}[] = [
+  {pairId: 'a', icon: 'animal-dog'},
+  {pairId: 'b', icon: 'animal-cat'},
+  {pairId: 'c', icon: 'animal-rabbit'},
+  {pairId: 'd', icon: 'animal-bear'},
+  {pairId: 'e', icon: 'animal-fox'},
+  {pairId: 'f', icon: 'animal-panda'},
 ];
 
 function buildDeck(salt: number, pairCount: number): Card[] {
@@ -28,8 +30,8 @@ function buildDeck(salt: number, pairCount: number): Card[] {
   };
   const pairs = ALL_PAIRS.slice(0, pairCount);
   const cards: Card[] = pairs.flatMap((p, i) => [
-    {id: i * 2, pairId: p.pairId, emoji: p.emoji},
-    {id: i * 2 + 1, pairId: p.pairId, emoji: p.emoji},
+    {id: i * 2, pairId: p.pairId, icon: p.icon},
+    {id: i * 2 + 1, pairId: p.pairId, icon: p.icon},
   ]);
   for (let i = cards.length - 1; i > 0; i -= 1) {
     const j = Math.floor(rand() * (i + 1));
@@ -88,11 +90,11 @@ export default function MemoryCardsGame() {
     if (a.pairId === b.pairId) {
       const nextMatched = [...matched, a.pairId];
       setMatched(nextMatched);
-      setMessage('짝꿍 발견! 👏');
+      setMessage('짝꿍 발견!');
       setFlipped([]);
       setLock(false);
       if (nextMatched.length === pairCount) {
-        setMessage('모두 찾았어요! 대단해 🎉');
+        setMessage('모두 찾았어요! 대단해');
         setScore((s) => {
           const ns = s + 1;
           window.setTimeout(() => startBoard(ns), 1000);
@@ -131,10 +133,14 @@ export default function MemoryCardsGame() {
               key={card.id}
               type="button"
               className={`memory-cards__card${open ? ' is-open' : ''}`}
-              aria-label={open ? card.emoji : '숨겨진 카드'}
+              aria-label={open ? card.icon : '숨겨진 카드'}
               onClick={() => onFlip(card.id)}
             >
-              <span aria-hidden="true">{open ? card.emoji : '❓'}</span>
+              {open ? (
+                <KidsIcon id={card.icon} size="1em" />
+              ) : (
+                <KidsIcon id="item-question" size="1em" />
+              )}
             </button>
           );
         })}

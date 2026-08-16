@@ -1,30 +1,32 @@
 'use client';
 
 import {useCallback, useEffect, useMemo, useState} from 'react';
+import {KidsIcon} from '@/components/kids-icon';
+import type {KidsIconId} from '@/assets/kids-icons';
 import SuccessBurst from '@/games/shared/SuccessBurst';
 import ScoreHud from '@/games/shared/ScoreHud';
 import {choiceCount} from '@/games/shared/stage-scale';
 import {useWrongShake} from '@/games/shared/useWrongShake';
 import './animal-tap.css';
 
-type Animal = {id: string; name: string; emoji: string};
+type Animal = {id: KidsIconId; name: string};
 
 const ANIMALS: Animal[] = [
-  {id: 'cat', name: '고양이', emoji: '🐱'},
-  {id: 'dog', name: '강아지', emoji: '🐶'},
-  {id: 'rabbit', name: '토끼', emoji: '🐰'},
-  {id: 'bear', name: '곰', emoji: '🐻'},
-  {id: 'frog', name: '개구리', emoji: '🐸'},
-  {id: 'chick', name: '병아리', emoji: '🐤'},
-  {id: 'fox', name: '여우', emoji: '🦊'},
-  {id: 'panda', name: '팬더', emoji: '🐼'},
-  {id: 'pig', name: '돼지', emoji: '🐷'},
-  {id: 'monkey', name: '원숭이', emoji: '🐵'},
-  {id: 'cow', name: '소', emoji: '🐮'},
-  {id: 'lion', name: '사자', emoji: '🦁'},
+  {id: 'animal-cat', name: '고양이'},
+  {id: 'animal-dog', name: '강아지'},
+  {id: 'animal-rabbit', name: '토끼'},
+  {id: 'animal-bear', name: '곰'},
+  {id: 'animal-frog', name: '개구리'},
+  {id: 'animal-chick', name: '병아리'},
+  {id: 'animal-fox', name: '여우'},
+  {id: 'animal-panda', name: '팬더'},
+  {id: 'animal-pig', name: '돼지'},
+  {id: 'animal-monkey', name: '원숭이'},
+  {id: 'animal-cow', name: '소'},
+  {id: 'animal-lion', name: '사자'},
 ];
 
-function pick(excludeId?: string) {
+function pick(excludeId?: KidsIconId) {
   const pool = ANIMALS.filter((a) => a.id !== excludeId);
   return pool[Math.floor(Math.random() * pool.length)];
 }
@@ -67,7 +69,7 @@ export default function AnimalTapGame() {
     return shuffle([target, ...others], seed + 11);
   }, [seed, target, score]);
 
-  const nextRound = useCallback((currentId: string) => {
+  const nextRound = useCallback((currentId: KidsIconId) => {
     setTarget(pick(currentId));
     setSeed((n) => n + 1);
     setMessage('동물을 찾아 콕!');
@@ -78,7 +80,7 @@ export default function AnimalTapGame() {
     if (animal.id === target.id) {
       setScore((n) => n + 1);
       setFlash('ok');
-      setMessage('🎉');
+      setMessage('맞았어요!');
       window.setTimeout(() => {
         setFlash(null);
         nextRound(animal.id);
@@ -98,7 +100,7 @@ export default function AnimalTapGame() {
       <div className="animal-tap__prompt">
         <p className="animal-tap__message">{message}</p>
         <div className="animal-tap__sample" aria-hidden="true">
-          {target.emoji}
+          <KidsIcon id={target.id} size="1em" />
         </div>
         <strong className="animal-tap__label">{target.name}</strong>
       </div>
@@ -111,7 +113,7 @@ export default function AnimalTapGame() {
             aria-label={animal.name}
             onClick={() => onPick(animal)}
           >
-            <span aria-hidden="true">{animal.emoji}</span>
+            <KidsIcon id={animal.id} size="1em" />
           </button>
         ))}
       </div>

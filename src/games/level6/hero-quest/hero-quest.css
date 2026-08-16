@@ -60,7 +60,7 @@
 }
 
 .hero-quest__side span:first-child {
-  font-size: clamp(44px, 12vw, 64px);
+  font-size: clamp(56px, 15vw, 88px);
   line-height: 1;
 }
 

@@ -1,6 +1,8 @@
 'use client';
 
 import {useCallback, useEffect, useState} from 'react';
+import {KidsIcon} from '@/components/kids-icon';
+import type {KidsIconId} from '@/assets/kids-icons';
 import SuccessBurst from '@/games/shared/SuccessBurst';
 import {loadRpg, saveRpg} from '@/games/shared/rpg-storage';
 import './pet-care.css';
@@ -23,11 +25,11 @@ const DEFAULT: PetSave = {
   love: 70,
 };
 
-function stageEmoji(level: number) {
-  if (level >= 8) return '🦅';
-  if (level >= 5) return '🐔';
-  if (level >= 3) return '🐥';
-  return '🐣';
+function stageIcon(level: number): KidsIconId {
+  if (level >= 8) return 'pet-big';
+  if (level >= 5) return 'pet-kid';
+  if (level >= 3) return 'pet-baby';
+  return 'pet-egg';
 }
 
 function xpNeed(level: number) {
@@ -110,7 +112,9 @@ export default function PetCareGame() {
       <p className="pet-care__msg">{msg}</p>
 
       <div className="pet-care__stage" aria-hidden="true">
-        <span className="pet-care__emoji">{stageEmoji(pet.level)}</span>
+        <span className="pet-care__emoji">
+          <KidsIcon id={stageIcon(pet.level)} size="1em" />
+        </span>
       </div>
 
       <div className="pet-care__bars">
@@ -136,13 +140,13 @@ export default function PetCareGame() {
 
       <div className="pet-care__actions">
         <button type="button" onClick={feed}>
-          🍚 밥주기
+          밥주기
         </button>
         <button type="button" onClick={play}>
-          🎾 놀아주기
+          놀아주기
         </button>
         <button type="button" onClick={rest}>
-          💤 쉬기
+          쉬기
         </button>
       </div>
     </div>

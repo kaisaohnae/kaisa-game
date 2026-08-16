@@ -80,7 +80,7 @@
   border-radius: 24px;
   background: linear-gradient(180deg, #e8f5e9, #fffde7);
   box-shadow: 0 8px 0 #c8e6c9;
-  font-size: clamp(40px, 12vw, 56px);
+  font-size: clamp(56px, 15vw, 80px);
   line-height: 1;
 }
 

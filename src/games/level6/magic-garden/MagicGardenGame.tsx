@@ -1,13 +1,16 @@
 'use client';
 
 import {useCallback, useEffect, useState} from 'react';
+import {KidsIcon} from '@/components/kids-icon';
+import type {KidsIconId} from '@/assets/kids-icons';
+import {isKidsIconId} from '@/assets/kids-icons';
 import SuccessBurst from '@/games/shared/SuccessBurst';
 import {loadRpg, saveRpg} from '@/games/shared/rpg-storage';
 import './magic-garden.css';
 
 const KEY = 'kaisa-rpg-magic-garden';
 
-type Plot = {stage: 0 | 1 | 2 | 3; crop: string};
+type Plot = {stage: 0 | 1 | 2 | 3; crop: KidsIconId};
 
 type GardenSave = {
   level: number;
@@ -16,18 +19,49 @@ type GardenSave = {
   plots: Plot[];
 };
 
-const CROPS = ['🌱', '🌷', '🌻', '🥕', '🍓'];
-const STAGE = ['🕳️', '🌱', '🌿', '🌸'] as const;
+const CROPS: KidsIconId[] = [
+  'garden-seed',
+  'garden-tulip',
+  'garden-sunflower',
+  'garden-carrot',
+  'fruit-strawberry',
+];
+
+const STAGE_ICONS: KidsIconId[] = [
+  'garden-hole',
+  'garden-sprout',
+  'garden-leaf',
+  'garden-bloom',
+];
 
 const DEFAULT: GardenSave = {
   level: 1,
   xp: 0,
   coins: 5,
-  plots: Array.from({length: 4}, () => ({stage: 0 as const, crop: '🌱'})),
+  plots: Array.from({length: 4}, () => ({
+    stage: 0 as const,
+    crop: 'garden-seed',
+  })),
 };
+
+function normalizeSave(raw: GardenSave): GardenSave {
+  return {
+    ...raw,
+    plots: raw.plots.map((p) => ({
+      stage: p.stage,
+      crop: isKidsIconId(p.crop) ? p.crop : 'garden-seed',
+    })),
+  };
+}
 
 function xpNeed(level: number) {
   return 10 + level * 8;
+}
+
+function plotIcon(plot: Plot): KidsIconId {
+  if (plot.stage === 0) return STAGE_ICONS[0];
+  if (plot.stage === 3) return plot.crop;
+  return STAGE_ICONS[plot.stage];
 }
 
 export default function MagicGardenGame() {
@@ -37,7 +71,7 @@ export default function MagicGardenGame() {
   const [msg, setMsg] = useState('씨앗을 심고 물을 줘요');
 
   useEffect(() => {
-    setSave(loadRpg(KEY, DEFAULT));
+    setSave(normalizeSave(loadRpg(KEY, DEFAULT)));
     setReady(true);
   }, []);
 
@@ -103,7 +137,7 @@ export default function MagicGardenGame() {
     const plot = save.plots[index];
     if (plot.stage !== 3) return;
     const plots = save.plots.map((p, i) =>
-      i === index ? {stage: 0 as const, crop: '🌱'} : p,
+      i === index ? {stage: 0 as const, crop: 'garden-seed' as KidsIconId} : p,
     );
     const next = addXp({...save, plots, coins: save.coins + 3}, 6);
     persist(next);
@@ -125,7 +159,8 @@ export default function MagicGardenGame() {
     <div className="magic-garden">
       <SuccessBurst show={celebrate} />
       <div className="magic-garden__badge">
-        🌱 Lv.{save.level} · 🪙 {save.coins}
+        <KidsIcon id="item-plant" size="1.1em" /> Lv.{save.level} ·{' '}
+        <KidsIcon id="item-coin" size="1em" /> {save.coins}
       </div>
       <p className="magic-garden__msg">{msg}</p>
 
@@ -151,13 +186,7 @@ export default function MagicGardenGame() {
             }
             onClick={() => onPlot(i)}
           >
-            <span aria-hidden="true">
-              {plot.stage === 0
-                ? STAGE[0]
-                : plot.stage === 3
-                  ? plot.crop
-                  : STAGE[plot.stage]}
-            </span>
+            <KidsIcon id={plotIcon(plot)} size="1em" />
             <em>
               {plot.stage === 0 ? '심기' : plot.stage < 3 ? '물주기' : '수확'}
             </em>

@@ -1,13 +1,16 @@
 'use client';
 
 import {useCallback, useEffect, useRef, useState, type PointerEvent} from 'react';
+import {KidsIcon} from '@/components/kids-icon';
+import type {KidsIconId} from '@/assets/kids-icons';
+import {FRUIT_ICON_IDS} from '@/assets/kids-icons';
 import SuccessBurst from '@/games/shared/SuccessBurst';
 import ScoreHud from '@/games/shared/ScoreHud';
 import './drag-fruit.css';
 
-type Fruit = {id: string; emoji: string; x: number; y: number};
+type Fruit = {id: string; icon: KidsIconId; x: number; y: number};
 
-const EMOJIS = ['🍎', '🍌', '🍇', '🍊', '🍓', '🍑'];
+const FRUITS = FRUIT_ICON_IDS.filter((id) => id !== 'fruit-watermelon');
 
 function makeFruits(salt: number, stage: number): Fruit[] {
   let t = salt + 1;
@@ -18,7 +21,7 @@ function makeFruits(salt: number, stage: number): Fruit[] {
   const count = Math.min(8, 3 + Math.floor(stage / 2) + Math.floor(rand() * 2));
   return Array.from({length: count}, (_, i) => ({
     id: `f-${salt}-${i}`,
-    emoji: EMOJIS[Math.floor(rand() * EMOJIS.length)],
+    icon: FRUITS[Math.floor(rand() * FRUITS.length)],
     x: 8 + rand() * 70,
     y: 8 + rand() * 42,
   }));
@@ -29,7 +32,7 @@ export default function DragFruitGame() {
   const [score, setScore] = useState(0);
   const [celebrate, setCelebrate] = useState(false);
   const [dragging, setDragging] = useState<string | null>(null);
-  const [ghost, setGhost] = useState<{x: number; y: number; emoji: string} | null>(
+  const [ghost, setGhost] = useState<{x: number; y: number; icon: KidsIconId} | null>(
     null,
   );
   const stageRef = useRef<HTMLDivElement>(null);
@@ -90,7 +93,7 @@ export default function DragFruitGame() {
     e.currentTarget.setPointerCapture(e.pointerId);
     dragIdRef.current = fruit.id;
     setDragging(fruit.id);
-    setGhost({x: e.clientX, y: e.clientY, emoji: fruit.emoji});
+    setGhost({x: e.clientX, y: e.clientY, icon: fruit.icon});
   };
 
   const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
@@ -124,12 +127,12 @@ export default function DragFruitGame() {
             aria-label="과일 옮기기"
             onPointerDown={(e) => onPointerDown(fruit, e)}
           >
-            <span aria-hidden="true">{fruit.emoji}</span>
+            <KidsIcon id={fruit.icon} size="1em" />
           </button>
         ))}
 
         <div ref={basketRef} className="drag-fruit__basket" aria-label="바구니">
-          <span aria-hidden="true">🧺</span>
+          <KidsIcon id="item-basket" size="1em" />
         </div>
       </div>
 
@@ -139,7 +142,7 @@ export default function DragFruitGame() {
           style={{left: ghost.x, top: ghost.y}}
           aria-hidden="true"
         >
-          {ghost.emoji}
+          <KidsIcon id={ghost.icon} size="1em" />
         </div>
       ) : null}
     </div>

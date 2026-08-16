@@ -11,48 +11,6 @@
     var(--kids-pad);
 }
 
-.game-portal__deco {
-  position: absolute;
-  z-index: 0;
-  pointer-events: none;
-  user-select: none;
-  opacity: 0.55;
-  animation: kidsFloat 4.8s ease-in-out infinite;
-}
-
-.game-portal__deco--star {
-  top: 72px;
-  right: 10%;
-  font-size: clamp(28px, 6vw, 48px);
-  color: #ffd54f;
-}
-
-.game-portal__deco--heart {
-  top: 160px;
-  left: 7%;
-  font-size: clamp(24px, 5vw, 40px);
-  color: #ff8fab;
-  animation-delay: 0.8s;
-}
-
-.game-portal__deco--cloud {
-  bottom: 10%;
-  right: 8%;
-  font-size: clamp(36px, 8vw, 64px);
-  color: #81d4fa;
-  animation-delay: 1.4s;
-}
-
-@keyframes kidsFloat {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
 .game-portal__header {
   position: relative;
   z-index: 1;
@@ -152,7 +110,7 @@
 }
 
 .game-portal__emoji {
-  font-size: clamp(36px, 8vw, 52px);
+  font-size: clamp(56px, 12vw, 80px);
   line-height: 1;
 }
 
@@ -242,10 +200,6 @@
 
   .game-portal__lead {
     font-size: 14px;
-  }
-
-  .game-portal__deco {
-    display: none;
   }
 
   .game-portal__stage {

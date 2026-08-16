@@ -1,18 +1,20 @@
 'use client';
 
 import {useCallback, useEffect, useState} from 'react';
+import {KidsIcon} from '@/components/kids-icon';
+import type {KidsIconId} from '@/assets/kids-icons';
 import SuccessBurst from '@/games/shared/SuccessBurst';
 import ScoreHud from '@/games/shared/ScoreHud';
 import {useWrongShake} from '@/games/shared/useWrongShake';
 import './pattern-copy.css';
 
-type Tone = {id: string; emoji: string; color: string};
+type Tone = {id: string; icon: KidsIconId; color: string};
 
 const TONES: Tone[] = [
-  {id: 'red', emoji: '🔴', color: '#ef5350'},
-  {id: 'blue', emoji: '🔵', color: '#42a5f5'},
-  {id: 'yellow', emoji: '🟡', color: '#ffee58'},
-  {id: 'green', emoji: '🟢', color: '#66bb6a'},
+  {id: 'red', icon: 'color-red', color: '#ef5350'},
+  {id: 'blue', icon: 'color-blue', color: '#42a5f5'},
+  {id: 'yellow', icon: 'color-yellow', color: '#ffee58'},
+  {id: 'green', icon: 'color-green', color: '#66bb6a'},
 ];
 
 function makePattern(salt: number, length: number): Tone[] {
@@ -115,7 +117,7 @@ export default function PatternCopyGame() {
             disabled={phase !== 'play'}
             onClick={() => onPick(tone)}
           >
-            <span aria-hidden="true">{tone.emoji}</span>
+            <KidsIcon id={tone.icon} size="1em" />
           </button>
         ))}
       </div>

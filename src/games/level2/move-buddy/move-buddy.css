@@ -49,12 +49,12 @@
 }
 
 .move-buddy__treat {
-  font-size: clamp(36px, 10vw, 52px);
+  font-size: clamp(48px, 12vw, 72px);
   animation: treatBounce 1.2s ease-in-out infinite;
 }
 
 .move-buddy__hero {
-  font-size: clamp(40px, 12vw, 60px);
+  font-size: clamp(52px, 14vw, 80px);
   filter: drop-shadow(0 6px 0 rgba(93, 64, 55, 0.15));
   transition: transform 0.15s ease;
 }

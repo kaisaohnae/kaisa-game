@@ -1,27 +1,29 @@
 'use client';
 
 import {useCallback, useEffect, useState} from 'react';
+import {KidsIcon} from '@/components/kids-icon';
+import type {KidsIconId} from '@/assets/kids-icons';
 import SuccessBurst from '@/games/shared/SuccessBurst';
 import ScoreHud from '@/games/shared/ScoreHud';
 import {sequenceLength} from '@/games/shared/stage-scale';
 import {useWrongShake} from '@/games/shared/useWrongShake';
 import './tap-order.css';
 
-type Animal = {id: string; emoji: string; name: string};
+type Animal = {id: KidsIconId; name: string};
 
 const POOL: Animal[] = [
-  {id: 'dog', emoji: '🐶', name: '강아지'},
-  {id: 'cat', emoji: '🐱', name: '고양이'},
-  {id: 'bear', emoji: '🐻', name: '곰'},
-  {id: 'rabbit', emoji: '🐰', name: '토끼'},
-  {id: 'fox', emoji: '🦊', name: '여우'},
-  {id: 'panda', emoji: '🐼', name: '팬더'},
-  {id: 'pig', emoji: '🐷', name: '돼지'},
-  {id: 'monkey', emoji: '🐵', name: '원숭이'},
-  {id: 'lion', emoji: '🦁', name: '사자'},
-  {id: 'tiger', emoji: '🐯', name: '호랑이'},
-  {id: 'cow', emoji: '🐮', name: '소'},
-  {id: 'chick', emoji: '🐤', name: '병아리'},
+  {id: 'animal-dog', name: '강아지'},
+  {id: 'animal-cat', name: '고양이'},
+  {id: 'animal-bear', name: '곰'},
+  {id: 'animal-rabbit', name: '토끼'},
+  {id: 'animal-fox', name: '여우'},
+  {id: 'animal-panda', name: '팬더'},
+  {id: 'animal-pig', name: '돼지'},
+  {id: 'animal-monkey', name: '원숭이'},
+  {id: 'animal-lion', name: '사자'},
+  {id: 'animal-tiger', name: '호랑이'},
+  {id: 'animal-cow', name: '소'},
+  {id: 'animal-chick', name: '병아리'},
 ];
 
 function pickSequence(salt: number, length: number): Animal[] {
@@ -121,7 +123,7 @@ export default function TapOrderGame() {
             className={`tap-order__chip${i < step ? ' tap-order__chip--done' : ''}${i === step ? ' tap-order__chip--now' : ''}`}
             aria-hidden="true"
           >
-            {a.emoji}
+            <KidsIcon id={a.id} size="1em" />
           </span>
         ))}
       </div>
@@ -135,7 +137,7 @@ export default function TapOrderGame() {
             aria-label={animal.name}
             onClick={() => onPick(animal)}
           >
-            <span aria-hidden="true">{animal.emoji}</span>
+            <KidsIcon id={animal.id} size="1em" />
           </button>
         ))}
       </div>

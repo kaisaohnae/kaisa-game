@@ -1,5 +1,6 @@
 'use client';
 
+import {KidsIcon} from '@/components/kids-icon';
 import './success-burst.css';
 
 type Props = {
@@ -12,13 +13,27 @@ export default function SuccessBurst({show}: Props) {
 
   return (
     <div className="success-burst" aria-hidden="true">
-      <span className="success-burst__boom">🎉</span>
-      <span className="success-burst__star success-burst__star--1">✨</span>
-      <span className="success-burst__star success-burst__star--2">⭐</span>
-      <span className="success-burst__star success-burst__star--3">💫</span>
-      <span className="success-burst__star success-burst__star--4">🌟</span>
-      <span className="success-burst__star success-burst__star--5">✨</span>
-      <span className="success-burst__heart">💖</span>
+      <span className="success-burst__boom">
+        <KidsIcon id="item-party" size="1em" />
+      </span>
+      <span className="success-burst__star success-burst__star--1">
+        <KidsIcon id="item-sparkle" size="1em" />
+      </span>
+      <span className="success-burst__star success-burst__star--2">
+        <KidsIcon id="shape-star" size="1em" />
+      </span>
+      <span className="success-burst__star success-burst__star--3">
+        <KidsIcon id="item-sparkle" size="1em" />
+      </span>
+      <span className="success-burst__star success-burst__star--4">
+        <KidsIcon id="shape-star" size="1em" />
+      </span>
+      <span className="success-burst__star success-burst__star--5">
+        <KidsIcon id="item-sparkle" size="1em" />
+      </span>
+      <span className="success-burst__heart">
+        <KidsIcon id="shape-heart" size="1em" />
+      </span>
     </div>
   );
 }

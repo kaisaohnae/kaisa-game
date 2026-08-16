@@ -1,20 +1,29 @@
 'use client';
 
 import {useCallback, useEffect, useState} from 'react';
+import {KidsIcon} from '@/components/kids-icon';
+import type {KidsIconId} from '@/assets/kids-icons';
 import SuccessBurst from '@/games/shared/SuccessBurst';
 import ScoreHud from '@/games/shared/ScoreHud';
 import './balloon-pop.css';
 
 type Balloon = {
   id: number;
-  emoji: string;
+  icon: KidsIconId;
   left: number;
   delay: number;
   size: number;
   color: string;
 };
 
-const EMOJIS = ['🎈', '🔴', '🟡', '🔵', '🟢', '🟠'];
+const ICONS: KidsIconId[] = [
+  'item-balloon',
+  'color-red',
+  'color-yellow',
+  'color-blue',
+  'color-green',
+  'color-orange',
+];
 const COLORS = ['#ff8a80', '#ffd54f', '#81d4fa', '#a5d6a7', '#ffcc80', '#ce93d8'];
 
 function makeBalloons(count: number, salt: number): Balloon[] {
@@ -25,10 +34,10 @@ function makeBalloons(count: number, salt: number): Balloon[] {
   };
   return Array.from({length: count}, (_, i) => ({
     id: salt * 100 + i,
-    emoji: EMOJIS[Math.floor(rand() * EMOJIS.length)],
+    icon: ICONS[Math.floor(rand() * ICONS.length)],
     left: 8 + rand() * 76,
     delay: rand() * 1.2,
-    size: 52 + rand() * 36,
+    size: 72 + rand() * 48,
     color: COLORS[Math.floor(rand() * COLORS.length)],
   }));
 }
@@ -89,7 +98,7 @@ export default function BalloonPopGame() {
             aria-label="풍선 터뜨리기"
             onClick={() => pop(b.id)}
           >
-            <span aria-hidden="true">{b.emoji}</span>
+            <KidsIcon id={b.icon} size="85%" />
           </button>
         ))}
       </div>

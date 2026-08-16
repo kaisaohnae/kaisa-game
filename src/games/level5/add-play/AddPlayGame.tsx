@@ -1,19 +1,26 @@
 'use client';
 
 import {useCallback, useEffect, useMemo, useState} from 'react';
+import {FRUIT_ICON_IDS, type KidsIconId} from '@/assets/kids-icons';
+import FruitMathBoard from '@/games/shared/FruitMathBoard';
 import SuccessBurst from '@/games/shared/SuccessBurst';
 import ScoreHud from '@/games/shared/ScoreHud';
 import {numberSpan} from '@/games/shared/stage-scale';
 import {useWrongShake} from '@/games/shared/useWrongShake';
 import './add-play.css';
 
-type Q = {a: number; b: number; answer: number};
+type Q = {a: number; b: number; answer: number; fruit: KidsIconId};
 
+function pickFruit(): KidsIconId {
+  return FRUIT_ICON_IDS[Math.floor(Math.random() * FRUIT_ICON_IDS.length)];
+}
+
+/** Keep groups small so kids can count fruits by eye */
 function makeQ(stage: number): Q {
-  const max = numberSpan(stage, 5);
+  const max = Math.min(5, numberSpan(stage, 3));
   const a = 1 + Math.floor(Math.random() * max);
   const b = 1 + Math.floor(Math.random() * max);
-  return {a, b, answer: a + b};
+  return {a, b, answer: a + b, fruit: pickFruit()};
 }
 
 function choicesFor(answer: number, salt: number, stage: number) {
@@ -78,7 +85,10 @@ export default function AddPlayGame() {
     <div className={`add-play${shakeClass}`}>
       <SuccessBurst show={celebrate} />
       <ScoreHud score={score} />
-      <p className="add-play__help">더하기</p>
+      <p className="add-play__help">과일이 더해져요!</p>
+
+      <FruitMathBoard mode="add" a={q.a} b={q.b} fruit={q.fruit} roundKey={seed} />
+
       <div className="add-play__sum" aria-label={`${q.a} 더하기 ${q.b}`}>
         <span>{q.a}</span>
         <span className="add-play__op">+</span>
@@ -86,7 +96,8 @@ export default function AddPlayGame() {
         <span className="add-play__op">=</span>
         <span className="add-play__q">?</span>
       </div>
-      <div className="add-play__grid" role="group">
+
+      <div className="add-play__grid" role="group" aria-label="정답 고르기">
         {choices.map((n) => (
           <button
             key={n}

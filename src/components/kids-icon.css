@@ -1,0 +1,13 @@
+.kids-icon {
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: -0.12em;
+  overflow: visible;
+  pointer-events: none;
+  user-select: none;
+}
+
+.game-portal__brand-icon {
+  width: 1.15em !important;
+  height: 1.15em !important;
+}

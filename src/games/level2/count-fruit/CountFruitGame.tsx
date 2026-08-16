@@ -1,13 +1,16 @@
 'use client';
 
 import {useCallback, useEffect, useState} from 'react';
+import {KidsIcon} from '@/components/kids-icon';
+import type {KidsIconId} from '@/assets/kids-icons';
+import {FRUIT_ICON_IDS} from '@/assets/kids-icons';
 import SuccessBurst from '@/games/shared/SuccessBurst';
 import ScoreHud from '@/games/shared/ScoreHud';
 import {numberSpan} from '@/games/shared/stage-scale';
 import {useWrongShake} from '@/games/shared/useWrongShake';
 import './count-fruit.css';
 
-const FRUITS = ['🍎', '🍌', '🍓', '🍊', '🍇', '🍉'];
+const FRUITS = [...FRUIT_ICON_IDS];
 
 function makeRound(salt: number, stage: number) {
   let t = salt + 1;
@@ -17,7 +20,7 @@ function makeRound(salt: number, stage: number) {
   };
   const max = numberSpan(stage, 4);
   const count = 1 + Math.floor(rand() * max);
-  const fruit = FRUITS[Math.floor(rand() * FRUITS.length)];
+  const fruit = FRUITS[Math.floor(rand() * FRUITS.length)] as KidsIconId;
   const optionCount = Math.min(4, 3 + Math.floor(stage / 3));
   const options = new Set<number>([count]);
   while (options.size < optionCount) {
@@ -54,7 +57,7 @@ export default function CountFruitGame() {
       setScore((s) => {
         const ns = s + 1;
         setFlash('ok');
-        setMessage('🎉');
+        setMessage('맞았어요!');
         window.setTimeout(() => {
           setFlash(null);
           next(ns);
@@ -77,7 +80,7 @@ export default function CountFruitGame() {
       <div className="count-fruit__tray" aria-label={`${round.count}개의 과일`}>
         {Array.from({length: round.count}, (_, i) => (
           <span key={i} className="count-fruit__item" aria-hidden="true">
-            {round.fruit}
+            <KidsIcon id={round.fruit} size="1em" />
           </span>
         ))}
       </div>

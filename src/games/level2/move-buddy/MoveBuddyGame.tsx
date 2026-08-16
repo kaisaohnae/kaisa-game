@@ -1,14 +1,22 @@
 'use client';
 
 import {useCallback, useEffect, useState} from 'react';
+import {KidsIcon} from '@/components/kids-icon';
+import type {KidsIconId} from '@/assets/kids-icons';
 import SuccessBurst from '@/games/shared/SuccessBurst';
 import ScoreHud from '@/games/shared/ScoreHud';
 import './move-buddy.css';
 
 const COLS = 5;
-const TREATS = ['⭐', '🍎', '🍬', '🌸', '🧸'];
+const TREATS: KidsIconId[] = [
+  'shape-star',
+  'fruit-apple',
+  'item-candy',
+  'item-flower',
+  'item-teddy',
+];
 
-type Spot = {col: number; emoji: string};
+type Spot = {col: number; icon: KidsIconId};
 
 function makeSpot(salt: number, buddyCol: number): Spot {
   let t = salt + 1;
@@ -20,7 +28,7 @@ function makeSpot(salt: number, buddyCol: number): Spot {
   if (col === buddyCol) col = (col + 1 + Math.floor(rand() * (COLS - 1))) % COLS;
   return {
     col,
-    emoji: TREATS[Math.floor(rand() * TREATS.length)],
+    icon: TREATS[Math.floor(rand() * TREATS.length)],
   };
 }
 
@@ -64,7 +72,7 @@ export default function MoveBuddyGame() {
             <div key={`t-${i}`} className="move-buddy__cell">
               {spot.col === i ? (
                 <span className="move-buddy__treat" aria-hidden="true">
-                  {spot.emoji}
+                  <KidsIcon id={spot.icon} size="1em" />
                 </span>
               ) : null}
             </div>
@@ -75,7 +83,7 @@ export default function MoveBuddyGame() {
             <div key={`b-${i}`} className="move-buddy__cell">
               {buddy === i ? (
                 <span className="move-buddy__hero" aria-hidden="true">
-                  🐻
+                  <KidsIcon id="animal-bear" size="1em" />
                 </span>
               ) : (
                 <span className="move-buddy__pad" aria-hidden="true" />
@@ -88,7 +96,7 @@ export default function MoveBuddyGame() {
       <div className="move-buddy__controls">
         <button
           type="button"
-          className="move-buddy__pad-btn"
+          className="move-buddy__btn"
           aria-label="왼쪽"
           onClick={() => move(-1)}
         >
@@ -96,7 +104,7 @@ export default function MoveBuddyGame() {
         </button>
         <button
           type="button"
-          className="move-buddy__pad-btn"
+          className="move-buddy__btn"
           aria-label="오른쪽"
           onClick={() => move(1)}
         >

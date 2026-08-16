@@ -1,0 +1,229 @@
+.fruit-math {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 12px;
+  width: 100%;
+  max-width: 440px;
+}
+
+.fruit-math--sub {
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fruit-math__tray {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 120px;
+  min-height: 120px;
+  padding: 16px 16px 32px;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow:
+    0 0 0 3px rgba(255, 183, 77, 0.35),
+    0 8px 0 #ffe0b2;
+}
+
+.fruit-math__tray--right {
+  box-shadow:
+    0 0 0 3px rgba(129, 199, 132, 0.4),
+    0 8px 0 #c8e6c9;
+}
+
+.fruit-math__tray--wide {
+  width: 100%;
+  min-height: 140px;
+  padding-bottom: 16px;
+  box-shadow:
+    0 0 0 3px rgba(255, 171, 145, 0.4),
+    0 8px 0 #ffccbc;
+}
+
+.fruit-math__fruit {
+  display: inline-flex;
+  font-size: clamp(48px, 12vw, 72px);
+  line-height: 1;
+  transform-origin: center;
+}
+
+.fruit-math__fruit--in {
+  animation: fruitPopIn 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.fruit-math__fruit--join {
+  animation: fruitJoinIn 0.55s cubic-bezier(0.2, 1.5, 0.35, 1) both;
+}
+
+.fruit-math__fruit--stay {
+  animation: fruitPopIn 0.4s ease both;
+}
+
+.fruit-math__fruit--gone {
+  animation: fruitTakeAway 0.7s ease forwards;
+  position: relative;
+}
+
+.fruit-math__fruit--gone::after {
+  content: '';
+  position: absolute;
+  inset: 15% 10%;
+  border-radius: 4px;
+  background: linear-gradient(
+    to top left,
+    transparent 44%,
+    #e53935 45%,
+    #e53935 55%,
+    transparent 56%
+  );
+  opacity: 0;
+  animation: fruitSlash 0.35s ease 0.15s forwards;
+  pointer-events: none;
+}
+
+.fruit-math__count {
+  position: absolute;
+  right: 10px;
+  bottom: 6px;
+  font-family: var(--font-kids-display), sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #ef6c00;
+  font-style: normal;
+}
+
+.fruit-math__count--join {
+  color: #2e7d32;
+  animation: fruitPopIn 0.4s ease 0.35s both;
+}
+
+.fruit-math__plus {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #ff8a65;
+  color: #fff;
+  font-family: var(--font-kids-display), sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  box-shadow: 0 4px 0 #e64a19;
+  animation: fruitPlusBounce 0.6s ease 0.2s both;
+}
+
+.fruit-math__hint {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  font-family: var(--font-kids-display), var(--font-kids-body), sans-serif;
+  font-size: clamp(14px, 3.5vw, 18px);
+  font-weight: 700;
+}
+
+.fruit-math__hint-keep {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.fruit-math__hint-gone {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #ffebee;
+  color: #c62828;
+  animation: fruitHintGone 0.45s ease 0.5s both;
+}
+
+@keyframes fruitPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fruitJoinIn {
+  from {
+    opacity: 0;
+    transform: translateX(28px) scale(0.4) rotate(-12deg);
+  }
+  60% {
+    transform: translateX(-4px) scale(1.12) rotate(4deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1) rotate(0);
+  }
+}
+
+@keyframes fruitTakeAway {
+  0% {
+    opacity: 1;
+    transform: scale(1) translate(0, 0) rotate(0);
+  }
+  35% {
+    opacity: 1;
+    transform: scale(1.08) translate(0, -4px) rotate(-6deg);
+  }
+  100% {
+    opacity: 0.28;
+    transform: scale(0.75) translate(18px, -28px) rotate(18deg);
+    filter: grayscale(0.7);
+  }
+}
+
+@keyframes fruitSlash {
+  to {
+    opacity: 0.9;
+  }
+}
+
+@keyframes fruitPlusBounce {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  60% {
+    transform: scale(1.15);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fruitHintGone {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 380px) {
+  .fruit-math__tray--left,
+  .fruit-math__tray--right {
+    min-width: 96px;
+    min-height: 100px;
+    padding: 12px 12px 28px;
+  }
+
+  .fruit-math__fruit {
+    font-size: 42px;
+  }
+}

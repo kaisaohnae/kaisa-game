@@ -1,6 +1,8 @@
 'use client';
 
 import {useCallback, useEffect, useState} from 'react';
+import {KidsIcon} from '@/components/kids-icon';
+import type {KidsIconId} from '@/assets/kids-icons';
 import SuccessBurst from '@/games/shared/SuccessBurst';
 import {loadRpg, saveRpg} from '@/games/shared/rpg-storage';
 import './hero-quest.css';
@@ -16,7 +18,7 @@ type HeroSave = {
   wins: number;
 };
 
-type Monster = {emoji: string; name: string; hp: number; maxHp: number; reward: number};
+type Monster = {icon: KidsIconId; name: string; hp: number; maxHp: number; reward: number};
 
 const DEFAULT: HeroSave = {
   level: 1,
@@ -27,18 +29,18 @@ const DEFAULT: HeroSave = {
   wins: 0,
 };
 
-const FOES = [
-  {emoji: '🟢', name: '슬라임', hp: 12, reward: 6},
-  {emoji: '🦇', name: '박쥐', hp: 16, reward: 8},
-  {emoji: '🐺', name: '늑대', hp: 22, reward: 12},
-  {emoji: '🐉', name: '아기용', hp: 30, reward: 18},
+const FOES: {icon: KidsIconId; name: string; hp: number; reward: number}[] = [
+  {icon: 'monster-slime', name: '슬라임', hp: 12, reward: 6},
+  {icon: 'monster-bat', name: '박쥐', hp: 16, reward: 8},
+  {icon: 'monster-wolf', name: '늑대', hp: 22, reward: 12},
+  {icon: 'monster-dragon', name: '아기용', hp: 30, reward: 18},
 ];
 
 function makeMonster(level: number): Monster {
   const base = FOES[Math.min(FOES.length - 1, Math.floor((level - 1) / 2))];
   const maxHp = base.hp + level * 2;
   return {
-    emoji: base.emoji,
+    icon: base.icon,
     name: base.name,
     hp: maxHp,
     maxHp,
@@ -131,19 +133,19 @@ export default function HeroQuestGame() {
     <div className="hero-quest">
       <SuccessBurst show={celebrate} />
       <div className="hero-quest__badge">
-        🦸 Lv.{hero.level} · 승 {hero.wins}
+        <KidsIcon id="item-sword" size="1.1em" /> Lv.{hero.level} · 승 {hero.wins}
       </div>
       <p className="hero-quest__log">{log}</p>
 
       <div className="hero-quest__arena">
         <div className="hero-quest__side">
-          <span aria-hidden="true">🦸</span>
+          <KidsIcon id="animal-bear" size="1em" />
           <strong>HP {hero.hp}/{hero.maxHp}</strong>
           <span>ATK {hero.atk}</span>
         </div>
         <div className="hero-quest__vs">VS</div>
         <div className="hero-quest__side">
-          <span aria-hidden="true">{monster.emoji}</span>
+          <KidsIcon id={monster.icon} size="1em" />
           <strong>{monster.name}</strong>
           <span>
             HP {monster.hp}/{monster.maxHp}
