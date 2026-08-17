@@ -5,4 +5,4 @@
 :HL["/_next/static/chunks/0_l4zkicuy8sk.css","style"]
 :HL["/_next/static/chunks/1rxnw36stey8c.css","style"]
 :HL["/_next/static/chunks/12ps68nzni0a8.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"games","param":null,"prefetchHints":0,"slots":{"children":{"name":"id","param":{"type":"d","key":"pattern-copy","siblings":null},"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"IO5HhL8zGtEU7R9JLafJh"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"games","param":null,"prefetchHints":0,"slots":{"children":{"name":"id","param":{"type":"d","key":"pattern-copy","siblings":null},"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"aqT-FV0RurKy9THB_SvW1"}
