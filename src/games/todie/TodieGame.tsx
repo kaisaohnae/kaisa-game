@@ -181,8 +181,17 @@ type GearSave = {
   v: 1;
   name: string;
   job: JobId;
-  equipped: Partial<Record<GearSlot, SavedGearItem | null>>;
+  /** May include legacy earring_l/r, ring_l/r from older cookies */
+  equipped: Partial<Record<string, SavedGearItem | null>>;
 };
+
+const LEGACY_GEAR_SLOT_KEYS = ['earring_l', 'earring_r', 'ring_l', 'ring_r'] as const;
+
+function gearSaveHasEquipped(save: GearSave | null | undefined): boolean {
+  if (!save?.equipped) return false;
+  if (EQUIP_SLOTS.some((s) => Boolean(save.equipped[s.id]))) return true;
+  return LEGACY_GEAR_SLOT_KEYS.some((k) => Boolean(save.equipped[k]));
+}
 
 function serializeGearItem(it: Item): SavedGearItem | null {
   if (it.kind !== 'gear') return null;
@@ -253,6 +262,9 @@ function equipmentFromSave(save: GearSave): Equipment {
     const slot = legacySlot(key);
     if (!slot || !raw || raw.kind !== 'gear') continue;
     if (eq[slot]) continue; // keep first if both L/R existed
+    const gearId = raw.gearId
+      ? raw.gearId.replace(/_(?:l|r)$/, '')
+      : raw.gearId;
     eq[slot] = {
       id: raw.id || `saved-${slot}`,
       kind: 'gear',
@@ -260,7 +272,7 @@ function equipmentFromSave(save: GearSave): Equipment {
       qty: Math.max(1, raw.qty || 1),
       color: raw.color || '#aaa',
       job: raw.job,
-      gearId: raw.gearId,
+      gearId,
       gearSlot: slot,
       tier: raw.tier,
     };
@@ -350,7 +362,7 @@ export default function TodieGame() {
     const gear = readGearCookie();
     if (gear?.job === 'warrior' || gear?.job === 'mage') {
       setPickJobUi(gear.job);
-      setHasGearSave(EQUIP_SLOTS.some((s) => Boolean(gear.equipped?.[s.id])));
+      setHasGearSave(gearSaveHasEquipped(gear));
     }
   }, []);
 
@@ -435,8 +447,7 @@ export default function TodieGame() {
       const restore =
         saved &&
         saved.job === pickJobUi &&
-        saved.equipped &&
-        EQUIP_SLOTS.some((s) => Boolean(saved.equipped?.[s.id]));
+        gearSaveHasEquipped(saved);
 
       if (restore && saved) {
         equippedRef.current = equipmentFromSave(saved);
@@ -2023,12 +2034,7 @@ export default function TodieGame() {
               onClick={() => {
               setPickJobUi('warrior');
               const gear = readGearCookie();
-              setHasGearSave(
-                Boolean(
-                  gear?.job === 'warrior' &&
-                    EQUIP_SLOTS.some((s) => Boolean(gear.equipped?.[s.id])),
-                ),
-              );
+              setHasGearSave(Boolean(gear?.job === 'warrior' && gearSaveHasEquipped(gear)));
             }}
             disabled={loadingAssets}
           >
@@ -2040,12 +2046,7 @@ export default function TodieGame() {
               onClick={() => {
                 setPickJobUi('mage');
                 const gear = readGearCookie();
-                setHasGearSave(
-                  Boolean(
-                    gear?.job === 'mage' &&
-                      EQUIP_SLOTS.some((s) => Boolean(gear.equipped?.[s.id])),
-                  ),
-                );
+                setHasGearSave(Boolean(gear?.job === 'mage' && gearSaveHasEquipped(gear)));
               }}
               disabled={loadingAssets}
             >
