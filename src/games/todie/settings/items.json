@@ -1,0 +1,79 @@
+{
+  "tiers": {
+    "basic": { "label": "기본템", "color": "#b0bec5", "dropWeight": 58 },
+    "unique": { "label": "유일템", "color": "#4fc3f7", "dropWeight": 32 },
+    "hero": { "label": "영웅템", "color": "#ffd54f", "dropWeight": 10 }
+  },
+  "starter": {
+    "gearId": "stick",
+    "tier": "basic",
+    "name": "나무작대기",
+    "slot": "weapon",
+    "color": "#a1887f",
+    "qty": 1,
+    "autoEquip": true
+  },
+  "consumables": {
+    "potion": { "name": "체력포션", "color": "#ef5350" },
+    "mana": { "name": "마나포션", "color": "#42a5f5" },
+    "scroll": { "name": "회복스크롤", "color": "#ffd54f" }
+  },
+  "gear": {
+    "warrior": {
+      "basic": [
+        { "id": "stick", "name": "나무작대기", "slot": "weapon", "color": "#a1887f", "droppable": false },
+        { "id": "cloth_wrap", "name": "천 두건", "slot": "head", "color": "#90a4ae" },
+        { "id": "ragged_vest", "name": "누더기 조끼", "slot": "armor", "color": "#8d6e63" },
+        { "id": "wrap_gloves", "name": "붕대 장갑", "slot": "gloves", "color": "#a1887f" },
+        { "id": "straw_shoes", "name": "짚신", "slot": "shoes", "color": "#6d4c41" }
+      ],
+      "unique": [
+        { "id": "iron_sword", "name": "강철 장검", "slot": "weapon", "color": "#cfd8dc" },
+        { "id": "knight_helm", "name": "기사 헬멧", "slot": "head", "color": "#90a4ae" },
+        { "id": "blue_plate", "name": "청동 갑옷", "slot": "armor", "color": "#5c6bc0" },
+        { "id": "iron_gauntlets", "name": "철 건틀릿", "slot": "gloves", "color": "#78909c" },
+        { "id": "march_boots", "name": "행군 장화", "slot": "shoes", "color": "#5d4037" },
+        { "id": "courage_pendant", "name": "용기의 목걸이", "slot": "necklace", "color": "#ffd54f" },
+        { "id": "battle_ear_l", "name": "전투 귀걸이(왼)", "slot": "earring_l", "color": "#ffcc80" },
+        { "id": "battle_ear_r", "name": "전투 귀걸이(오른)", "slot": "earring_r", "color": "#ffe082" },
+        { "id": "power_ring_l", "name": "힘의 반지(왼)", "slot": "ring_l", "color": "#ef9a9a" },
+        { "id": "power_ring_r", "name": "힘의 반지(오른)", "slot": "ring_r", "color": "#e57373" }
+      ],
+      "hero": [
+        { "id": "wasteland_blade", "name": "황무지 검", "slot": "weapon", "color": "#fff59d" },
+        { "id": "war_crown", "name": "전장의 왕관", "slot": "head", "color": "#ffca28" },
+        { "id": "hero_plate", "name": "영웅 판금", "slot": "armor", "color": "#ff8a65" },
+        { "id": "hero_gauntlets", "name": "영웅 건틀릿", "slot": "gloves", "color": "#ffab91" },
+        { "id": "hero_greaves", "name": "영웅 각반", "slot": "shoes", "color": "#ffccbc" }
+      ]
+    },
+    "mage": {
+      "basic": [
+        { "id": "stick", "name": "나무작대기", "slot": "weapon", "color": "#a1887f", "droppable": false },
+        { "id": "apprentice_cap", "name": "견습 모자", "slot": "head", "color": "#b39ddb" },
+        { "id": "plain_robe", "name": "수련 로브", "slot": "armor", "color": "#9575cd" },
+        { "id": "soft_gloves", "name": "부드러운 장갑", "slot": "gloves", "color": "#ce93d8" },
+        { "id": "cloth_shoes", "name": "천 신발", "slot": "shoes", "color": "#8e24aa" }
+      ],
+      "unique": [
+        { "id": "crystal_staff", "name": "수정 지팡이", "slot": "weapon", "color": "#81d4fa" },
+        { "id": "wizard_hat", "name": "마법사 모자", "slot": "head", "color": "#7e57c2" },
+        { "id": "arcane_robe", "name": "비전 로브", "slot": "armor", "color": "#5e35b1" },
+        { "id": "silk_gloves", "name": "비단 장갑", "slot": "gloves", "color": "#ce93d8" },
+        { "id": "mana_boots", "name": "마나 장화", "slot": "shoes", "color": "#6a1b9a" },
+        { "id": "wisdom_pendant", "name": "지혜의 목걸이", "slot": "necklace", "color": "#80deea" },
+        { "id": "mana_ear_l", "name": "마력 귀걸이(왼)", "slot": "earring_l", "color": "#a5d6a7" },
+        { "id": "mana_ear_r", "name": "마력 귀걸이(오른)", "slot": "earring_r", "color": "#81c784" },
+        { "id": "mind_ring_l", "name": "지력 반지(왼)", "slot": "ring_l", "color": "#90caf9" },
+        { "id": "mind_ring_r", "name": "지력 반지(오른)", "slot": "ring_r", "color": "#64b5f6" }
+      ],
+      "hero": [
+        { "id": "wasteland_staff", "name": "황무지 지팡이", "slot": "weapon", "color": "#e1f5fe" },
+        { "id": "arcane_circlet", "name": "비전 서클릿", "slot": "head", "color": "#e1bee7" },
+        { "id": "hero_robe", "name": "영웅 로브", "slot": "armor", "color": "#ea80fc" },
+        { "id": "hero_gloves", "name": "영웅 장갑", "slot": "gloves", "color": "#e040fb" },
+        { "id": "hero_slippers", "name": "영웅 슬리퍼", "slot": "shoes", "color": "#d500f9" }
+      ]
+    }
+  }
+}

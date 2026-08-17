@@ -9,7 +9,11 @@ function starsLabel(level: GameLevel) {
 }
 
 export default function GamePortal() {
-  const games = [...GAMES].sort((a, b) => b.level - a.level);
+  const games = [...GAMES].sort((a, b) => {
+    if (a.id === 'todie') return -1;
+    if (b.id === 'todie') return 1;
+    return b.level - a.level;
+  });
 
   return (
     <main className="game-portal">

@@ -1,0 +1,29 @@
+{
+  "art": {
+    "format": "png",
+    "size": 48,
+    "note": "도트 필수 아님. PNG면 됨. 캐릭터: jobs/<job>/actions. 장비: public/todie/gear/... 소비: public/todie/items/<kind>.png"
+  },
+  "character": {
+    "worldSize": 72,
+    "previewSize": 160,
+    "anchorX": 0.5,
+    "anchorY": 0.5,
+    "facingOffsetRad": 1.57079632679,
+    "imageSmoothing": true
+  },
+  "equipLayerOrder": ["shoes", "armor", "gloves", "head", "weapon", "necklace", "earring_l", "earring_r", "ring_l", "ring_r"],
+  "actions": {
+    "idle": { "fps": 1, "loop": true },
+    "walk": { "fps": 8, "loop": true },
+    "roll": { "fps": 14, "loop": false }
+  },
+  "skillFx": {
+    "size": 72,
+    "life": 0.35
+  },
+  "hotbarIconSize": 32,
+  "groundItemSize": 36,
+  "gearPublicBase": "/todie/gear",
+  "consumablePublicBase": "/todie/items"
+}

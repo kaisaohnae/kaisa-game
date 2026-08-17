@@ -15,12 +15,20 @@ import {SubPlayGame} from './level5/sub-play';
 import {HeroQuestGame} from './level6/hero-quest';
 import {MagicGardenGame} from './level6/magic-garden';
 import {PetCareGame} from './level6/pet-care';
+import {TodieGame} from './todie';
 
 /**
  * ★ 바로 콕 · ★★ 조작·학습 · ★★★ 기억·연산·전투
  * (모양맞추기·그림자찾기·숫자공부는 중복으로 제외)
  */
 export const GAMES: GameModule[] = [
+  {
+    id: 'todie',
+    title: 'todie',
+    description: 'WASD로 탐험하고 싸워요',
+    level: 3,
+    Component: TodieGame,
+  },
   {
     id: 'animal-tap',
     title: '동물 찾기',

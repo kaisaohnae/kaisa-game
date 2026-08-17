@@ -1,0 +1,14 @@
+{
+  "slots": [
+    { "id": "head", "label": "머리", "group": "armor" },
+    { "id": "armor", "label": "갑옷", "group": "armor" },
+    { "id": "weapon", "label": "무기", "group": "weapon" },
+    { "id": "gloves", "label": "장갑", "group": "armor" },
+    { "id": "shoes", "label": "신발", "group": "armor" },
+    { "id": "necklace", "label": "목걸이", "group": "accessory" },
+    { "id": "earring_l", "label": "귀걸이(왼)", "group": "accessory" },
+    { "id": "earring_r", "label": "귀걸이(오른)", "group": "accessory" },
+    { "id": "ring_l", "label": "반지(왼)", "group": "accessory" },
+    { "id": "ring_r", "label": "반지(오른)", "group": "accessory" }
+  ]
+}

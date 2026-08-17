@@ -7,7 +7,8 @@
     "dev": "next dev -p 8888",
     "build": "next build",
     "start": "next start -p 8888",
-    "lint": "next lint"
+    "lint": "next lint",
+    "todie:sprites": "node src/games/todie/scripts/gen-pixel-sprites.mjs"
   },
   "dependencies": {
     "next": "16.2.9",

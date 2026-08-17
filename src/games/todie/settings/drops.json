@@ -1,0 +1,33 @@
+{
+  "note": "기본템 자주 / 유일템 중간 / 영웅템 희귀",
+  "groundTtlSec": 180,
+  "pickupRadius": 42,
+  "wrongJobToastCooldown": 1.2,
+  "alwaysDrop": true,
+  "rolls": {
+    "gearChance": 0.34,
+    "consumableChance": 0.66
+  },
+  "consumableWeights": {
+    "potion": 48,
+    "mana": 40,
+    "scroll": 12
+  },
+  "tierWeights": {
+    "basic": 58,
+    "unique": 32,
+    "hero": 10
+  },
+  "slotWeights": {
+    "weapon": 14,
+    "head": 12,
+    "armor": 12,
+    "gloves": 12,
+    "shoes": 12,
+    "necklace": 8,
+    "earring_l": 7,
+    "earring_r": 7,
+    "ring_l": 8,
+    "ring_r": 8
+  }
+}

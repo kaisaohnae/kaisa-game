@@ -1,0 +1,14 @@
+{
+  "initialCount": 280,
+  "minAlive": 240,
+  "respawnCooldownSec": 30,
+  "worldMargin": 80,
+  "aggroRange": 2000,
+  "deaggroRange": 2200,
+  "kinds": ["slime", "bat", "block"],
+  "kindWeights": {
+    "slime": 45,
+    "bat": 35,
+    "block": 20
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "jobs": {
+    "warrior": {
+      "id": "warrior",
+      "label": "검사",
+      "folder": "warrior",
+      "actions": ["idle", "walk", "roll"],
+      "skills": ["slash", "spin", "bash"]
+    },
+    "mage": {
+      "id": "mage",
+      "label": "마법사",
+      "folder": "mage",
+      "actions": ["idle", "walk", "roll"],
+      "skills": ["bolt", "nova", "shield"]
+    }
+  },
+  "paths": {
+    "actions": "actions",
+    "skills": "skills",
+    "ext": "png"
+  }
+}

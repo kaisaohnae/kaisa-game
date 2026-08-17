@@ -1,0 +1,541 @@
+.todie {
+  position: fixed;
+  inset: 0;
+  background: #0b1a12;
+  overflow: hidden;
+  font-family: Fredoka, Nunito, 'Segoe UI', sans-serif;
+  user-select: none;
+  touch-action: none;
+  /* cute sword cursor — hotspot near tip */
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M6 26l4-4 2 2-4 4-2-2z' fill='%235d4037'/%3E%3Cpath d='M9 23L22 10l3 3L12 26z' fill='%23b0bec5' stroke='%233e2723' stroke-width='1.5'/%3E%3Cpath d='M21 9l4 4 3-7z' fill='%23ffe082' stroke='%233e2723' stroke-width='1.2'/%3E%3Ccircle cx='24.5' cy='7.5' r='2.2' fill='%23ff8a65'/%3E%3C/svg%3E") 6 26, crosshair;
+}
+
+.todie__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: inherit;
+}
+
+.todie__minimap-wrap {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.todie__minimap {
+  display: block;
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 2px rgba(255, 224, 130, 0.45),
+    0 10px 24px rgba(0, 0, 0, 0.45);
+  cursor: grab;
+  pointer-events: auto;
+  background: #1b4332;
+}
+
+.todie__minimap:active {
+  cursor: grabbing;
+}
+
+.todie__exit {
+  position: relative;
+  top: auto;
+  left: auto;
+  z-index: 30;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 138, 128, 0.55);
+  background: rgba(40, 16, 16, 0.85);
+  color: #ffab91;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.todie__exit:hover {
+  background: rgba(80, 24, 24, 0.95);
+  color: #ffcdd2;
+}
+
+/* name gate: keep exit top-left */
+.todie--gate .todie__exit {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+}
+
+/* —— name gate —— */
+.todie--gate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(126, 87, 194, 0.25), transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(255, 138, 101, 0.2), transparent 45%),
+    #0b1a12;
+}
+
+.todie__gate-card {
+  width: min(420px, calc(100vw - 32px));
+  padding: 28px 28px 24px;
+  border-radius: 18px;
+  background: rgba(22, 28, 24, 0.92);
+  border: 2px solid rgba(255, 224, 130, 0.45);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  color: #f5f5f5;
+}
+
+.todie__gate-card h1 {
+  margin: 0 0 6px;
+  font-size: 28px;
+  color: #ffe082;
+  letter-spacing: 0.04em;
+}
+
+.todie__gate-card p {
+  margin: 0 0 20px;
+  color: #b0bec5;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.todie__gate-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffe082;
+}
+
+.todie__gate-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #0d1511;
+  color: #fff;
+  font-size: 18px;
+  font-family: inherit;
+  outline: none;
+}
+
+.todie__gate-input:focus {
+  border-color: #ffe082;
+}
+
+.todie__gate-hint {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: #90a4ae;
+}
+
+.todie__gate-error {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: #ff8a80;
+  min-height: 1.2em;
+}
+
+.todie__gate-jobs {
+  display: flex;
+  gap: 10px;
+  margin: 18px 0 8px;
+}
+
+.todie__gate-job {
+  flex: 1;
+  padding: 12px 10px;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  background: #121a16;
+  color: #eee;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.todie__gate-job.is-on {
+  border-color: #ffe082;
+  background: rgba(255, 224, 130, 0.12);
+  color: #ffe082;
+}
+
+.todie__gate-start {
+  margin-top: 18px;
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffe082, #ffca28);
+  color: #3e2723;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.todie__gate-start:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* —— inventory dock (always bottom-right) —— */
+.todie__inv-dock {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 20;
+  display: flex;
+  width: min(560px, calc(100vw - 24px));
+  height: min(390px, calc(100vh - 100px));
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(28, 25, 22, 0.94);
+  border: 2px solid rgba(255, 224, 130, 0.55);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
+  pointer-events: auto;
+  cursor: default;
+}
+
+.todie__inv-equip {
+  width: 200px;
+  flex-shrink: 0;
+  padding: 10px;
+  background: #161310;
+  border-right: 1px solid rgba(255, 224, 130, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.todie__inv-equip-head {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.todie__inv-char-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.todie__inv-char-job {
+  font-size: 12px;
+  color: #b0bec5;
+}
+
+.todie__inv-hint {
+  margin: 4px 0 0;
+  font-size: 10px;
+  color: #ffe082;
+}
+
+.todie__char-preview {
+  width: 72px;
+  height: 76px;
+  border-radius: 8px;
+  background: #0f1512;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.todie__equip-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
+
+.todie__equip-slot {
+  position: relative;
+  min-height: 48px;
+  border-radius: 8px;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  background: #12100e;
+  color: #90a4ae;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.todie__equip-slot.has-item {
+  border-style: solid;
+  border-color: rgba(255, 224, 130, 0.45);
+}
+
+.todie__equip-label {
+  position: absolute;
+  left: 4px;
+  top: 3px;
+  font-size: 9px;
+  color: rgba(255, 224, 130, 0.55);
+  pointer-events: none;
+}
+
+.todie__inv-bag {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
+
+.todie__inv-bag-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  color: #fff;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.todie__inv-bag-sub {
+  font-size: 10px;
+  font-weight: 600;
+  color: #90a4ae;
+}
+
+.todie__inv-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #c9a227 transparent;
+}
+
+.todie__inv-equip {
+  scrollbar-width: thin;
+  scrollbar-color: #c9a227 transparent;
+}
+
+/* game-style scrollbar (Chromium / Safari) */
+.todie__inv-scroll::-webkit-scrollbar,
+.todie__inv-equip::-webkit-scrollbar {
+  width: 8px;
+}
+
+.todie__inv-scroll::-webkit-scrollbar-track,
+.todie__inv-equip::-webkit-scrollbar-track {
+  margin: 6px 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.35),
+    rgba(40, 32, 22, 0.55),
+    rgba(0, 0, 0, 0.35)
+  );
+  border-radius: 999px;
+  border: 1px solid rgba(255, 224, 130, 0.12);
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.45);
+}
+
+.todie__inv-scroll::-webkit-scrollbar-thumb,
+.todie__inv-equip::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  border: 1px solid rgba(62, 39, 35, 0.85);
+  background:
+    linear-gradient(180deg, #ffe082 0%, #c9a227 42%, #8d6e1a 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 0 8px rgba(255, 213, 79, 0.25);
+}
+
+.todie__inv-scroll::-webkit-scrollbar-thumb:hover,
+.todie__inv-equip::-webkit-scrollbar-thumb:hover {
+  background:
+    linear-gradient(180deg, #fff59d 0%, #e0b83a 45%, #a67c1a 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 0 10px rgba(255, 224, 130, 0.4);
+}
+
+.todie__inv-scroll::-webkit-scrollbar-thumb:active,
+.todie__inv-equip::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, #ffd54f, #b8860b);
+}
+
+.todie__inv-scroll::-webkit-scrollbar-button,
+.todie__inv-equip::-webkit-scrollbar-button {
+  display: none;
+  height: 0;
+  width: 0;
+}
+
+.todie__inv-scroll::-webkit-scrollbar-corner,
+.todie__inv-equip::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.todie__inv-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+}
+
+.todie__slot {
+  aspect-ratio: 1;
+  border-radius: 7px;
+  background: #151210;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  position: relative;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+}
+
+.todie__slot:active {
+  cursor: grabbing;
+}
+
+.todie__slot.is-drag {
+  opacity: 0.45;
+  outline: 2px dashed #ffe082;
+}
+
+.todie__slot.is-over {
+  border-color: #ffe082;
+  background: rgba(255, 224, 130, 0.12);
+}
+
+.todie__slot-icon {
+  width: 58%;
+  height: 58%;
+  border-radius: 5px;
+  pointer-events: none;
+}
+
+.todie__slot-icon-img {
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+  image-rendering: auto;
+  pointer-events: none;
+}
+
+.todie__slot-qty {
+  position: absolute;
+  right: 2px;
+  bottom: 1px;
+  font-size: 9px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 1px 2px #000;
+  pointer-events: none;
+}
+
+.todie__slot-idx {
+  position: absolute;
+  left: 2px;
+  top: 1px;
+  font-size: 8px;
+  color: rgba(255, 224, 130, 0.45);
+  pointer-events: none;
+}
+
+.todie__tier-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.todie__tier-badge {
+  display: inline-block;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  padding: 1px 3px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+
+.todie__slot .todie__tier-badge,
+.todie__equip-slot .todie__tier-badge {
+  position: absolute;
+  left: 1px;
+  bottom: 1px;
+  max-width: calc(100% - 2px);
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.todie__slot.is-tier-basic,
+.todie__equip-slot.is-tier-basic {
+  box-shadow: inset 0 0 0 1px rgba(176, 190, 197, 0.55);
+}
+
+.todie__slot.is-tier-unique,
+.todie__equip-slot.is-tier-unique {
+  box-shadow: inset 0 0 0 1.5px rgba(79, 195, 247, 0.75);
+}
+
+.todie__slot.is-tier-hero,
+.todie__equip-slot.is-tier-hero {
+  box-shadow: inset 0 0 0 2px rgba(255, 213, 79, 0.9);
+}
+
+.todie__tier-badge--basic {
+  color: #b0bec5;
+}
+
+.todie__tier-badge--unique {
+  color: #4fc3f7;
+}
+
+.todie__tier-badge--hero {
+  color: #ffd54f;
+}
+
+.todie__minimap.is-disabled {
+  pointer-events: none;
+  cursor: default;
+  opacity: 0.92;
+  box-shadow:
+    0 0 0 1px rgba(255, 224, 130, 0.35),
+    0 6px 14px rgba(0, 0, 0, 0.35);
+}
+
+@media (max-width: 999px) {
+  .todie__minimap-wrap {
+    top: 8px;
+    right: 8px;
+    gap: 6px;
+  }
+}
+
+@media (max-width: 900px) {
+  .todie__inv-dock {
+    width: calc(100vw - 16px);
+    height: min(330px, 42vh);
+    right: 8px;
+    bottom: 8px;
+  }
+  .todie__inv-equip {
+    width: 150px;
+  }
+  .todie__inv-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}

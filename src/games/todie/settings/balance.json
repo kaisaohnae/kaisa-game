@@ -1,0 +1,111 @@
+{
+  "player": {
+    "maxHp": 1000,
+    "maxMp": 1000,
+    "maxStamina": 100,
+    "rollCost": 20,
+    "staminaRegenRolls": 5,
+    "mpRegenPerSec": 35,
+    "hpRegenPerSec": 2,
+    "jobs": {
+      "warrior": {
+        "label": "검사",
+        "speed": 440,
+        "rollInvuln": 0.32,
+        "rollDuration": 0.28,
+        "rollSpeed": 720
+      },
+      "mage": {
+        "label": "마법사",
+        "speed": 480,
+        "rollInvuln": 0.32,
+        "rollDuration": 0.28,
+        "rollSpeed": 720
+      }
+    }
+  },
+  "items": {
+    "potionHeal": 220,
+    "manaRestore": 220,
+    "scrollHeal": 400,
+    "scrollMana": 200
+  },
+  "skills": {
+    "warrior": {
+      "slash": {
+        "name": "베기",
+        "desc": "전방 베기",
+        "mp": 0,
+        "cd": 0.45,
+        "damage": 55,
+        "radius": 48,
+        "offset": 36,
+        "fxColor": "#ffe082",
+        "fxRadius": 42
+      },
+      "spin": {
+        "name": "회전베기",
+        "desc": "주변 회전 공격",
+        "mp": 40,
+        "cd": 3.5,
+        "damage": 70,
+        "radius": 78,
+        "offset": 0,
+        "fxColor": "#ffcc80",
+        "fxRadius": 78
+      },
+      "bash": {
+        "name": "돌진",
+        "desc": "앞으로 돌진",
+        "mp": 55,
+        "cd": 5,
+        "damage": 80,
+        "radius": 55,
+        "offset": 40,
+        "dashSpeed": 520,
+        "invuln": 0.35,
+        "fxColor": "#ffab91",
+        "fxRadius": 50
+      }
+    },
+    "mage": {
+      "bolt": {
+        "name": "마법탄",
+        "desc": "원거리 탄",
+        "mp": 25,
+        "cd": 0.55,
+        "damage": 65,
+        "projectileSpeed": 520,
+        "projectileLife": 1.4,
+        "fxColor": "#81d4fa",
+        "fxRadius": 16
+      },
+      "nova": {
+        "name": "마법폭발",
+        "desc": "주변 폭발",
+        "mp": 70,
+        "cd": 4.5,
+        "damage": 95,
+        "radius": 110,
+        "offset": 0,
+        "fxColor": "#ce93d8",
+        "fxRadius": 110
+      },
+      "shield": {
+        "name": "보호막",
+        "desc": "잠시 무적",
+        "mp": 50,
+        "cd": 6,
+        "damage": 0,
+        "invuln": 2.2,
+        "fxColor": "#80cbc4",
+        "fxRadius": 40
+      }
+    }
+  },
+  "mobs": {
+    "slime": { "hp": 90, "speed": 55, "touchDamage": 18 },
+    "bat": { "hp": 70, "speed": 95, "touchDamage": 18 },
+    "block": { "hp": 120, "speed": 40, "touchDamage": 28 }
+  }
+}

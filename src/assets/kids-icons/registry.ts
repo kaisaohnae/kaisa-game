@@ -257,6 +257,7 @@ export const FRUIT_ICON_IDS = [
 ] as const satisfies readonly KidsIconId[];
 
 export const GAME_CARD_ICONS: Record<string, KidsIconId> = {
+  todie: 'item-sword',
   'animal-tap': 'animal-dog',
   'color-touch': 'item-palette',
   'balloon-pop': 'item-balloon',
