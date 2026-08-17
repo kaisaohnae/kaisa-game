@@ -9,6 +9,6 @@
     { "id": "earring", "label": "귀걸이", "group": "accessory" },
     { "id": "ring", "label": "반지", "group": "accessory" }
   ],
-  "uniqueOwnGroups": ["armor", "weapon"],
+  "uniqueOwnGroups": ["armor", "weapon", "accessory"],
   "alreadyOwnedToast": "이미 가지고 있는 장비예요"
 }

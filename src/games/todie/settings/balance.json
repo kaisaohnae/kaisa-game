@@ -112,6 +112,7 @@
     "spider": { "hp": 85, "speed": 80, "touchDamage": 24 },
     "boss": { "hp": 2200, "speed": 70, "touchDamage": 45, "label": "필드 보스" },
     "bigBoss": { "hp": 5500, "speed": 78, "touchDamage": 70, "label": "빅 보스" },
+    "finalBoss": { "hp": 12000, "speed": 82, "touchDamage": 95, "label": "최종 보스" },
     "elite": {
       "hpMult": 2.4,
       "speedMult": 1.15,

@@ -52,7 +52,8 @@
       "wolf": 76,
       "spider": 72,
       "boss": 140,
-      "bigBoss": 200
+      "bigBoss": 200,
+      "finalBoss": 240
     }
   }
 }

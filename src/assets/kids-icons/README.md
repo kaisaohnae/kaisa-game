@@ -23,6 +23,4 @@ import {KidsIcon} from '@/components/kids-icon';
 - `shape-*` 도형
 - `color-*` 색깔 방울
 - `item-*` UI·소품
-- `garden-*` 정원
-- `pet-*` 펫 성장
 - `monster-*` 모험 몬스터

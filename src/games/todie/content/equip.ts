@@ -11,7 +11,7 @@ export type GearSlot =
   | 'earring'
   | 'ring';
 
-export type GearTier = 'basic' | 'ascend' | 'unique' | 'hero';
+export type GearTier = 'basic' | 'ascend' | 'unique' | 'hero' | 'mythic';
 
 export type EquipSlotDef = {
   id: GearSlot;
@@ -29,7 +29,7 @@ export function alreadyOwnedToast(): string {
   return (equipJson as {alreadyOwnedToast?: string}).alreadyOwnedToast ?? '이미 가지고 있는 장비예요';
 }
 
-/** 방어구·무기 슬롯인지 (액세서리 제외) */
+/** 모든 장비 슬롯 — 가방·장착 중복 불가 */
 export function isUniqueOwnGearSlot(slot: GearSlot | null | undefined): boolean {
   if (!slot) return false;
   const def = EQUIP_SLOTS.find((s) => s.id === slot);
@@ -47,13 +47,14 @@ function sameGear(a: Item, b: Item): boolean {
   );
 }
 
-/** 가방·장착 중 같은 방어구/무기 보유 여부 */
+/** 가방 또는 장착 중 같은 장비 보유 여부 */
 export function ownsSameUniqueGear(
   bag: Item[],
   equipped: Equipment,
   item: Item,
 ): boolean {
-  if (item.kind !== 'gear' || !isUniqueOwnGearSlot(item.gearSlot)) return false;
+  if (item.kind !== 'gear' || !item.gearSlot) return false;
+  if (!isUniqueOwnGearSlot(item.gearSlot)) return false;
   for (const s of EQUIP_SLOTS) {
     const wearing = equipped[s.id];
     if (wearing && sameGear(wearing, item)) return true;
@@ -132,21 +133,7 @@ export function putItemInBag(bag: Item[], item: Item): boolean {
       return true;
     }
   } else if (item.kind === 'gear') {
-    // 방어구·무기는 스택/중복 보유 불가
-    if (!isUniqueOwnGearSlot(item.gearSlot)) {
-      const stack = bag.find(
-        (s) =>
-          s.kind === 'gear' &&
-          s.gearId === item.gearId &&
-          s.job === item.job &&
-          s.tier === item.tier &&
-          s.name === item.name,
-      );
-      if (stack) {
-        stack.qty += item.qty;
-        return true;
-      }
-    }
+    // 장비는 스택하지 않음 (중복 보유는 ownsSameUniqueGear로 차단)
   }
   const idx = findEmptyBagIndex(bag);
   if (idx < 0) return false;
@@ -168,6 +155,7 @@ const TIER_RANK: Record<GearTier, number> = {
   ascend: 2,
   unique: 3,
   hero: 4,
+  mythic: 5,
 };
 
 export function tierRank(tier: GearTier | null | undefined): number {

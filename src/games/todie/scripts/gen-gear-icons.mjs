@@ -148,25 +148,28 @@ const TIER_BG = {
   ascend: {glow: hex('#42a5f5', 0.28), rim: hex('#90caf9', 0.7), spark: false},
   unique: {glow: hex('#ffd54f', 0.32), rim: hex('#ffe082', 0.85), spark: true},
   hero: {glow: hex('#ff6d00', 0.42), rim: hex('#ffab40', 0.95), spark: true, rays: true},
+  mythic: {glow: hex('#ab47bc', 0.48), rim: hex('#e1bee7', 0.95), spark: true, rays: true},
 };
 
 function tierBackdrop(tier) {
   const px = blank();
   const t = TIER_BG[tier] || TIER_BG.basic;
+  const ornate = tier === 'hero' || tier === 'mythic';
+  const rayColor = tier === 'mythic' ? hex('#ce93d8', 0.28) : hex('#ff9100', 0.22);
   // soft plate behind item
   softEllipse(px, CX, CY + 8, 98, 88, hex('#1a1410', 0.35), 0.5);
-  glow(px, CX, CY, tier === 'hero' ? 110 : tier === 'unique' ? 95 : 80, t.glow);
+  glow(px, CX, CY, ornate ? 118 : tier === 'unique' ? 95 : 80, t.glow);
   if (t.rays) {
-    for (let i = 0; i < 10; i += 1) {
-      const a = (i / 10) * Math.PI * 2 + 0.2;
+    for (let i = 0; i < 12; i += 1) {
+      const a = (i / 12) * Math.PI * 2 + 0.2;
       softCapsule(
         px,
         CX + Math.cos(a) * 28,
         CY + Math.sin(a) * 28,
-        CX + Math.cos(a) * 108,
-        CY + Math.sin(a) * 108,
+        CX + Math.cos(a) * 112,
+        CY + Math.sin(a) * 112,
         4 + (i % 2),
-        hex('#ff9100', 0.22),
+        rayColor,
         0.5,
       );
     }
@@ -174,10 +177,12 @@ function tierBackdrop(tier) {
   // rim ring
   for (let a = 0; a < 48; a += 1) {
     const ang = (a / 48) * Math.PI * 2;
-    const rr = tier === 'hero' ? 108 : 96;
+    const rr = ornate ? 110 : 96;
     softEllipse(px, CX + Math.cos(ang) * rr, CY + Math.sin(ang) * rr, 3.2, 3.2, t.rim, 0.4);
   }
-  if (tier === 'hero') {
+  if (tier === 'hero' || tier === 'mythic') {
+    const gemA = tier === 'mythic' ? hex('#ab47bc') : hex('#ff6d00');
+    const gemB = tier === 'mythic' ? hex('#e1bee7') : hex('#ffe082');
     // corner gems
     for (const [gx, gy] of [
       [48, 48],
@@ -185,21 +190,22 @@ function tierBackdrop(tier) {
       [48, 208],
       [208, 208],
     ]) {
-      softEllipse(px, gx, gy, 10, 10, hex('#ff6d00'), 0.25);
-      softEllipse(px, gx, gy, 6, 6, hex('#ffe082'), 0.22);
+      softEllipse(px, gx, gy, 10, 10, gemA, 0.25);
+      softEllipse(px, gx, gy, 6, 6, gemB, 0.22);
       softEllipse(px, gx - 2, gy - 2, 2.5, 2.5, hex('#ffffff'), 0.3);
     }
   }
   if (t.spark) {
-    for (let i = 0; i < (tier === 'hero' ? 14 : 8); i += 1) {
+    const fancy = tier === 'hero' || tier === 'mythic';
+    for (let i = 0; i < (fancy ? 14 : 8); i += 1) {
       const ang = (i / 14) * Math.PI * 2;
       const rr = 55 + (i % 4) * 12;
       softEllipse(
         px,
         CX + Math.cos(ang) * rr,
         CY + Math.sin(ang) * rr - 6,
-        tier === 'hero' ? 3.5 : 2.4,
-        tier === 'hero' ? 3.5 : 2.4,
+        fancy ? 3.5 : 2.4,
+        fancy ? 3.5 : 2.4,
         hex('#ffffff', 0.75),
         0.4,
       );
@@ -230,40 +236,73 @@ function iconStick() {
   softEllipse(px, CX, 200, 18, 12, hex('#4e342e'), 0.28);
   return px;
 }
-function iconSword({hero = false} = {}) {
+function iconSword({hero = false, mythic = false} = {}) {
   const px = blank();
-  if (hero) glow(px, CX, 90, 70, hex('#ff6d00', 0.35));
-  const blade = hero ? hex('#ffe082') : hex('#eceff1');
-  const edge = hero ? hex('#ff9100') : hex('#78909c');
-  softCapsule(px, CX, 195, CX, 42, hero ? 16 : 13, edge);
-  softCapsule(px, CX, 195, CX, 42, hero ? 10 : 8, blade);
+  const fancy = hero || mythic;
+  if (mythic) glow(px, CX, 90, 74, hex('#ab47bc', 0.4));
+  else if (hero) glow(px, CX, 90, 70, hex('#ff6d00', 0.35));
+  const blade = mythic ? hex('#e1bee7') : hero ? hex('#ffe082') : hex('#eceff1');
+  const edge = mythic ? hex('#7b1fa2') : hero ? hex('#ff9100') : hex('#78909c');
+  softCapsule(px, CX, 195, CX, 42, fancy ? 16 : 13, edge);
+  softCapsule(px, CX, 195, CX, 42, fancy ? 10 : 8, blade);
   softCapsule(px, CX, 195, CX, 42, 3, hex('#ffffff', 0.7));
   softEllipse(px, CX, 40, 14, 18, hex('#ffffff', 0.85), 0.3);
   softCapsule(px, CX - 48, 178, CX + 48, 178, 10, hex('#5d4037'));
-  softCapsule(px, CX - 48, 178, CX + 48, 178, 6, hero ? hex('#ffb74d') : hex('#a1887f'));
+  softCapsule(
+    px,
+    CX - 48,
+    178,
+    CX + 48,
+    178,
+    6,
+    mythic ? hex('#ce93d8') : hero ? hex('#ffb74d') : hex('#a1887f'),
+  );
   softCapsule(px, CX, 178, CX, 230, 11, hex('#4e342e'));
   softCapsule(px, CX, 178, CX, 230, 6, hex('#8d6e63'));
-  softEllipse(px, CX, 232, 16, 12, hero ? hex('#ff6d00') : hex('#6d4c41'), 0.25);
-  if (hero) {
-    softEllipse(px, CX, 100, 8, 8, hex('#ffd54f'), 0.22);
-    softEllipse(px, CX - 18, 130, 5, 5, hex('#ffab40'), 0.28);
-    softEllipse(px, CX + 18, 130, 5, 5, hex('#ffab40'), 0.28);
+  softEllipse(
+    px,
+    CX,
+    232,
+    16,
+    12,
+    mythic ? hex('#ab47bc') : hero ? hex('#ff6d00') : hex('#6d4c41'),
+    0.25,
+  );
+  if (fancy) {
+    softEllipse(px, CX, 100, 8, 8, mythic ? hex('#ea80fc') : hex('#ffd54f'), 0.22);
+    softEllipse(px, CX - 18, 130, 5, 5, mythic ? hex('#ce93d8') : hex('#ffab40'), 0.28);
+    softEllipse(px, CX + 18, 130, 5, 5, mythic ? hex('#ce93d8') : hex('#ffab40'), 0.28);
   }
   return px;
 }
-function iconStaff({hero = false, crystal = false} = {}) {
+function iconStaff({hero = false, crystal = false, mythic = false} = {}) {
   const px = blank();
   softCapsule(px, CX, 220, CX, 90, 11, hex('#5d4037'));
   softCapsule(px, CX, 220, CX, 90, 6, hex('#a1887f'));
-  const gem = hero ? hex('#ff9100') : crystal ? hex('#4fc3f7') : hex('#80deea');
-  glow(px, CX, 70, hero ? 55 : 40, [...gem.slice(0, 3), 110]);
-  softEllipse(px, CX, 70, hero ? 38 : 30, hero ? 38 : 30, gem, 0.2);
-  softEllipse(px, CX, 70, hero ? 24 : 18, hero ? 24 : 18, hex('#ffffff', 0.35), 0.35);
+  const fancy = hero || mythic;
+  const gem = mythic
+    ? hex('#ea80fc')
+    : hero
+      ? hex('#ff9100')
+      : crystal
+        ? hex('#4fc3f7')
+        : hex('#80deea');
+  glow(px, CX, 70, fancy ? 55 : 40, [...gem.slice(0, 3), 110]);
+  softEllipse(px, CX, 70, fancy ? 38 : 30, fancy ? 38 : 30, gem, 0.2);
+  softEllipse(px, CX, 70, fancy ? 24 : 18, fancy ? 24 : 18, hex('#ffffff', 0.35), 0.35);
   softEllipse(px, CX - 10, 58, 10, 10, hex('#ffffff', 0.85), 0.3);
-  if (hero) {
+  if (fancy) {
     for (let i = 0; i < 6; i += 1) {
       const a = (i / 6) * Math.PI * 2;
-      softEllipse(px, CX + Math.cos(a) * 48, 70 + Math.sin(a) * 48, 6, 6, hex('#ffd54f'), 0.3);
+      softEllipse(
+        px,
+        CX + Math.cos(a) * 48,
+        70 + Math.sin(a) * 48,
+        6,
+        6,
+        mythic ? hex('#ce93d8') : hex('#ffd54f'),
+        0.3,
+      );
     }
   }
   return px;
@@ -302,6 +341,22 @@ function iconHelm({kind}) {
     softEllipse(px, CX, CY - 18, 22, 22, hex('#ff9100'), 0.2);
     softEllipse(px, CX, CY - 18, 12, 12, hex('#ffe082'), 0.25);
     softEllipse(px, CX - 6, CY - 24, 5, 5, hex('#ffffff'), 0.3);
+  } else if (kind === 'myth_helm') {
+    glow(px, CX, CY - 20, 74, hex('#ab47bc', 0.45));
+    softCapsule(px, CX - 70, CY + 10, CX + 70, CY + 10, 16, hex('#6a1b9a'));
+    softCapsule(px, CX - 70, CY + 10, CX + 70, CY + 10, 10, hex('#ce93d8'));
+    for (const x of [-50, 0, 50]) {
+      softEllipse(px, CX + x, CY - 30, 14, 28, hex('#ea80fc'), 0.22);
+      softEllipse(px, CX + x, CY - 48, 8, 8, hex('#f3e5f5'), 0.25);
+    }
+    softEllipse(px, CX, CY - 55, 12, 12, hex('#ab47bc'), 0.22);
+  } else if (kind === 'myth_circlet') {
+    glow(px, CX, CY - 10, 64, hex('#ab47bc', 0.4));
+    softCapsule(px, CX - 68, CY + 8, CX + 68, CY + 8, 12, hex('#7b1fa2'));
+    softCapsule(px, CX - 68, CY + 8, CX + 68, CY + 8, 7, hex('#e1bee7'));
+    softEllipse(px, CX, CY - 18, 22, 22, hex('#ea80fc'), 0.2);
+    softEllipse(px, CX, CY - 18, 12, 12, hex('#f3e5f5'), 0.25);
+    softEllipse(px, CX - 6, CY - 24, 5, 5, hex('#ffffff'), 0.3);
   }
   return px;
 }
@@ -336,6 +391,17 @@ function iconArmor({kind}) {
     paint(hex('#4a148c'), hex('#7b1fa2'), hex('#f3e5f5'));
     softEllipse(px, CX, CY + 4, 22, 22, hex('#ff9100'), 0.22);
     softEllipse(px, CX, CY + 4, 12, 12, hex('#ffe082'), 0.28);
+  } else if (kind === 'myth_plate') {
+    glow(px, CX, CY, 86, hex('#ab47bc', 0.4));
+    paint(hex('#4a148c'), hex('#9c27b0'), hex('#e1bee7'));
+    softCapsule(px, CX - 40, CY - 22, CX + 40, CY - 22, 8, hex('#ce93d8'));
+    softEllipse(px, CX, CY + 10, 20, 20, hex('#f3e5f5'), 0.25);
+    softEllipse(px, CX, CY + 10, 10, 10, hex('#ea80fc'), 0.28);
+  } else if (kind === 'myth_robe') {
+    glow(px, CX, CY, 86, hex('#ab47bc', 0.38));
+    paint(hex('#311b92'), hex('#7b1fa2'), hex('#f3e5f5'));
+    softEllipse(px, CX, CY + 4, 22, 22, hex('#ea80fc'), 0.22);
+    softEllipse(px, CX, CY + 4, 12, 12, hex('#e1bee7'), 0.28);
   }
   return px;
 }
@@ -442,6 +508,14 @@ save('warrior', 'hero', 'hero_plate', () => iconArmor({kind: 'hero_plate'}));
 save('warrior', 'hero', 'hero_gauntlets', () => iconGloves(hex('#ff7043'), hex('#e64a19'), true));
 save('warrior', 'hero', 'hero_greaves', () => iconShoes(hex('#bf360c'), true));
 
+save('warrior', 'mythic', 'void_blade', () => iconSword({mythic: true}));
+save('warrior', 'mythic', 'myth_helm', () => iconHelm({kind: 'myth_helm'}));
+save('warrior', 'mythic', 'myth_plate', () => iconArmor({kind: 'myth_plate'}));
+save('warrior', 'mythic', 'myth_gauntlets', () =>
+  iconGloves(hex('#ce93d8'), hex('#ab47bc'), true, true),
+);
+save('warrior', 'mythic', 'myth_greaves', () => iconShoes(hex('#6a1b9a'), true, true));
+
 // mage
 save('mage', 'basic', 'stick', iconStick);
 save('mage', 'basic', 'apprentice_cap', () => iconHelm({kind: 'cap'}));
@@ -464,6 +538,14 @@ save('mage', 'hero', 'arcane_circlet', () => iconHelm({kind: 'circlet'}));
 save('mage', 'hero', 'hero_robe', () => iconArmor({kind: 'hero_robe'}));
 save('mage', 'hero', 'hero_gloves', () => iconGloves(hex('#ff7043'), hex('#ab47bc'), true));
 save('mage', 'hero', 'hero_slippers', () => iconShoes(hex('#bf360c'), true));
+
+save('mage', 'mythic', 'void_staff', () => iconStaff({mythic: true}));
+save('mage', 'mythic', 'myth_circlet', () => iconHelm({kind: 'myth_circlet'}));
+save('mage', 'mythic', 'myth_robe', () => iconArmor({kind: 'myth_robe'}));
+save('mage', 'mythic', 'myth_gloves', () =>
+  iconGloves(hex('#ce93d8'), hex('#7b1fa2'), true, true),
+);
+save('mage', 'mythic', 'myth_slippers', () => iconShoes(hex('#6a1b9a'), true, true));
 
 // consumables — prettier bottles
 saveItem('potion', () => {

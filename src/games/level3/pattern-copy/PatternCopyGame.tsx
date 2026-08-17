@@ -26,8 +26,15 @@ function makePattern(salt: number, length: number): Tone[] {
   return Array.from({length}, () => TONES[Math.floor(rand() * TONES.length)]);
 }
 
+const START_LEN = 6;
+const MAX_LEN = 10;
+
+function patternLenForScore(score: number) {
+  return Math.min(START_LEN + Math.floor(score / 2), MAX_LEN);
+}
+
 export default function PatternCopyGame() {
-  const [pattern, setPattern] = useState<Tone[]>(() => makePattern(1, 3));
+  const [pattern, setPattern] = useState<Tone[]>(() => makePattern(1, START_LEN));
   const [phase, setPhase] = useState<'show' | 'play'>('show');
   const [highlight, setHighlight] = useState<string | null>(null);
   const [step, setStep] = useState(0);
@@ -44,7 +51,7 @@ export default function PatternCopyGame() {
   }, []);
 
   useEffect(() => {
-    startRound(Date.now() % 100000, 3);
+    startRound(Date.now() % 100000, START_LEN);
   }, [startRound]);
 
   useEffect(() => {
@@ -80,7 +87,7 @@ export default function PatternCopyGame() {
     if (tone.id !== pattern[step].id) {
       triggerWrong();
       window.setTimeout(() => {
-        startRound(Date.now() % 100000, Math.min(3 + Math.floor(score / 2), 5));
+        startRound(Date.now() % 100000, patternLenForScore(score));
       }, 500);
       return;
     }
@@ -91,7 +98,7 @@ export default function PatternCopyGame() {
       setScore((n) => n + 1);
       window.setTimeout(() => {
         setCelebrate(false);
-        startRound(Date.now() % 100000, Math.min(3 + Math.floor((score + 1) / 2), 5));
+        startRound(Date.now() % 100000, patternLenForScore(score + 1));
       }, 900);
       return;
     }

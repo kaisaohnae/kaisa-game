@@ -37,13 +37,13 @@
 .drag-fruit__item {
   position: absolute;
   z-index: 2;
-  width: clamp(64px, 16vw, 88px);
-  height: clamp(64px, 16vw, 88px);
+  width: clamp(56px, 14vw, 76px);
+  height: clamp(56px, 14vw, 76px);
   border: 0;
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 6px 0 rgba(121, 85, 72, 0.18);
-  font-size: clamp(48px, 12vw, 72px);
+  font-size: clamp(40px, 10vw, 60px);
   line-height: 1;
   cursor: grab;
   -webkit-tap-highlight-color: transparent;

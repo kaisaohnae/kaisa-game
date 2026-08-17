@@ -278,6 +278,7 @@ export function InventoryDock({
               <span className="todie__tier-badge todie__tier-badge--ascend">전승템</span>
               <span className="todie__tier-badge todie__tier-badge--unique">유일템</span>
               <span className="todie__tier-badge todie__tier-badge--hero">영웅템</span>
+              <span className="todie__tier-badge todie__tier-badge--mythic">신화템</span>
             </div>
             <div className="todie__inv-toolbar-sub">
               장비 {worn} · 가방 {bagUsed}
@@ -327,7 +328,7 @@ export function InventoryDock({
 
       <div className="todie__inv-bag">
         <div className="todie__inv-bag-head">
-          <span>가방 100</span>
+          <span>가방 {bag.length}</span>
           <span className="todie__inv-bag-sub">드래그 이동 · 더블탭/우클릭 장착</span>
         </div>
         <div className="todie__inv-scroll">

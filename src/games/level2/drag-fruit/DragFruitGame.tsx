@@ -18,12 +18,13 @@ function makeFruits(salt: number, stage: number): Fruit[] {
     t = (t * 1664525 + 1013904223) >>> 0;
     return t / 0xffffffff;
   };
-  const count = Math.min(8, 3 + Math.floor(stage / 2) + Math.floor(rand() * 2));
+  // 시작 ~5~6개, 스테이지 올리면 최대 12개
+  const count = Math.min(12, 5 + Math.floor(stage / 2) + Math.floor(rand() * 2));
   return Array.from({length: count}, (_, i) => ({
     id: `f-${salt}-${i}`,
     icon: FRUITS[Math.floor(rand() * FRUITS.length)],
-    x: 8 + rand() * 70,
-    y: 8 + rand() * 42,
+    x: 6 + rand() * 74,
+    y: 6 + rand() * 48,
   }));
 }
 

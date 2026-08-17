@@ -49,28 +49,61 @@
 .todie__top-actions {
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: stretch;
   gap: 8px;
   pointer-events: auto;
 }
 
 .todie__exit,
-.todie__fresh {
+.todie__fresh,
+.todie__mute {
   position: relative;
   top: auto;
   left: auto;
   z-index: 30;
-  padding: 8px 14px;
+  box-sizing: border-box;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid transparent;
   border-radius: 10px;
   font-family: inherit;
   font-weight: 800;
   font-size: 13px;
+  line-height: 1;
   cursor: pointer;
   pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.todie__mute {
+  border-color: rgba(129, 212, 250, 0.55);
+  background: rgba(16, 32, 48, 0.85);
+  color: #81d4fa;
+  width: 36px;
+  padding: 0;
+}
+
+.todie__mute-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.todie__mute:hover {
+  background: rgba(24, 48, 72, 0.95);
+  color: #b3e5fc;
+}
+
+.todie__mute[aria-pressed='true'] {
+  border-color: rgba(158, 158, 158, 0.55);
+  background: rgba(32, 32, 36, 0.85);
+  color: #bdbdbd;
 }
 
 .todie__exit {
-  border: 1px solid rgba(255, 138, 128, 0.55);
+  border-color: rgba(255, 138, 128, 0.55);
   background: rgba(40, 16, 16, 0.85);
   color: #ffab91;
 }
@@ -81,7 +114,7 @@
 }
 
 .todie__fresh {
-  border: 1px solid rgba(129, 199, 132, 0.55);
+  border-color: rgba(129, 199, 132, 0.55);
   background: rgba(16, 40, 24, 0.85);
   color: #a5d6a7;
 }
@@ -181,7 +214,11 @@
 
 .todie__gate-job {
   flex: 1;
-  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 10px 10px;
   border-radius: 12px;
   border: 2px solid rgba(255, 255, 255, 0.15);
   background: #121a16;
@@ -192,10 +229,33 @@
   cursor: pointer;
 }
 
+.todie__gate-job:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.todie__gate-job-sprite {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45));
+}
+
+.todie__gate-job-label {
+  line-height: 1.2;
+}
+
 .todie__gate-job.is-on {
   border-color: #ffe082;
   background: rgba(255, 224, 130, 0.12);
   color: #ffe082;
+}
+
+.todie__gate-job.is-on .todie__gate-job-sprite {
+  filter: drop-shadow(0 0 10px rgba(255, 224, 130, 0.35))
+    drop-shadow(0 4px 8px rgba(0, 0, 0, 0.45));
 }
 
 .todie__gate-start {
@@ -350,7 +410,8 @@
   flex-wrap: wrap;
   align-content: stretch;
   width: min(560px, calc(100vw - 24px));
-  height: min(390px, calc(100vh - 100px));
+  /* +100 vs previous 390; leave headroom so it stays below HP/MP/ST panel */
+  height: min(490px, calc(100vh - 120px));
   border-radius: 14px;
   overflow: hidden;
   background: rgba(28, 25, 22, 0.94);
@@ -865,6 +926,11 @@
   box-shadow: inset 0 0 0 2px rgba(230, 81, 0, 0.95);
 }
 
+.todie__slot.is-tier-mythic,
+.todie__equip-slot.is-tier-mythic {
+  box-shadow: inset 0 0 0 2px rgba(171, 71, 188, 0.95);
+}
+
 .todie__tier-badge--basic {
   color: #b0bec5;
 }
@@ -879,6 +945,10 @@
 
 .todie__tier-badge--hero {
   color: #e65100;
+}
+
+.todie__tier-badge--mythic {
+  color: #ce93d8;
 }
 
 .todie__minimap.is-disabled {
@@ -901,7 +971,7 @@
 @media (max-width: 900px) {
   .todie__inv-dock {
     width: calc(100vw - 16px);
-    height: min(330px, 42vh);
+    height: min(430px, 48vh);
     left: 8px;
     bottom: 8px;
   }
@@ -916,5 +986,32 @@
   }
   .todie__inv-grid {
     grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* Phone: match canvas HUD edge (8px) + keep FAB clear of stacked hotbar */
+@media (max-width: 500px) {
+  .todie__inv-fab {
+    left: 8px;
+    bottom: 8px;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+  }
+  .todie__inv-fab-icon {
+    width: 22px;
+    height: 18px;
+  }
+  .todie__inv-fab-icon::before {
+    width: 10px;
+    height: 7px;
+    top: -6px;
+    margin-left: -5px;
+  }
+  .todie__inv-dock {
+    left: 8px;
+    bottom: 8px;
+    width: calc(100vw - 16px);
+    height: min(400px, 52vh);
   }
 }

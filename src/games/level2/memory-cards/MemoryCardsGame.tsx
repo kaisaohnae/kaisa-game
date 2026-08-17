@@ -20,7 +20,19 @@ const ALL_PAIRS: {pairId: string; icon: KidsIconId}[] = [
   {pairId: 'd', icon: 'animal-bear'},
   {pairId: 'e', icon: 'animal-fox'},
   {pairId: 'f', icon: 'animal-panda'},
+  {pairId: 'g', icon: 'animal-frog'},
+  {pairId: 'h', icon: 'animal-chick'},
+  {pairId: 'i', icon: 'animal-pig'},
+  {pairId: 'j', icon: 'animal-monkey'},
+  {pairId: 'k', icon: 'animal-lion'},
+  {pairId: 'l', icon: 'animal-tiger'},
+  {pairId: 'm', icon: 'animal-cow'},
+  {pairId: 'n', icon: 'fruit-apple'},
+  {pairId: 'o', icon: 'fruit-banana'},
+  {pairId: 'p', icon: 'shape-star'},
 ];
+
+const MAX_PAIRS = ALL_PAIRS.length; // 16
 
 function buildDeck(salt: number, pairCount: number): Card[] {
   let t = salt + 1;
@@ -41,14 +53,14 @@ function buildDeck(salt: number, pairCount: number): Card[] {
 }
 
 function pairsForStage(stage: number) {
-  return Math.min(6, 3 + Math.floor(stage / 2));
+  return Math.min(MAX_PAIRS, 4 + stage);
 }
 
 export default function MemoryCardsGame() {
   const [ready, setReady] = useState(false);
   const [score, setScore] = useState(0);
-  const [pairCount, setPairCount] = useState(3);
-  const [cards, setCards] = useState<Card[]>(() => buildDeck(1, 3));
+  const [pairCount, setPairCount] = useState(4);
+  const [cards, setCards] = useState<Card[]>(() => buildDeck(1, 4));
   const [flipped, setFlipped] = useState<number[]>([]);
   const [matched, setMatched] = useState<string[]>([]);
   const [lock, setLock] = useState(false);
@@ -125,7 +137,11 @@ export default function MemoryCardsGame() {
         </button>
       </div>
       <p className="memory-cards__message">{message}</p>
-      <div className="memory-cards__grid" role="group" aria-label="기억 카드">
+      <div
+        className={`memory-cards__grid${pairCount >= 8 ? ' is-wide' : ''}`}
+        role="group"
+        aria-label="기억 카드"
+      >
         {cards.map((card) => {
           const open = flipped.includes(card.id) || matched.includes(card.pairId);
           return (

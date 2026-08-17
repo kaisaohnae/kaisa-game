@@ -58,6 +58,25 @@
   width: min(100%, 380px);
 }
 
+.memory-cards__grid.is-wide {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: min(100%, 440px);
+  gap: clamp(8px, 2vw, 12px);
+}
+
+.memory-cards__grid.is-wide .memory-cards__card {
+  border-width: 3px;
+  border-radius: 16px;
+  box-shadow: 0 6px 0 #1e88e5;
+  font-size: clamp(28px, 8vw, 48px);
+  min-width: 0;
+  min-height: 0;
+}
+
+.memory-cards__grid.is-wide .memory-cards__card.is-open {
+  box-shadow: 0 6px 0 #ffe082;
+}
+
 .memory-cards__card {
   display: grid;
   place-items: center;
@@ -90,6 +109,10 @@
   .memory-cards__grid {
     width: min(100%, 460px);
     gap: 18px;
+  }
+
+  .memory-cards__grid.is-wide {
+    width: min(100%, 520px);
   }
 }
 

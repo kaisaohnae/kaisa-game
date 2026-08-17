@@ -3,9 +3,14 @@ import {KidsIcon} from '@/components/kids-icon';
 import {GAME_CARD_ICONS} from '@/assets/kids-icons';
 import {GAMES} from '@/games';
 import type {GameLevel} from '@/games';
+import warriorCardIcon from '@/games/todie/jobs/warrior/actions/idle_down.png';
 
 function starsLabel(level: GameLevel) {
   return '★'.repeat(level);
+}
+
+function pngSrc(mod: string | {src: string}) {
+  return typeof mod === 'string' ? mod : mod.src;
 }
 
 export default function GamePortal() {
@@ -30,7 +35,16 @@ export default function GamePortal() {
             <li key={game.id} className="game-portal__item">
               <Link href={`/games/${game.id}/`} className="game-portal__card">
                 <span className="game-portal__emoji" aria-hidden="true">
-                  <KidsIcon id={GAME_CARD_ICONS[game.id] ?? 'item-balloon'} size="1em" />
+                  {game.id === 'todie' ? (
+                    <img
+                      className="game-portal__char-icon"
+                      src={pngSrc(warriorCardIcon)}
+                      alt=""
+                      draggable={false}
+                    />
+                  ) : (
+                    <KidsIcon id={GAME_CARD_ICONS[game.id] ?? 'item-balloon'} size="1em" />
+                  )}
                 </span>
                 <span className="game-portal__level" aria-hidden="true">
                   {starsLabel(game.level)}

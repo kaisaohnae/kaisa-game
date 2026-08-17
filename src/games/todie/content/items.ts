@@ -9,7 +9,7 @@ import {EQUIP_SLOTS} from './equip';
 export const itemSettings = itemsJson;
 export const dropSettings = dropsJson;
 
-export type GearTier = 'basic' | 'ascend' | 'unique' | 'hero';
+export type GearTier = 'basic' | 'ascend' | 'unique' | 'hero' | 'mythic';
 
 export type GearDef = {
   id: string;

@@ -55,23 +55,11 @@ import {
   ItemTeddy,
 } from './items';
 import {
-  GardenBloom,
-  GardenCarrot,
-  GardenHole,
-  GardenLeaf,
-  GardenSeed,
-  GardenSprout,
-  GardenSunflower,
-  GardenTulip,
   MonsterBat,
   MonsterDragon,
   MonsterSlime,
   MonsterWolf,
-  PetBaby,
-  PetBig,
-  PetEgg,
-  PetKid,
-} from './garden-pets';
+} from './monsters';
 
 export type KidsIconId =
   | 'animal-cat'
@@ -122,18 +110,6 @@ export type KidsIconId =
   | 'item-minus'
   | 'item-finger'
   | 'item-plant'
-  | 'garden-hole'
-  | 'garden-seed'
-  | 'garden-sprout'
-  | 'garden-leaf'
-  | 'garden-bloom'
-  | 'garden-tulip'
-  | 'garden-sunflower'
-  | 'garden-carrot'
-  | 'pet-egg'
-  | 'pet-baby'
-  | 'pet-kid'
-  | 'pet-big'
   | 'monster-slime'
   | 'monster-bat'
   | 'monster-wolf'
@@ -142,7 +118,7 @@ export type KidsIconId =
 type IconEntry = {
   id: KidsIconId;
   label: string;
-  category: 'animal' | 'fruit' | 'shape' | 'color' | 'item' | 'garden' | 'pet' | 'monster';
+  category: 'animal' | 'fruit' | 'shape' | 'color' | 'item' | 'monster';
   Component: ComponentType<SvgProps>;
 };
 
@@ -210,20 +186,6 @@ export const KIDS_ICON_REGISTRY: Record<KidsIconId, IconEntry> = {
   'item-finger': entry('item-finger', '손가락', 'item', ItemFinger),
   'item-plant': entry('item-plant', '새싹', 'item', ItemPlant),
 
-  'garden-hole': entry('garden-hole', '빈 땅', 'garden', GardenHole),
-  'garden-seed': entry('garden-seed', '씨앗', 'garden', GardenSeed),
-  'garden-sprout': entry('garden-sprout', '새싹', 'garden', GardenSprout),
-  'garden-leaf': entry('garden-leaf', '잎', 'garden', GardenLeaf),
-  'garden-bloom': entry('garden-bloom', '꽃', 'garden', GardenBloom),
-  'garden-tulip': entry('garden-tulip', '튤립', 'garden', GardenTulip),
-  'garden-sunflower': entry('garden-sunflower', '해바라기', 'garden', GardenSunflower),
-  'garden-carrot': entry('garden-carrot', '당근', 'garden', GardenCarrot),
-
-  'pet-egg': entry('pet-egg', '알', 'pet', PetEgg),
-  'pet-baby': entry('pet-baby', '아기', 'pet', PetBaby),
-  'pet-kid': entry('pet-kid', '아이', 'pet', PetKid),
-  'pet-big': entry('pet-big', '큰 펫', 'pet', PetBig),
-
   'monster-slime': entry('monster-slime', '슬라임', 'monster', MonsterSlime),
   'monster-bat': entry('monster-bat', '박쥐', 'monster', MonsterBat),
   'monster-wolf': entry('monster-wolf', '늑대', 'monster', MonsterWolf),
@@ -263,7 +225,6 @@ export const GAME_CARD_ICONS: Record<string, KidsIconId> = {
   'balloon-pop': 'item-balloon',
   'drag-fruit': 'item-basket',
   'tap-order': 'item-finger',
-  'move-buddy': 'animal-bear',
   'count-fruit': 'fruit-apple',
   'memory-cards': 'shape-star',
   'maze-pad': 'item-map',
@@ -271,9 +232,6 @@ export const GAME_CARD_ICONS: Record<string, KidsIconId> = {
   'hangul-study': 'item-book',
   'add-play': 'item-plus',
   'sub-play': 'item-minus',
-  'pet-care': 'pet-baby',
-  'hero-quest': 'item-sword',
-  'magic-garden': 'item-plant',
 };
 
 export function getKidsIcon(id: KidsIconId) {

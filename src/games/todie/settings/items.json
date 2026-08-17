@@ -11,28 +11,35 @@
       "color": "#b0bec5",
       "dropWeight": 40,
       "help": "초보 장비. 자주 드랍됩니다.",
-      "stats": { "atk": 5, "def": 4, "hp": 30 }
+      "stats": { "atk": 5, "def": 3, "hp": 30 }
     },
     "ascend": {
       "label": "전승템",
       "color": "#42a5f5",
       "dropWeight": 32,
       "help": "전승 등급. 기본보다 강하고 드랍이 줄어듭니다.",
-      "stats": { "atk": 14, "def": 12, "hp": 80 }
+      "stats": { "atk": 14, "def": 10, "hp": 80 }
     },
     "unique": {
       "label": "유일템",
       "color": "#ffd54f",
       "dropWeight": 18,
       "help": "유일 등급. 희귀하며 성능이 뛰어납니다.",
-      "stats": { "atk": 28, "def": 22, "hp": 150 }
+      "stats": { "atk": 28, "def": 18, "hp": 150 }
     },
     "hero": {
       "label": "영웅템",
       "color": "#e65100",
-      "dropWeight": 10,
-      "help": "영웅 등급. 가장 희귀하고 성능이 가장 높습니다.",
-      "stats": { "atk": 48, "def": 38, "hp": 260 }
+      "dropWeight": 8,
+      "help": "영웅 등급. 매우 희귀하고 성능이 높습니다.",
+      "stats": { "atk": 48, "def": 30, "hp": 260 }
+    },
+    "mythic": {
+      "label": "신화템",
+      "color": "#ab47bc",
+      "dropWeight": 2,
+      "help": "신화 등급. 가장 희귀하며 성능이 최상입니다.",
+      "stats": { "atk": 72, "def": 45, "hp": 380 }
     }
   },
   "slotStatFocus": {
@@ -95,6 +102,13 @@
         { "id": "hero_plate", "name": "영웅 불멸갑", "slot": "armor", "color": "#d84315" },
         { "id": "hero_gauntlets", "name": "영웅 멸살장갑", "slot": "gloves", "color": "#ff7043" },
         { "id": "hero_greaves", "name": "영웅 돌격각반", "slot": "shoes", "color": "#bf360c" }
+      ],
+      "mythic": [
+        { "id": "void_blade", "name": "신화 공허검", "slot": "weapon", "color": "#ab47bc" },
+        { "id": "myth_helm", "name": "신화 심연관", "slot": "head", "color": "#9c27b0" },
+        { "id": "myth_plate", "name": "신화 성역갑", "slot": "armor", "color": "#7b1fa2" },
+        { "id": "myth_gauntlets", "name": "신화 파멸장갑", "slot": "gloves", "color": "#ce93d8" },
+        { "id": "myth_greaves", "name": "신화 차원각반", "slot": "shoes", "color": "#6a1b9a" }
       ]
     },
     "mage": {
@@ -123,6 +137,13 @@
         { "id": "hero_robe", "name": "영웅 심연로브", "slot": "armor", "color": "#d84315" },
         { "id": "hero_gloves", "name": "영웅 마력장갑", "slot": "gloves", "color": "#ff7043" },
         { "id": "hero_slippers", "name": "영웅 별걸음", "slot": "shoes", "color": "#bf360c" }
+      ],
+      "mythic": [
+        { "id": "void_staff", "name": "신화 공허지팡이", "slot": "weapon", "color": "#ab47bc" },
+        { "id": "myth_circlet", "name": "신화 별무관", "slot": "head", "color": "#9c27b0" },
+        { "id": "myth_robe", "name": "신화 성역로브", "slot": "armor", "color": "#7b1fa2" },
+        { "id": "myth_gloves", "name": "신화 영력장갑", "slot": "gloves", "color": "#ce93d8" },
+        { "id": "myth_slippers", "name": "신화 은하걸음", "slot": "shoes", "color": "#6a1b9a" }
       ]
     }
   }

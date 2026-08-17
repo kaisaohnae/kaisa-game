@@ -114,6 +114,18 @@
   line-height: 1;
 }
 
+.game-portal__char-icon {
+  display: block;
+  width: 1em;
+  height: 1em;
+  object-fit: contain;
+  object-position: center bottom;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  pointer-events: none;
+  user-select: none;
+}
+
 .game-portal__level {
   display: inline-flex;
   align-items: center;

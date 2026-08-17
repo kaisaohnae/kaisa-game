@@ -5,20 +5,16 @@ import {ColorTouchGame} from './level1/color-touch';
 import {CountFruitGame} from './level2/count-fruit';
 import {DragFruitGame} from './level2/drag-fruit';
 import {MemoryCardsGame} from './level2/memory-cards';
-import {MoveBuddyGame} from './level2/move-buddy';
 import {TapOrderGame} from './level2/tap-order';
 import {MazePadGame} from './level3/maze-pad';
 import {PatternCopyGame} from './level3/pattern-copy';
 import {HangulStudyGame} from './level4/hangul-study';
 import {AddPlayGame} from './level5/add-play';
 import {SubPlayGame} from './level5/sub-play';
-import {HeroQuestGame} from './level6/hero-quest';
-import {MagicGardenGame} from './level6/magic-garden';
-import {PetCareGame} from './level6/pet-care';
 import {TodieGame} from './todie';
 
 /**
- * ★ 바로 콕 · ★★ 조작·학습 · ★★★ 기억·연산·전투
+ * ★ 바로 콕 · ★★ 조작·학습 · ★★★ 기억·연산 · ★★★★★ todie
  * (모양맞추기·그림자찾기·숫자공부는 중복으로 제외)
  */
 export const GAMES: GameModule[] = [
@@ -26,7 +22,7 @@ export const GAMES: GameModule[] = [
     id: 'todie',
     title: 'todie',
     description: 'WASD로 탐험하고 싸워요',
-    level: 3,
+    level: 5,
     Component: TodieGame,
   },
   {
@@ -58,13 +54,6 @@ export const GAMES: GameModule[] = [
     Component: DragFruitGame,
   },
   {
-    id: 'move-buddy',
-    title: '친구 움직이기',
-    description: '좌우로 움직여 선물을 받아요',
-    level: 2,
-    Component: MoveBuddyGame,
-  },
-  {
     id: 'tap-order',
     title: '순서 콕콕',
     description: '보여준 순서대로 눌러요',
@@ -84,20 +73,6 @@ export const GAMES: GameModule[] = [
     description: '자음·모음을 찾아요',
     level: 2,
     Component: HangulStudyGame,
-  },
-  {
-    id: 'pet-care',
-    title: '펫 키우기',
-    description: '밥을 주고 키워봐요',
-    level: 2,
-    Component: PetCareGame,
-  },
-  {
-    id: 'magic-garden',
-    title: '마법 정원',
-    description: '심고 키우고 수확해요',
-    level: 2,
-    Component: MagicGardenGame,
   },
   {
     id: 'memory-cards',
@@ -134,13 +109,6 @@ export const GAMES: GameModule[] = [
     level: 3,
     Component: SubPlayGame,
   },
-  {
-    id: 'hero-quest',
-    title: '영웅 모험',
-    description: '싸워서 레벨을 올려요',
-    level: 3,
-    Component: HeroQuestGame,
-  },
 ];
 
 export function getGame(id: string) {
@@ -152,7 +120,7 @@ export function getGameIds() {
 }
 
 export function getLevelsDesc(): GameLevel[] {
-  return [3, 2, 1];
+  return [5, 4, 3, 2, 1];
 }
 
 export function getGamesByLevel(level: GameLevel) {
