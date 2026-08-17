@@ -3,6 +3,12 @@
 import {useEffect, useRef, useState, type PointerEvent as ReactPointerEvent} from 'react';
 import {createPortal} from 'react-dom';
 import {EQUIP_SLOTS, type Equipment, type GearSlot, type Item} from '../content/equip';
+import {
+  clearItem,
+  isHotbarConsumableBagIndex,
+  HOTBAR_MANA_BAG,
+  HOTBAR_POTION_BAG,
+} from '../content/equip';
 import {jobLabel, type JobId, type LoadedImages} from '../content';
 import {displaySettings} from '../content/settings';
 import {drawJobPreview} from '../render/drawCharacter';
@@ -155,8 +161,14 @@ export function InventoryDock({
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastTapRef = useRef<{key: string; t: number} | null>(null);
   const tapStartRef = useRef<{x: number; y: number} | null>(null);
+  const dropHandledRef = useRef(false);
+  const dragFromRef = useRef<number | null>(null);
 
   const tryEquipBag = (index: number, item: Item) => {
+    if (isHotbarConsumableBagIndex(index)) {
+      onToast('4·5번은 물약 전용이에요');
+      return;
+    }
     if (item.kind === 'gear') onToggleEquip(index);
     else if (item.kind !== 'empty') onToast('장비만 장착할 수 있어요');
   };
@@ -212,10 +224,25 @@ export function InventoryDock({
 
   const swap = (a: number, b: number) => {
     if (a === b || a < 0 || b < 0 || a >= bag.length || b >= bag.length) return;
+    // Hotbar potion/mana slots stay fixed — no rearranging into/out of 0·1
+    if (isHotbarConsumableBagIndex(a) || isHotbarConsumableBagIndex(b)) {
+      onToast('4·5번 물약 칸은 고정이에요');
+      return;
+    }
     const tmp = bag[a];
     bag[a] = bag[b];
     bag[b] = tmp;
     onMutate();
+  };
+
+  const discardIfDroppedOutside = (from: number) => {
+    if (from < 0 || from >= bag.length) return;
+    const it = bag[from];
+    if (!it || it.kind === 'empty') return;
+    if (!window.confirm('삭제하시겠습니까?')) return;
+    clearItem(it);
+    onMutate();
+    onToast('아이템을 버렸어요');
   };
 
   const power = sumEquippedStats(equipped);
@@ -329,19 +356,26 @@ export function InventoryDock({
       <div className="todie__inv-bag">
         <div className="todie__inv-bag-head">
           <span>가방 {bag.length}</span>
-          <span className="todie__inv-bag-sub">드래그 이동 · 더블탭/우클릭 장착</span>
+          <span className="todie__inv-bag-sub">
+            드래그 이동 · 밖으로 떨구면 삭제 · 1·2칸=핫바 4·5(물약)
+          </span>
         </div>
         <div className="todie__inv-scroll">
           <div className="todie__inv-grid">
             {bag.map((it, i) => {
               const wrongJob = Boolean(it.job && it.job !== job);
               const blocked = wrongJob;
+              const hotbarLock = isHotbarConsumableBagIndex(i);
+              const hotbarLabel =
+                i === HOTBAR_POTION_BAG ? '4 체력' : i === HOTBAR_MANA_BAG ? '5 마나' : null;
               return (
                 <div
                   key={`${it.id}-${i}`}
                   className={`todie__slot${dragFrom === i ? ' is-drag' : ''}${
                     over === i ? ' is-over' : ''
-                  }${it.tier ? ` is-tier-${it.tier}` : ''}${blocked ? ' is-blocked' : ''}`}
+                  }${it.tier ? ` is-tier-${it.tier}` : ''}${blocked ? ' is-blocked' : ''}${
+                    hotbarLock ? ' is-hotbar-lock' : ''
+                  }`}
                   draggable={it.kind !== 'empty'}
                   onMouseEnter={(e) => showTip(it, e.currentTarget)}
                   onMouseLeave={hideTipSoon}
@@ -355,13 +389,22 @@ export function InventoryDock({
                   }}
                   onDragStart={(e) => {
                     setTip(null);
+                    dropHandledRef.current = false;
+                    dragFromRef.current = i;
                     setDragFrom(i);
                     e.dataTransfer.setData('text/plain', String(i));
                     e.dataTransfer.effectAllowed = 'move';
                   }}
                   onDragEnd={() => {
+                    const from = dragFromRef.current;
+                    const droppedOnSlot = dropHandledRef.current;
+                    dragFromRef.current = null;
                     setDragFrom(null);
                     setOver(null);
+                    dropHandledRef.current = false;
+                    if (!droppedOnSlot && from != null) {
+                      discardIfDroppedOutside(from);
+                    }
                   }}
                   onDragOver={(e) => {
                     e.preventDefault();
@@ -370,6 +413,7 @@ export function InventoryDock({
                   onDragLeave={() => setOver((o) => (o === i ? null : o))}
                   onDrop={(e) => {
                     e.preventDefault();
+                    dropHandledRef.current = true;
                     const from = Number(e.dataTransfer.getData('text/plain'));
                     if (!Number.isNaN(from)) swap(from, i);
                     setDragFrom(null);
@@ -377,11 +421,15 @@ export function InventoryDock({
                   }}
                   onContextMenu={(e) => {
                     e.preventDefault();
+                    if (hotbarLock) {
+                      onToast('4·5번 물약 칸은 고정이에요');
+                      return;
+                    }
                     if (it.kind === 'gear') onToggleEquip(i);
                     else if (it.kind !== 'empty') onToast('장비만 장착할 수 있어요');
                   }}
                 >
-                  <span className="todie__slot-idx">{i + 1}</span>
+                  <span className="todie__slot-idx">{hotbarLabel ?? i + 1}</span>
                   {it.kind !== 'empty' && (
                     <>
                       <ItemIcon item={it} forbidden={blocked} />

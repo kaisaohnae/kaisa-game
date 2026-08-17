@@ -1,7 +1,7 @@
 import {displaySettings} from '../content/settings';
 import type {ActionId, JobId} from '../content/types';
 import {facingToCardinal, type LoadedImages} from '../content/jobAssets';
-import type {Equipment} from '../content/equip';
+import {EQUIP_SLOTS, type Equipment} from '../content/equip';
 
 const char = displaySettings.character;
 const skillFx = displaySettings.skillFx;
@@ -17,6 +17,71 @@ function applyPixelScale(ctx: CanvasRenderingContext2D) {
   ctx.imageSmoothingEnabled = char.imageSmoothing === true;
 }
 
+/** Equipped mythic piece count (0..slot count). */
+export function countMythicEquipped(equipped?: Equipment | null): number {
+  if (!equipped) return 0;
+  let n = 0;
+  for (const s of EQUIP_SLOTS) {
+    if (equipped[s.id]?.tier === 'mythic') n += 1;
+  }
+  return n;
+}
+
+/**
+ * Soft purple glow behind the body — strength scales with mythic pieces worn.
+ * Drawn in local character space (origin at feet/center after translate).
+ */
+function drawMythicBackGlow(
+  ctx: CanvasRenderingContext2D,
+  mythicCount: number,
+  bodySize: number,
+) {
+  if (mythicCount <= 0) return;
+  const t = performance.now() / 1000;
+  const pulse = 0.85 + Math.sin(t * 2.2) * 0.15;
+  const strength = Math.min(1, mythicCount / 8);
+  const baseR = bodySize * (0.38 + strength * 0.42);
+  const alpha = (0.16 + strength * 0.38) * pulse;
+
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+
+  // Outer soft bloom (behind body)
+  const outer = ctx.createRadialGradient(0, -bodySize * 0.08, bodySize * 0.08, 0, -bodySize * 0.05, baseR);
+  outer.addColorStop(0, `rgba(225, 190, 231, ${alpha * 0.95})`);
+  outer.addColorStop(0.35, `rgba(171, 71, 188, ${alpha * 0.55})`);
+  outer.addColorStop(0.7, `rgba(123, 31, 162, ${alpha * 0.22})`);
+  outer.addColorStop(1, 'rgba(74, 20, 140, 0)');
+  ctx.fillStyle = outer;
+  ctx.beginPath();
+  ctx.ellipse(0, -bodySize * 0.05, baseR * 0.92, baseR * 1.08, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Inner brighter core when 3+ mythic
+  if (mythicCount >= 3) {
+    const innerA = alpha * (0.35 + (mythicCount - 2) * 0.12);
+    const inner = ctx.createRadialGradient(0, -bodySize * 0.12, 2, 0, -bodySize * 0.1, baseR * 0.45);
+    inner.addColorStop(0, `rgba(243, 229, 245, ${innerA})`);
+    inner.addColorStop(0.5, `rgba(206, 147, 216, ${innerA * 0.5})`);
+    inner.addColorStop(1, 'rgba(171, 71, 188, 0)');
+    ctx.fillStyle = inner;
+    ctx.beginPath();
+    ctx.ellipse(0, -bodySize * 0.1, baseR * 0.42, baseR * 0.52, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Full set accessories+armor: faint rim ring
+  if (mythicCount >= 8) {
+    ctx.strokeStyle = `rgba(224, 176, 255, ${0.35 * pulse})`;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(0, -bodySize * 0.06, baseR * 0.78, baseR * 0.95, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
 export function drawJobCharacter(
   ctx: CanvasRenderingContext2D,
   images: LoadedImages | null,
@@ -26,7 +91,7 @@ export function drawJobCharacter(
   y: number,
   facing: number,
   rollingSpin = false,
-  _equipped?: Equipment | null,
+  equipped?: Equipment | null,
   _gearImages?: Record<string, HTMLImageElement> | null,
   _attackSwing?: AttackSwing | null,
 ) {
@@ -38,10 +103,14 @@ export function drawJobCharacter(
     images?.actions.idle?.down;
   const ox = -size * char.anchorX;
   const oy = -size * char.anchorY;
+  const mythicCount = countMythicEquipped(equipped);
 
   ctx.save();
   applyPixelScale(ctx);
   ctx.translate(x, y);
+
+  // Mythic aura behind body (before shadow/sprite)
+  drawMythicBackGlow(ctx, mythicCount, size);
 
   // ground shadow
   ctx.fillStyle = 'rgba(0,0,0,0.3)';
@@ -70,7 +139,7 @@ export function drawJobPreview(
   job: JobId,
   w: number,
   h: number,
-  _equipped?: Equipment | null,
+  equipped?: Equipment | null,
   _gearImages?: Record<string, HTMLImageElement> | null,
 ) {
   ctx.clearRect(0, 0, w, h);
@@ -85,6 +154,13 @@ export function drawJobPreview(
   const size = Math.min(w, h) * 0.88;
   const ox = (w - size) / 2;
   const oy = (h - size) / 2;
+  const mythicCount = countMythicEquipped(equipped);
+  if (mythicCount > 0) {
+    ctx.save();
+    ctx.translate(w / 2, h * 0.55);
+    drawMythicBackGlow(ctx, mythicCount, size);
+    ctx.restore();
+  }
   if (img && img.complete && img.naturalWidth > 0) {
     ctx.drawImage(img, ox, oy, size, size);
   } else {

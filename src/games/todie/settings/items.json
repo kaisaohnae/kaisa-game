@@ -101,14 +101,20 @@
         { "id": "war_crown", "name": "영웅 전장관", "slot": "head", "color": "#ef6c00" },
         { "id": "hero_plate", "name": "영웅 불멸갑", "slot": "armor", "color": "#d84315" },
         { "id": "hero_gauntlets", "name": "영웅 멸살장갑", "slot": "gloves", "color": "#ff7043" },
-        { "id": "hero_greaves", "name": "영웅 돌격각반", "slot": "shoes", "color": "#bf360c" }
+        { "id": "hero_greaves", "name": "영웅 돌격각반", "slot": "shoes", "color": "#bf360c" },
+        { "id": "hero_pendant", "name": "영웅 불멸의 목걸이", "slot": "necklace", "color": "#ff9100" },
+        { "id": "hero_ear", "name": "영웅 혈광 귀걸이", "slot": "earring", "color": "#ffab40" },
+        { "id": "hero_ring", "name": "영웅 멸살 반지", "slot": "ring", "color": "#ff6e40" }
       ],
       "mythic": [
         { "id": "void_blade", "name": "신화 공허검", "slot": "weapon", "color": "#ab47bc" },
         { "id": "myth_helm", "name": "신화 심연관", "slot": "head", "color": "#9c27b0" },
         { "id": "myth_plate", "name": "신화 성역갑", "slot": "armor", "color": "#7b1fa2" },
         { "id": "myth_gauntlets", "name": "신화 파멸장갑", "slot": "gloves", "color": "#ce93d8" },
-        { "id": "myth_greaves", "name": "신화 차원각반", "slot": "shoes", "color": "#6a1b9a" }
+        { "id": "myth_greaves", "name": "신화 차원각반", "slot": "shoes", "color": "#6a1b9a" },
+        { "id": "myth_pendant", "name": "신화 공허의 목걸이", "slot": "necklace", "color": "#ea80fc" },
+        { "id": "myth_ear", "name": "신화 심연 귀걸이", "slot": "earring", "color": "#e1bee7" },
+        { "id": "myth_ring", "name": "신화 차원 반지", "slot": "ring", "color": "#ba68c8" }
       ]
     },
     "mage": {
@@ -136,14 +142,20 @@
         { "id": "arcane_circlet", "name": "영웅 비전관", "slot": "head", "color": "#ef6c00" },
         { "id": "hero_robe", "name": "영웅 심연로브", "slot": "armor", "color": "#d84315" },
         { "id": "hero_gloves", "name": "영웅 마력장갑", "slot": "gloves", "color": "#ff7043" },
-        { "id": "hero_slippers", "name": "영웅 별걸음", "slot": "shoes", "color": "#bf360c" }
+        { "id": "hero_slippers", "name": "영웅 별걸음", "slot": "shoes", "color": "#bf360c" },
+        { "id": "hero_pendant", "name": "영웅 심연의 목걸이", "slot": "necklace", "color": "#ff9100" },
+        { "id": "hero_ear", "name": "영웅 별빛 귀걸이", "slot": "earring", "color": "#ffab40" },
+        { "id": "hero_ring", "name": "영웅 마력 반지", "slot": "ring", "color": "#ff6e40" }
       ],
       "mythic": [
         { "id": "void_staff", "name": "신화 공허지팡이", "slot": "weapon", "color": "#ab47bc" },
         { "id": "myth_circlet", "name": "신화 별무관", "slot": "head", "color": "#9c27b0" },
         { "id": "myth_robe", "name": "신화 성역로브", "slot": "armor", "color": "#7b1fa2" },
         { "id": "myth_gloves", "name": "신화 영력장갑", "slot": "gloves", "color": "#ce93d8" },
-        { "id": "myth_slippers", "name": "신화 은하걸음", "slot": "shoes", "color": "#6a1b9a" }
+        { "id": "myth_slippers", "name": "신화 은하걸음", "slot": "shoes", "color": "#6a1b9a" },
+        { "id": "myth_pendant", "name": "신화 성역의 목걸이", "slot": "necklace", "color": "#ea80fc" },
+        { "id": "myth_ear", "name": "신화 은하 귀걸이", "slot": "earring", "color": "#e1bee7" },
+        { "id": "myth_ring", "name": "신화 영력 반지", "slot": "ring", "color": "#ba68c8" }
       ]
     }
   }

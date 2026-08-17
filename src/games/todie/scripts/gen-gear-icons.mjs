@@ -434,30 +434,39 @@ function iconShoes(c1, hero = false) {
   }
   return px;
 }
-function iconNecklace(c, heroish = false) {
+function iconNecklace(c, heroish = false, mythic = false) {
   const px = blank();
+  if (mythic) glow(px, CX, CY + 10, 62, hex('#ab47bc', 0.35));
+  else if (heroish) glow(px, CX, CY + 10, 56, hex('#ff6d00', 0.28));
   softCapsule(px, CX - 50, CY - 40, CX + 50, CY - 40, 6, hex('#fff8e1', 0.8));
   softCapsule(px, CX - 50, CY - 40, CX - 20, CY + 10, 5, hex('#ffe082', 0.7));
   softCapsule(px, CX + 50, CY - 40, CX + 20, CY + 10, 5, hex('#ffe082', 0.7));
-  glow(px, CX, CY + 20, heroish ? 50 : 36, [...c.slice(0, 3), 120]);
+  glow(px, CX, CY + 20, heroish || mythic ? 50 : 36, [...c.slice(0, 3), 120]);
   softEllipse(px, CX, CY + 20, 28, 32, c, 0.2);
   softEllipse(px, CX, CY + 20, 16, 18, hex('#ffffff', 0.45), 0.35);
   softEllipse(px, CX - 8, CY + 8, 8, 8, hex('#ffffff'), 0.28);
+  if (mythic) {
+    softEllipse(px, CX, CY + 20, 8, 8, hex('#ea80fc'), 0.35);
+  }
   return px;
 }
-function iconEarring(c) {
+function iconEarring(c, fancy = false, mythic = false) {
   const px = blank();
+  if (mythic) glow(px, CX, CY, 58, hex('#ab47bc', 0.32));
+  else if (fancy) glow(px, CX, CY, 52, hex('#ff6d00', 0.25));
   for (const sx of [-36, 36]) {
-    softEllipse(px, CX + sx, CY - 30, 10, 10, hex('#ffd54f'), 0.25);
-    softCapsule(px, CX + sx, CY - 22, CX + sx, CY + 10, 4, hex('#ffe082'));
+    softEllipse(px, CX + sx, CY - 30, 10, 10, mythic ? hex('#e1bee7') : hex('#ffd54f'), 0.25);
+    softCapsule(px, CX + sx, CY - 22, CX + sx, CY + 10, 4, mythic ? hex('#ce93d8') : hex('#ffe082'));
     softEllipse(px, CX + sx, CY + 28, 18, 22, c, 0.2);
     softEllipse(px, CX + sx - 5, CY + 18, 6, 6, hex('#ffffff'), 0.3);
   }
   return px;
 }
-function iconRing(c) {
+function iconRing(c, fancy = false, mythic = false) {
   const px = blank();
-  softEllipse(px, CX, CY, 48, 48, hex('#ffd54f'), 0.22);
+  if (mythic) glow(px, CX, CY, 62, hex('#ab47bc', 0.35));
+  else if (fancy) glow(px, CX, CY, 56, hex('#ff6d00', 0.28));
+  softEllipse(px, CX, CY, 48, 48, mythic ? hex('#ce93d8') : hex('#ffd54f'), 0.22);
   softEllipse(px, CX, CY, 34, 34, hex('#fff8e1'), 0.25);
   softEllipse(px, CX, CY, 22, 22, hex('#1a1410', 0.5), 0.3);
   softEllipse(px, CX, CY - 8, 14, 14, c, 0.22);
@@ -507,6 +516,9 @@ save('warrior', 'hero', 'war_crown', () => iconHelm({kind: 'crown'}));
 save('warrior', 'hero', 'hero_plate', () => iconArmor({kind: 'hero_plate'}));
 save('warrior', 'hero', 'hero_gauntlets', () => iconGloves(hex('#ff7043'), hex('#e64a19'), true));
 save('warrior', 'hero', 'hero_greaves', () => iconShoes(hex('#bf360c'), true));
+save('warrior', 'hero', 'hero_pendant', () => iconNecklace(hex('#ff9100'), true));
+save('warrior', 'hero', 'hero_ear', () => iconEarring(hex('#ffab40'), true));
+save('warrior', 'hero', 'hero_ring', () => iconRing(hex('#ff6e40'), true));
 
 save('warrior', 'mythic', 'void_blade', () => iconSword({mythic: true}));
 save('warrior', 'mythic', 'myth_helm', () => iconHelm({kind: 'myth_helm'}));
@@ -515,6 +527,9 @@ save('warrior', 'mythic', 'myth_gauntlets', () =>
   iconGloves(hex('#ce93d8'), hex('#ab47bc'), true, true),
 );
 save('warrior', 'mythic', 'myth_greaves', () => iconShoes(hex('#6a1b9a'), true, true));
+save('warrior', 'mythic', 'myth_pendant', () => iconNecklace(hex('#ea80fc'), true, true));
+save('warrior', 'mythic', 'myth_ear', () => iconEarring(hex('#e1bee7'), true, true));
+save('warrior', 'mythic', 'myth_ring', () => iconRing(hex('#ba68c8'), true, true));
 
 // mage
 save('mage', 'basic', 'stick', iconStick);
@@ -538,6 +553,9 @@ save('mage', 'hero', 'arcane_circlet', () => iconHelm({kind: 'circlet'}));
 save('mage', 'hero', 'hero_robe', () => iconArmor({kind: 'hero_robe'}));
 save('mage', 'hero', 'hero_gloves', () => iconGloves(hex('#ff7043'), hex('#ab47bc'), true));
 save('mage', 'hero', 'hero_slippers', () => iconShoes(hex('#bf360c'), true));
+save('mage', 'hero', 'hero_pendant', () => iconNecklace(hex('#ff9100'), true));
+save('mage', 'hero', 'hero_ear', () => iconEarring(hex('#ffab40'), true));
+save('mage', 'hero', 'hero_ring', () => iconRing(hex('#ff6e40'), true));
 
 save('mage', 'mythic', 'void_staff', () => iconStaff({mythic: true}));
 save('mage', 'mythic', 'myth_circlet', () => iconHelm({kind: 'myth_circlet'}));
@@ -546,6 +564,9 @@ save('mage', 'mythic', 'myth_gloves', () =>
   iconGloves(hex('#ce93d8'), hex('#7b1fa2'), true, true),
 );
 save('mage', 'mythic', 'myth_slippers', () => iconShoes(hex('#6a1b9a'), true, true));
+save('mage', 'mythic', 'myth_pendant', () => iconNecklace(hex('#ea80fc'), true, true));
+save('mage', 'mythic', 'myth_ear', () => iconEarring(hex('#e1bee7'), true, true));
+save('mage', 'mythic', 'myth_ring', () => iconRing(hex('#ba68c8'), true, true));
 
 // consumables — prettier bottles
 saveItem('potion', () => {

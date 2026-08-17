@@ -120,33 +120,115 @@ export function copyItem(item: Item): Item {
   return {...item};
 }
 
-/** Find first empty bag index */
+/** Hotbar keys 4·5 map to these bag indices — always potion / mana. */
+export const HOTBAR_POTION_BAG = 0;
+export const HOTBAR_MANA_BAG = 1;
+/** Free bag slots start here (0·1 reserved). */
+export const BAG_FREE_START = 2;
+
+export function isHotbarConsumableBagIndex(index: number): boolean {
+  return index === HOTBAR_POTION_BAG || index === HOTBAR_MANA_BAG;
+}
+
+function writeItemInto(slot: Item, item: Item) {
+  slot.kind = item.kind;
+  slot.name = item.name;
+  slot.qty = item.qty;
+  slot.color = item.color;
+  slot.id = item.id;
+  slot.job = item.job;
+  slot.gearId = item.gearId;
+  slot.gearSlot = item.gearSlot;
+  slot.tier = item.tier;
+}
+
+/** Find first empty bag index (skips hotbar potion/mana slots). */
 export function findEmptyBagIndex(bag: Item[]): number {
-  return bag.findIndex((s) => s.kind === 'empty');
+  for (let i = BAG_FREE_START; i < bag.length; i += 1) {
+    if (bag[i].kind === 'empty') return i;
+  }
+  return -1;
+}
+
+/** Move whatever is in `index` into a free bag slot. Returns false if bag full. */
+function migrateBagSlotOut(bag: Item[], index: number): boolean {
+  const it = bag[index];
+  if (!it || it.kind === 'empty') return true;
+  const moving = copyItem(it);
+  clearItem(it);
+  const dest = findEmptyBagIndex(bag);
+  if (dest < 0) {
+    writeItemInto(it, moving);
+    return false;
+  }
+  writeItemInto(bag[dest], moving);
+  return true;
+}
+
+/**
+ * Keep bag[0]=potion-only and bag[1]=mana-only.
+ * Migrates wrong items out and merges stray potions/mana into those slots.
+ */
+export function ensureHotbarConsumableSlots(bag: Item[]) {
+  if (bag.length < 2) return;
+  if (bag[HOTBAR_POTION_BAG].kind !== 'empty' && bag[HOTBAR_POTION_BAG].kind !== 'potion') {
+    migrateBagSlotOut(bag, HOTBAR_POTION_BAG);
+  }
+  if (bag[HOTBAR_MANA_BAG].kind !== 'empty' && bag[HOTBAR_MANA_BAG].kind !== 'mana') {
+    migrateBagSlotOut(bag, HOTBAR_MANA_BAG);
+  }
+  for (let i = BAG_FREE_START; i < bag.length; i += 1) {
+    const it = bag[i];
+    if (it.kind === 'potion' || it.kind === 'mana') {
+      const moving = copyItem(it);
+      clearItem(it);
+      putItemInBag(bag, moving);
+    }
+  }
 }
 
 export function putItemInBag(bag: Item[], item: Item): boolean {
-  if (item.kind !== 'gear' && item.kind !== 'empty') {
-    const stack = bag.find((s) => s.kind === item.kind && s.kind !== 'empty' && !s.job);
+  if (item.kind === 'potion') {
+    const slot = bag[HOTBAR_POTION_BAG];
+    if (!slot) return false;
+    if (slot.kind !== 'empty' && slot.kind !== 'potion') {
+      if (!migrateBagSlotOut(bag, HOTBAR_POTION_BAG)) return false;
+    }
+    if (slot.kind === 'empty') {
+      writeItemInto(slot, item);
+      return true;
+    }
+    slot.qty += item.qty;
+    return true;
+  }
+  if (item.kind === 'mana') {
+    const slot = bag[HOTBAR_MANA_BAG];
+    if (!slot) return false;
+    if (slot.kind !== 'empty' && slot.kind !== 'mana') {
+      if (!migrateBagSlotOut(bag, HOTBAR_MANA_BAG)) return false;
+    }
+    if (slot.kind === 'empty') {
+      writeItemInto(slot, item);
+      return true;
+    }
+    slot.qty += item.qty;
+    return true;
+  }
+  if (item.kind === 'gear') {
+    // 장비는 스택하지 않음 (중복 보유는 ownsSameUniqueGear로 차단)
+  } else if (item.kind !== 'empty') {
+    const stack = bag.find(
+      (s, i) =>
+        i >= BAG_FREE_START && s.kind === item.kind && s.kind !== 'empty' && !s.job,
+    );
     if (stack) {
       stack.qty += item.qty;
       return true;
     }
-  } else if (item.kind === 'gear') {
-    // 장비는 스택하지 않음 (중복 보유는 ownsSameUniqueGear로 차단)
   }
   const idx = findEmptyBagIndex(bag);
   if (idx < 0) return false;
-  const empty = bag[idx];
-  empty.kind = item.kind;
-  empty.name = item.name;
-  empty.qty = item.qty;
-  empty.color = item.color;
-  empty.id = item.id;
-  empty.job = item.job;
-  empty.gearId = item.gearId;
-  empty.gearSlot = item.gearSlot;
-  empty.tier = item.tier;
+  writeItemInto(bag[idx], item);
   return true;
 }
 

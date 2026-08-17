@@ -47,6 +47,10 @@ export {
   isUniqueOwnGearSlot,
   tierRank,
   isBetterGear,
+  ensureHotbarConsumableSlots,
+  isHotbarConsumableBagIndex,
+  HOTBAR_POTION_BAG,
+  HOTBAR_MANA_BAG,
 } from './equip';
 export type {GearSlot, Item, Equipment, ItemKind} from './equip';
 export {preloadAllTodieAssets} from './preload';

@@ -9,6 +9,7 @@ import {
   draftToItem,
   dropSettings,
   emptyEquipment,
+  ensureHotbarConsumableSlots,
   EQUIP_SLOTS,
   gearImageKey,
   JOB_ART,
@@ -573,6 +574,7 @@ export default function TodieGame() {
   }, []);
 
   const syncBag = () => {
+    ensureHotbarConsumableSlots(bagRef.current);
     setBagTick((t) => t + 1);
     if (started) {
       writeGearCookie(gearSaveFromEquipment(charName, startJob, equippedRef.current));
@@ -645,6 +647,7 @@ export default function TodieGame() {
         equippedRef.current = eq;
         writeGearCookie(gearSaveFromEquipment(n, pickJobUi, eq));
       }
+      ensureHotbarConsumableSlots(bagRef.current);
       // Start BGM in the same turn as gameplay begin (after unlock finished).
       void bgm.start();
       setStarted(true);
@@ -1298,25 +1301,24 @@ export default function TodieGame() {
 
     const useItemSlot = (slot: number) => {
       if (!alive) return;
-      // 0..2 skills (1..3), 3..4 items (4..5) → bag[0..1]
+      // 0..2 skills (1..3), 3..4 items (4·5) → bag[0]=potion, bag[1]=mana (fixed)
       if (slot < 3) {
         useSkill(slot);
         return;
       }
       const item = inventory[slot - 3];
       if (!item || item.kind === 'empty' || item.qty <= 0) return;
+      if (item.kind !== 'potion' && item.kind !== 'mana') {
+        showToast('4·5번은 물약만 쓸 수 있어요');
+        return;
+      }
 
       if (item.kind === 'potion') {
         player.hp = Math.min(player.maxHp, player.hp + bal.items.potionHeal);
         showToast(`체력 회복 +${bal.items.potionHeal}`);
-      } else if (item.kind === 'mana') {
+      } else {
         player.mp = Math.min(player.maxMp, player.mp + bal.items.manaRestore);
         showToast(`마나 회복 +${bal.items.manaRestore}`);
-      } else if (item.kind === 'gear') {
-        const msg = toggleEquipFromBag(inventory, equippedRef.current, slot - 3, player.job);
-        if (msg) showToast(msg);
-        syncBag();
-        return;
       }
       item.qty -= 1;
       if (item.qty <= 0) clearItem(item);
