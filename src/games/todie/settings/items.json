@@ -42,10 +42,8 @@
     "gloves": { "atk": 0.7, "def": 0.8, "hp": 0.4 },
     "shoes": { "atk": 0.35, "def": 0.9, "hp": 0.5 },
     "necklace": { "atk": 0.9, "def": 0.4, "hp": 0.8 },
-    "earring_l": { "atk": 0.75, "def": 0.35, "hp": 0.45 },
-    "earring_r": { "atk": 0.75, "def": 0.35, "hp": 0.45 },
-    "ring_l": { "atk": 1.0, "def": 0.3, "hp": 0.35 },
-    "ring_r": { "atk": 1.0, "def": 0.3, "hp": 0.35 }
+    "earring": { "atk": 0.85, "def": 0.4, "hp": 0.5 },
+    "ring": { "atk": 1.15, "def": 0.35, "hp": 0.4 }
   },
   "starter": {
     "gearId": "stick",
@@ -68,12 +66,6 @@
       "color": "#42a5f5",
       "help": "마나를 크게 회복합니다.",
       "effect": "MP 회복"
-    },
-    "scroll": {
-      "name": "회복스크롤",
-      "color": "#ffd54f",
-      "help": "체력과 마나를 함께 회복합니다.",
-      "effect": "HP·MP 회복"
     }
   },
   "gear": {
@@ -94,10 +86,8 @@
       ],
       "unique": [
         { "id": "courage_pendant", "name": "유일 용맹의 목걸이", "slot": "necklace", "color": "#ffd54f" },
-        { "id": "battle_ear_l", "name": "유일 혈투 귀걸이(왼)", "slot": "earring_l", "color": "#ffcc80" },
-        { "id": "battle_ear_r", "name": "유일 혈투 귀걸이(오른)", "slot": "earring_r", "color": "#ffe082" },
-        { "id": "power_ring_l", "name": "유일 파워 반지(왼)", "slot": "ring_l", "color": "#ef9a9a" },
-        { "id": "power_ring_r", "name": "유일 파워 반지(오른)", "slot": "ring_r", "color": "#e57373" }
+        { "id": "battle_ear", "name": "유일 혈투 귀걸이", "slot": "earring", "color": "#ffcc80" },
+        { "id": "power_ring", "name": "유일 파워 반지", "slot": "ring", "color": "#ef9a9a" }
       ],
       "hero": [
         { "id": "wasteland_blade", "name": "영웅 황무지검", "slot": "weapon", "color": "#e65100" },
@@ -124,10 +114,8 @@
       ],
       "unique": [
         { "id": "wisdom_pendant", "name": "유일 지혜의 목걸이", "slot": "necklace", "color": "#80deea" },
-        { "id": "mana_ear_l", "name": "유일 마력 귀걸이(왼)", "slot": "earring_l", "color": "#a5d6a7" },
-        { "id": "mana_ear_r", "name": "유일 마력 귀걸이(오른)", "slot": "earring_r", "color": "#81c784" },
-        { "id": "mind_ring_l", "name": "유일 정신 반지(왼)", "slot": "ring_l", "color": "#90caf9" },
-        { "id": "mind_ring_r", "name": "유일 정신 반지(오른)", "slot": "ring_r", "color": "#64b5f6" }
+        { "id": "mana_ear", "name": "유일 마력 귀걸이", "slot": "earring", "color": "#a5d6a7" },
+        { "id": "mind_ring", "name": "유일 정신 반지", "slot": "ring", "color": "#90caf9" }
       ],
       "hero": [
         { "id": "wasteland_staff", "name": "영웅 황무지 지팡이", "slot": "weapon", "color": "#e65100" },

@@ -8,10 +8,8 @@ export type GearSlot =
   | 'gloves'
   | 'shoes'
   | 'necklace'
-  | 'earring_l'
-  | 'earring_r'
-  | 'ring_l'
-  | 'ring_r';
+  | 'earring'
+  | 'ring';
 
 export type GearTier = 'basic' | 'ascend' | 'unique' | 'hero';
 
@@ -63,7 +61,7 @@ export function ownsSameUniqueGear(
   return bag.some((s) => s.kind !== 'empty' && sameGear(s, item));
 }
 
-export type ItemKind = 'potion' | 'mana' | 'scroll' | 'gear' | 'empty';
+export type ItemKind = 'potion' | 'mana' | 'gear' | 'empty';
 
 export type Item = {
   id: string;
@@ -87,10 +85,8 @@ export function emptyEquipment(): Equipment {
     gloves: null,
     shoes: null,
     necklace: null,
-    earring_l: null,
-    earring_r: null,
-    ring_l: null,
-    ring_r: null,
+    earring: null,
+    ring: null,
   };
 }
 
@@ -165,6 +161,37 @@ export function putItemInBag(bag: Item[], item: Item): boolean {
   empty.gearSlot = item.gearSlot;
   empty.tier = item.tier;
   return true;
+}
+
+/**
+ * Pickup: if gear slot is empty and job matches, equip immediately; else bag.
+ */
+export function pickupOrAutoEquip(
+  bag: Item[],
+  equipped: Equipment,
+  item: Item,
+  job: JobId,
+): {ok: boolean; autoEquipped: boolean} {
+  if (
+    item.kind === 'gear' &&
+    item.gearSlot &&
+    (!item.job || item.job === job) &&
+    !equipped[item.gearSlot]
+  ) {
+    const wearing = copyItem(item);
+    wearing.qty = 1;
+    equipped[item.gearSlot] = wearing;
+    if (item.qty > 1) {
+      const rest = copyItem(item);
+      rest.qty = item.qty - 1;
+      if (!putItemInBag(bag, rest)) {
+        // keep equipped piece; leftover stays on ground handled by caller
+        return {ok: true, autoEquipped: true};
+      }
+    }
+    return {ok: true, autoEquipped: true};
+  }
+  return {ok: putItemInBag(bag, item), autoEquipped: false};
 }
 
 /**

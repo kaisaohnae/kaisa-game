@@ -26,9 +26,7 @@
   },
   "items": {
     "potionHeal": 220,
-    "manaRestore": 220,
-    "scrollHeal": 400,
-    "scrollMana": 200
+    "manaRestore": 220
   },
   "skills": {
     "warrior": {

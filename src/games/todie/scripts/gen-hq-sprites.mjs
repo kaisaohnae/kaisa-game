@@ -378,21 +378,23 @@ function wearNecklace(c) {
   return px;
 }
 
-function wearEarring(side, c) {
+function wearEarring(c) {
   const px = blank();
-  const x = side === 'l' ? 15 * U : 31 * U;
-  softEllipse(px, x, 11.5 * U, 1.6 * U, 1.6 * U, hex('#ffe082'), 0.25);
-  softEllipse(px, x, 14 * U, 2 * U, 2.4 * U, c, 0.22);
-  softEllipse(px, x - 0.5 * U, 13 * U, 0.7 * U, 0.7 * U, hex('#ffffff'), 0.25);
+  for (const x of [15 * U, 31 * U]) {
+    softEllipse(px, x, 11.5 * U, 1.6 * U, 1.6 * U, hex('#ffe082'), 0.25);
+    softEllipse(px, x, 14 * U, 2 * U, 2.4 * U, c, 0.22);
+    softEllipse(px, x - 0.5 * U, 13 * U, 0.7 * U, 0.7 * U, hex('#ffffff'), 0.25);
+  }
   return px;
 }
 
-function wearRing(side, c) {
+function wearRing(c) {
   const px = blank();
-  const x = side === 'l' ? 12.5 * U : 33.5 * U;
-  softEllipse(px, x, 20.5 * U, 2.2 * U, 2.2 * U, hex('#ffd54f'), 0.25);
-  softEllipse(px, x, 20.5 * U, 1.2 * U, 1.2 * U, hex('#fff8e1'), 0.3);
-  softEllipse(px, x, 20.5 * U, 0.7 * U, 0.7 * U, c, 0.25);
+  for (const x of [12.5 * U, 33.5 * U]) {
+    softEllipse(px, x, 20.5 * U, 2.2 * U, 2.2 * U, hex('#ffd54f'), 0.25);
+    softEllipse(px, x, 20.5 * U, 1.2 * U, 1.2 * U, hex('#fff8e1'), 0.3);
+    softEllipse(px, x, 20.5 * U, 0.7 * U, 0.7 * U, c, 0.25);
+  }
   return px;
 }
 
@@ -538,10 +540,8 @@ gear('warrior', 'ascend', 'iron_gauntlets', wearGloves(hex('#90a4ae'), hex('#607
 gear('warrior', 'ascend', 'march_boots', wearShoes(hex('#5d4037')));
 
 gear('warrior', 'unique', 'courage_pendant', wearNecklace(hex('#ffd54f')));
-gear('warrior', 'unique', 'battle_ear_l', wearEarring('l', hex('#ff7043')));
-gear('warrior', 'unique', 'battle_ear_r', wearEarring('r', hex('#ff7043')));
-gear('warrior', 'unique', 'power_ring_l', wearRing('l', hex('#ef5350')));
-gear('warrior', 'unique', 'power_ring_r', wearRing('r', hex('#ef5350')));
+gear('warrior', 'unique', 'battle_ear', wearEarring(hex('#ff7043')));
+gear('warrior', 'unique', 'power_ring', wearRing(hex('#ef5350')));
 
 gear('warrior', 'hero', 'wasteland_blade', wearSword({hero: true}));
 gear('warrior', 'hero', 'war_crown', wearHead('crown'));
@@ -562,10 +562,8 @@ gear('mage', 'ascend', 'silk_gloves', wearGloves(hex('#e1bee7'), hex('#ba68c8'))
 gear('mage', 'ascend', 'mana_boots', wearShoes(hex('#6a1b9a')));
 
 gear('mage', 'unique', 'wisdom_pendant', wearNecklace(hex('#80deea')));
-gear('mage', 'unique', 'mana_ear_l', wearEarring('l', hex('#81c784')));
-gear('mage', 'unique', 'mana_ear_r', wearEarring('r', hex('#81c784')));
-gear('mage', 'unique', 'mind_ring_l', wearRing('l', hex('#64b5f6')));
-gear('mage', 'unique', 'mind_ring_r', wearRing('r', hex('#64b5f6')));
+gear('mage', 'unique', 'mana_ear', wearEarring(hex('#81c784')));
+gear('mage', 'unique', 'mind_ring', wearRing(hex('#64b5f6')));
 
 gear('mage', 'hero', 'wasteland_staff', wearStaff({hero: true}));
 gear('mage', 'hero', 'arcane_circlet', wearHead('circlet'));
@@ -575,6 +573,5 @@ gear('mage', 'hero', 'hero_slippers', wearShoes(hex('#bf360c')));
 
 savePublic('items/potion.png', strokeOutline(itemPotion()));
 savePublic('items/mana.png', strokeOutline(itemMana()));
-savePublic('items/scroll.png', strokeOutline(itemScroll()));
 
 console.log('Done.');

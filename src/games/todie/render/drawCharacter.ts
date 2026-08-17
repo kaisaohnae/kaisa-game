@@ -13,10 +13,8 @@ const layerOrder = (displaySettings.equipLayerOrder ?? [
   'head',
   'weapon',
   'necklace',
-  'earring_l',
-  'earring_r',
-  'ring_l',
-  'ring_r',
+  'earring',
+  'ring',
 ]) as GearSlot[];
 
 function applyPixelScale(ctx: CanvasRenderingContext2D) {

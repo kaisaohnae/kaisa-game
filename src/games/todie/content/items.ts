@@ -153,7 +153,7 @@ export function buildItemHelp(item: Item, playerJob: JobId): ItemHelpInfo | null
     };
   }
 
-  const cons = itemsJson.consumables[item.kind as 'potion' | 'mana' | 'scroll'] as
+  const cons = itemsJson.consumables[item.kind as 'potion' | 'mana'] as
     | {name: string; help?: string; effect?: string}
     | undefined;
   const cw = dropsJson.consumableWeights as Record<string, number>;
@@ -333,10 +333,10 @@ export function gearIconUrl(job: JobId, gearId: string, tier?: GearTier | null):
 
 const itemsBase = displayJson.consumablePublicBase || '/todie/items';
 
-export type ConsumableKind = 'potion' | 'mana' | 'scroll';
+export type ConsumableKind = 'potion' | 'mana';
 
 export function consumableIconUrl(kind: string): string | null {
-  if (kind === 'potion' || kind === 'mana' || kind === 'scroll') {
+  if (kind === 'potion' || kind === 'mana') {
     return `${itemsBase}/${kind}.png`;
   }
   return null;
@@ -377,7 +377,7 @@ export async function loadGearImages(): Promise<Record<string, HTMLImageElement>
 }
 
 export async function loadConsumableImages(): Promise<Record<string, HTMLImageElement>> {
-  const kinds: ConsumableKind[] = ['potion', 'mana', 'scroll'];
+  const kinds: ConsumableKind[] = ['potion', 'mana'];
   const map: Record<string, HTMLImageElement> = {};
   await Promise.all(
     kinds.map(

@@ -12,7 +12,7 @@
     "facingOffsetRad": 1.57079632679,
     "imageSmoothing": true
   },
-  "equipLayerOrder": ["shoes", "armor", "gloves", "head", "weapon", "necklace", "earring_l", "earring_r", "ring_l", "ring_r"],
+  "equipLayerOrder": ["shoes", "armor", "gloves", "head", "weapon", "necklace", "earring", "ring"],
   "actions": {
     "idle": { "fps": 1, "loop": true },
     "walk": { "fps": 8, "loop": true },

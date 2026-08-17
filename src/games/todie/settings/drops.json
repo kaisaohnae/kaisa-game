@@ -13,9 +13,8 @@
     "mage": 50
   },
   "consumableWeights": {
-    "potion": 48,
-    "mana": 40,
-    "scroll": 12
+    "potion": 55,
+    "mana": 45
   },
   "slotWeights": {
     "weapon": 14,
@@ -23,10 +22,8 @@
     "armor": 12,
     "gloves": 12,
     "shoes": 12,
-    "necklace": 8,
-    "earring_l": 7,
-    "earring_r": 7,
-    "ring_l": 8,
-    "ring_r": 8
+    "necklace": 10,
+    "earring": 10,
+    "ring": 10
   }
 }

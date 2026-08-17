@@ -145,22 +145,84 @@ function luminance(r, g, b) {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
-/** punch dark studio backdrop to alpha */
-function punchBg(pixels, w, h, thr = 48) {
+/** Magenta / green-screen / near-black → alpha (gray checker only via edge grow) */
+function isHardKey(r, g, b) {
+  const mx = Math.max(r, g, b);
+  const mn = Math.min(r, g, b);
+  const chroma = mx - mn;
+  const lum = luminance(r, g, b);
+  if (r > 150 && b > 150 && g < 150 && r + b > g * 2.2) return true;
+  if (g > 180 && r < 100 && b < 100 && g > r + 50 && g > b + 50) return true;
+  if (lum < 38 && chroma < 34) return true;
+  return false;
+}
+
+function isGrayFringe(r, g, b) {
+  const chroma = Math.max(r, g, b) - Math.min(r, g, b);
+  const lum = luminance(r, g, b);
+  return chroma < 24 && lum >= 38 && lum <= 210;
+}
+
+function punchBg(pixels, w, h) {
   for (let i = 0; i < w * h; i += 1) {
     const o = i * 4;
+    if (pixels[o + 3] < 8) continue;
+    if (isHardKey(pixels[o], pixels[o + 1], pixels[o + 2])) {
+      pixels[o + 3] = 0;
+    }
+  }
+
+  // Grow transparency into gray checker / residual key only where touching alpha
+  for (let iter = 0; iter < 10; iter += 1) {
+    const kill = [];
+    for (let y = 0; y < h; y += 1) {
+      for (let x = 0; x < w; x += 1) {
+        const i = y * w + x;
+        const o = i * 4;
+        if (pixels[o + 3] < 8) continue;
+        const r = pixels[o];
+        const g = pixels[o + 1];
+        const b = pixels[o + 2];
+        if (!isHardKey(r, g, b) && !isGrayFringe(r, g, b)) continue;
+        let touch = false;
+        for (const [dx, dy] of [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1],
+        ]) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= w || ny >= h) {
+            touch = true;
+            break;
+          }
+          if (pixels[(ny * w + nx) * 4 + 3] < 8) {
+            touch = true;
+            break;
+          }
+        }
+        if (touch) kill.push(o);
+      }
+    }
+    if (!kill.length) break;
+    for (const o of kill) pixels[o + 3] = 0;
+  }
+
+  // despill magenta on soft edges
+  for (let i = 0; i < w * h; i += 1) {
+    const o = i * 4;
+    const a = pixels[o + 3];
+    if (a < 8 || a > 250) continue;
     const r = pixels[o];
     const g = pixels[o + 1];
     const b = pixels[o + 2];
-    const a = pixels[o + 3];
-    if (a < 8) continue;
-    const lum = luminance(r, g, b);
-    // dark near-neutral background
-    const chroma = Math.max(r, g, b) - Math.min(r, g, b);
-    if (lum < thr && chroma < 28) {
-      pixels[o + 3] = 0;
-    } else if (lum < thr + 18 && chroma < 22) {
-      pixels[o + 3] = Math.round(a * ((lum - thr) / 18));
+    if (r > 140 && b > 140 && g < 160) {
+      const spill = Math.min(r, b) - g;
+      if (spill > 10) {
+        pixels[o] = Math.max(0, r - spill);
+        pixels[o + 2] = Math.max(0, b - spill);
+      }
     }
   }
 }
@@ -174,7 +236,6 @@ function eraseStaff(pixels, w, h) {
       const g = pixels[o + 1];
       const b = pixels[o + 2];
       if (pixels[o + 3] < 8) continue;
-      // cyan crystal / blue stick
       if (b > 140 && g > 100 && b > r + 30 && y < h * 0.78) {
         pixels[o + 3] = 0;
       } else if (b > 90 && g > 70 && r < 90 && b > r + 20 && x > w * 0.7) {
@@ -229,18 +290,18 @@ function resizeSoft(src, sw, sh, dw, dh) {
   return out;
 }
 
-function processBody(srcName, {eraseStaffFlag = false, thr = 42} = {}) {
+function processBody(srcName, {eraseStaffFlag = false} = {}) {
   const buf = fs.readFileSync(path.join(ASSETS, srcName));
   const {width, height, pixels} = decodePng(buf);
-  punchBg(pixels, width, height, thr);
+  punchBg(pixels, width, height);
   if (eraseStaffFlag) eraseStaff(pixels, width, height);
   return resizeSoft(pixels, width, height, OUT, OUT);
 }
 
-function processIcon(srcName, thr = 40) {
+function processIcon(srcName) {
   const buf = fs.readFileSync(path.join(ASSETS, srcName));
   const {width, height, pixels} = decodePng(buf);
-  punchBg(pixels, width, height, thr);
+  punchBg(pixels, width, height);
   return resizeSoft(pixels, width, height, OUT, OUT);
 }
 
@@ -268,20 +329,19 @@ function nudge(px, dy) {
   return out;
 }
 
-console.log('Installing painted HQ art…');
-const warrior = processBody('warrior-body.png', {thr: 38});
+console.log('Installing painted HQ art (v2, chroma key)…');
+const warrior = processBody('warrior-v2.png');
 saveJob('warrior', 'idle', warrior);
 saveJob('warrior', 'walk', nudge(warrior, 4));
 saveJob('warrior', 'roll', nudge(warrior, -3));
 
-const mage = processBody('mage-body-clean.png', {eraseStaffFlag: true, thr: 38});
+const mage = processBody('mage-v2.png');
 saveJob('mage', 'idle', mage);
 saveJob('mage', 'walk', nudge(mage, 4));
 saveJob('mage', 'roll', nudge(mage, -3));
 
-saveItem('potion', processIcon('potion-ref.png', 45));
-saveItem('mana', processIcon('mana-ref.png', 45));
-saveItem('scroll', processIcon('scroll-ref.png', 40));
+saveItem('potion', processIcon('potion-v2.png'));
+saveItem('mana', processIcon('mana-v2.png'));
 
 function saveMob(name, px) {
   const out = path.join(PUBLIC, 'mobs', `${name}.png`);
@@ -291,20 +351,20 @@ function saveMob(name, px) {
 }
 
 const mobFiles = [
-  ['slime', 'mob-slime.png', 36],
-  ['bat', 'mob-bat.png', 34],
-  ['block', 'mob-block.png', 34],
-  ['boss', 'mob-boss.png', 32],
-  ['slime_elite', 'mob-slime-elite.png', 34],
-  ['bat_elite', 'mob-bat-elite.png', 32],
-  ['block_elite', 'mob-block-elite.png', 32],
+  ['slime', 'slime-v2.png'],
+  ['bat', 'bat-v2.png'],
+  ['block', 'block-v2.png'],
+  ['boss', 'boss-v2.png'],
+  ['slime_elite', 'slime-elite-v2.png'],
+  ['bat_elite', 'bat-elite-v2.png'],
+  ['block_elite', 'block-elite-v2.png'],
 ];
-for (const [id, file, thr] of mobFiles) {
+for (const [id, file] of mobFiles) {
   if (!fs.existsSync(path.join(ASSETS, file))) {
     console.warn('missing mob source', file);
     continue;
   }
-  saveMob(id, processIcon(file, thr));
+  saveMob(id, processIcon(file));
 }
 
 console.log('Done bodies + consumables + mobs.');

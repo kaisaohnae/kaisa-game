@@ -9,6 +9,7 @@ import {
   draftToItem,
   dropSettings,
   emptyEquipment,
+  EQUIP_SLOTS,
   gearImageKey,
   jobLabel,
   jobSpeed,
@@ -18,7 +19,7 @@ import {
   alreadyOwnedToast,
   pickSpawnKind,
   preloadAllTodieAssets,
-  putItemInBag,
+  pickupOrAutoEquip,
   rollLootDrop,
   showNameOnGround,
   skillsFromBalance,
@@ -31,6 +32,7 @@ import {
   type ActionId,
   type Equipment,
   type GearSlot,
+  type GearTier,
   type Item,
   type JobId,
   type LoadedImages,
@@ -59,6 +61,7 @@ const BOSS_DEAGGRO = spawnSettings.bossDeaggroRange ?? 3200;
 const ELITE_CHANCE = spawnSettings.eliteChance ?? 0.12;
 const ELITE_DROP_COUNT = spawnSettings.eliteDropCount ?? 3;
 const NAME_COOKIE = 'todie_char_name';
+const GEAR_COOKIE = 'todie_gear';
 const MAP_NAME = '죽음의 황무지';
 const NAME_MAX = 10;
 
@@ -162,6 +165,119 @@ function writeNameCookie(name: string) {
   document.cookie = `${NAME_COOKIE}=${v};path=/;max-age=31536000;SameSite=Lax`;
 }
 
+type SavedGearItem = {
+  id: string;
+  kind: 'gear';
+  name: string;
+  qty: number;
+  color: string;
+  job: JobId | null;
+  gearId: string | null;
+  gearSlot: GearSlot | null;
+  tier: GearTier | null;
+};
+
+type GearSave = {
+  v: 1;
+  name: string;
+  job: JobId;
+  equipped: Partial<Record<GearSlot, SavedGearItem | null>>;
+};
+
+function serializeGearItem(it: Item): SavedGearItem | null {
+  if (it.kind !== 'gear') return null;
+  return {
+    id: it.id,
+    kind: 'gear',
+    name: it.name,
+    qty: it.qty,
+    color: it.color,
+    job: it.job,
+    gearId: it.gearId,
+    gearSlot: it.gearSlot,
+    tier: it.tier,
+  };
+}
+
+function writeGearCookie(save: GearSave) {
+  if (typeof document === 'undefined') return;
+  try {
+    const raw = encodeURIComponent(JSON.stringify(save));
+    // cookie ~4KB limit — equipment only stays small
+    if (raw.length > 3500) return;
+    document.cookie = `${GEAR_COOKIE}=${raw};path=/;max-age=31536000;SameSite=Lax`;
+  } catch {
+    /* ignore */
+  }
+}
+
+function clearGearCookie() {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${GEAR_COOKIE}=;path=/;max-age=0;SameSite=Lax`;
+}
+
+function readGearCookie(): GearSave | null {
+  if (typeof document === 'undefined') return null;
+  const m = document.cookie.match(/(?:^|; )todie_gear=([^;]*)/);
+  if (!m) return null;
+  try {
+    const data = JSON.parse(decodeURIComponent(m[1])) as GearSave;
+    if (!data || data.v !== 1 || (data.job !== 'warrior' && data.job !== 'mage')) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+function equipmentFromSave(save: GearSave): Equipment {
+  const eq = emptyEquipment();
+  const legacySlot = (id: string): GearSlot | null => {
+    if (id === 'earring_l' || id === 'earring_r') return 'earring';
+    if (id === 'ring_l' || id === 'ring_r') return 'ring';
+    if (
+      id === 'head' ||
+      id === 'armor' ||
+      id === 'weapon' ||
+      id === 'gloves' ||
+      id === 'shoes' ||
+      id === 'necklace' ||
+      id === 'earring' ||
+      id === 'ring'
+    ) {
+      return id;
+    }
+    return null;
+  };
+  const rawMap = save.equipped ?? {};
+  for (const [key, raw] of Object.entries(rawMap)) {
+    const slot = legacySlot(key);
+    if (!slot || !raw || raw.kind !== 'gear') continue;
+    if (eq[slot]) continue; // keep first if both L/R existed
+    eq[slot] = {
+      id: raw.id || `saved-${slot}`,
+      kind: 'gear',
+      name: raw.name,
+      qty: Math.max(1, raw.qty || 1),
+      color: raw.color || '#aaa',
+      job: raw.job,
+      gearId: raw.gearId,
+      gearSlot: slot,
+      tier: raw.tier,
+    };
+  }
+  return eq;
+}
+
+function gearSaveFromEquipment(name: string, job: JobId, equipped: Equipment): GearSave {
+  const equippedOut: GearSave['equipped'] = {};
+  for (const s of EQUIP_SLOTS) {
+    const it = equipped[s.id];
+    equippedOut[s.id] = it ? serializeGearItem(it) : null;
+  }
+  return {v: 1, name: name.slice(0, NAME_MAX), job, equipped: equippedOut};
+}
+
+
 const NAME_SYLLABLES = [
   '가',
   '나',
@@ -219,11 +335,43 @@ export default function TodieGame() {
   const [, setBagTick] = useState(0);
   const assetsRef = useRef<TodieAssetBundle | null>(null);
   const [assetsVersion, setAssetsVersion] = useState(0);
+  const [hasGearSave, setHasGearSave] = useState(false);
+  const [showRestart, setShowRestart] = useState(false);
+  const setShowRestartRef = useRef(setShowRestart);
+  setShowRestartRef.current = setShowRestart;
+
+  const restartGame = () => {
+    window.location.reload();
+  };
 
   useEffect(() => {
-    const saved = readNameCookie();
-    setDraftName(saved || randomCharName());
+    const savedName = readNameCookie();
+    setDraftName(savedName || randomCharName());
+    const gear = readGearCookie();
+    if (gear?.job === 'warrior' || gear?.job === 'mage') {
+      setPickJobUi(gear.job);
+      setHasGearSave(EQUIP_SLOTS.some((s) => Boolean(gear.equipped?.[s.id])));
+    }
   }, []);
+
+  useEffect(() => {
+    if (!started) return;
+    const persist = () => {
+      writeGearCookie(gearSaveFromEquipment(charName, startJob, equippedRef.current));
+    };
+    const onHide = () => {
+      if (document.visibilityState === 'hidden') persist();
+    };
+    window.addEventListener('beforeunload', persist);
+    document.addEventListener('visibilitychange', onHide);
+    const id = window.setInterval(persist, 8000);
+    return () => {
+      window.removeEventListener('beforeunload', persist);
+      document.removeEventListener('visibilitychange', onHide);
+      window.clearInterval(id);
+      persist();
+    };
+  }, [started, charName, startJob]);
 
   /** Block browser back / forward while on this game page */
   useEffect(() => {
@@ -238,7 +386,12 @@ export default function TodieGame() {
     };
   }, []);
 
-  const syncBag = () => setBagTick((t) => t + 1);
+  const syncBag = () => {
+    setBagTick((t) => t + 1);
+    if (started) {
+      writeGearCookie(gearSaveFromEquipment(charName, startJob, equippedRef.current));
+    }
+  };
 
   const begin = async () => {
     const n = (draftName.trim() || randomCharName()).slice(0, NAME_MAX);
@@ -253,6 +406,7 @@ export default function TodieGame() {
       writeNameCookie(n);
       setCharName(n);
       setStartJob(pickJobUi);
+
       const bag = emptyBag();
       bag[0] = {
         id: 'start-p',
@@ -276,15 +430,29 @@ export default function TodieGame() {
         gearSlot: null,
         tier: null,
       };
-      const stick = draftToItem(starterGearItem(pickJobUi));
-      stick.id = 'start-stick';
-      bag[2] = stick;
-      bagRef.current = bag;
-      const eq = emptyEquipment();
-      // auto-equip wooden stick
-      eq.weapon = {...stick, qty: 1};
-      clearItem(bag[2]);
-      equippedRef.current = eq;
+
+      const saved = readGearCookie();
+      const restore =
+        saved &&
+        saved.job === pickJobUi &&
+        saved.equipped &&
+        EQUIP_SLOTS.some((s) => Boolean(saved.equipped?.[s.id]));
+
+      if (restore && saved) {
+        equippedRef.current = equipmentFromSave(saved);
+        bagRef.current = bag;
+        writeGearCookie(gearSaveFromEquipment(n, pickJobUi, equippedRef.current));
+      } else {
+        const stick = draftToItem(starterGearItem(pickJobUi));
+        stick.id = 'start-stick';
+        bag[2] = stick;
+        bagRef.current = bag;
+        const eq = emptyEquipment();
+        eq.weapon = {...stick, qty: 1};
+        clearItem(bag[2]);
+        equippedRef.current = eq;
+        writeGearCookie(gearSaveFromEquipment(n, pickJobUi, eq));
+      }
       setStarted(true);
     } catch (err) {
       console.error(err);
@@ -496,6 +664,62 @@ export default function TodieGame() {
       }
     };
 
+    const spawnGroundDrop = (x: number, y: number, item: Item, scatter = 42) => {
+      const ang = Math.random() * Math.PI * 2;
+      const dist = rand(18, scatter);
+      groundDrops.push({
+        uid: nextDropUid++,
+        x: x + Math.cos(ang) * dist,
+        y: y + Math.sin(ang) * dist,
+        item,
+        life: GROUND_TTL,
+        maxLife: GROUND_TTL,
+      });
+    };
+
+    /** 가방·장착 아이템의 약 50%를 랜덤으로 바닥에 드랍 */
+    const dropHalfItemsOnDeath = () => {
+      type Entry =
+        | {source: 'bag'; index: number}
+        | {source: 'equip'; slot: GearSlot};
+      const entries: Entry[] = [];
+      for (let i = 0; i < inventory.length; i += 1) {
+        if (inventory[i].kind !== 'empty') entries.push({source: 'bag', index: i});
+      }
+      for (const s of EQUIP_SLOTS) {
+        if (equippedRef.current[s.id]) entries.push({source: 'equip', slot: s.id});
+      }
+      if (entries.length === 0) return 0;
+
+      for (let i = entries.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = entries[i];
+        entries[i] = entries[j];
+        entries[j] = tmp;
+      }
+
+      const dropCount = Math.round(entries.length * 0.5);
+      let dropped = 0;
+      for (let i = 0; i < dropCount; i += 1) {
+        const e = entries[i];
+        if (e.source === 'bag') {
+          const it = inventory[e.index];
+          if (it.kind === 'empty') continue;
+          spawnGroundDrop(player.x, player.y, {...it}, 90);
+          clearItem(it);
+          dropped += 1;
+        } else {
+          const it = equippedRef.current[e.slot];
+          if (!it) continue;
+          spawnGroundDrop(player.x, player.y, {...it}, 90);
+          equippedRef.current[e.slot] = null;
+          dropped += 1;
+        }
+      }
+      syncBag();
+      return dropped;
+    };
+
     const hurtPlayer = (dmg: number) => {
       if (player.invuln > 0 || player.rolling > 0) return;
       const def = gearPower().def;
@@ -512,21 +736,15 @@ export default function TodieGame() {
       });
       if (player.hp <= 0) {
         alive = false;
-        showToast('쓰러졌다… R로 재시작');
+        const n = dropHalfItemsOnDeath();
+        clearGearCookie();
+        setShowRestartRef.current(true);
+        showToast(
+          n > 0
+            ? `쓰러졌다… 아이템 ${n}개 떨어짐 · R로 재시작`
+            : '쓰러졌다… R로 재시작',
+        );
       }
-    };
-
-    const spawnGroundDrop = (x: number, y: number, item: Item) => {
-      const ang = Math.random() * Math.PI * 2;
-      const dist = rand(18, 42);
-      groundDrops.push({
-        uid: nextDropUid++,
-        x: x + Math.cos(ang) * dist,
-        y: y + Math.sin(ang) * dist,
-        item,
-        life: GROUND_TTL,
-        maxLife: GROUND_TTL,
-      });
     };
 
     const killMob = (m: Mob) => {
@@ -600,7 +818,13 @@ export default function TodieGame() {
           keep.push(d);
           continue;
         }
-        if (!putItemInBag(inventory, d.item)) {
+        const picked = pickupOrAutoEquip(
+          inventory,
+          equippedRef.current,
+          d.item,
+          player.job,
+        );
+        if (!picked.ok) {
           showToast('가방이 가득 찼어요');
           keep.push(d);
           continue;
@@ -611,10 +835,12 @@ export default function TodieGame() {
           y: d.y - 12,
           life: 0.6,
           max: 0.6,
-          text: `+${d.item.name}`,
+          text: picked.autoEquipped ? `장착 ${d.item.name}` : `+${d.item.name}`,
           color: d.item.color,
         });
-        showToast(`${d.item.name} 획득!`);
+        showToast(
+          picked.autoEquipped ? `${d.item.name} 자동 장착!` : `${d.item.name} 획득!`,
+        );
       }
       groundDrops = keep;
     };
@@ -720,10 +946,6 @@ export default function TodieGame() {
       } else if (item.kind === 'mana') {
         player.mp = Math.min(player.maxMp, player.mp + bal.items.manaRestore);
         showToast(`마나 회복 +${bal.items.manaRestore}`);
-      } else if (item.kind === 'scroll') {
-        player.hp = Math.min(player.maxHp, player.hp + bal.items.scrollHeal);
-        player.mp = Math.min(player.maxMp, player.mp + bal.items.scrollMana);
-        showToast('스크롤 사용!');
       } else if (item.kind === 'gear') {
         const msg = toggleEquipFromBag(inventory, equippedRef.current, slot - 3, player.job);
         if (msg) showToast(msg);
@@ -785,7 +1007,8 @@ export default function TodieGame() {
       let best: Mob | null = null;
       let bestD = Infinity;
       for (const m of mobs) {
-        const limit = m.kind === 'boss' ? MOB_CLICK_R * 1.8 : MOB_CLICK_R;
+        const limit =
+          m.kind === 'boss' ? MOB_CLICK_R * 1.8 : m.elite ? MOB_CLICK_R * 1.25 : MOB_CLICK_R;
         const d = Math.hypot(m.x - wx, m.y - wy);
         if (d <= limit && d < bestD) {
           bestD = d;
@@ -996,125 +1219,67 @@ export default function TodieGame() {
       c.translate(m.x, m.y);
       if (m.hurt > 0) c.translate(rand(-2, 2), rand(-2, 2));
 
-      const shadow = (rx: number, ry: number, alpha = 0.28) => {
-        c.fillStyle = `rgba(0,0,0,${alpha})`;
+      const size = mobDrawSize(m.kind, m.elite);
+      const key = mobSpriteKey(m.kind, m.elite);
+      const img = mobImages[key];
+      const bob =
+        m.kind === 'bat' ? Math.sin(performance.now() / 180 + m.id) * 3 : 0;
+      const pulse =
+        m.kind === 'boss' ? 1 + Math.sin(performance.now() / 180) * 0.035 : 1;
+
+      // soft ground shadow
+      c.fillStyle = 'rgba(0,0,0,0.3)';
+      c.beginPath();
+      c.ellipse(0, size * 0.38, size * 0.32, size * 0.1, 0, 0, Math.PI * 2);
+      c.fill();
+
+      if (m.elite) {
+        const aura = c.createRadialGradient(0, 0, size * 0.15, 0, 0, size * 0.55);
+        aura.addColorStop(0, 'rgba(206, 147, 216, 0.35)');
+        aura.addColorStop(1, 'rgba(206, 147, 216, 0)');
+        c.fillStyle = aura;
         c.beginPath();
-        c.ellipse(0, 16, rx, ry, 0, 0, Math.PI * 2);
+        c.arc(0, bob * 0.2, size * 0.55, 0, Math.PI * 2);
         c.fill();
-      };
+      }
+
+      c.save();
+      c.translate(0, bob);
+      c.scale(pulse, pulse);
+      c.imageSmoothingEnabled = true;
+
+      if (img && img.complete && img.naturalWidth > 0) {
+        c.drawImage(img, -size / 2, -size / 2, size, size);
+      } else {
+        // procedural fallback
+        c.fillStyle =
+          m.kind === 'boss'
+            ? '#e65100'
+            : m.kind === 'slime'
+              ? '#66bb6a'
+              : m.kind === 'bat'
+                ? '#7e57c2'
+                : '#8d6e63';
+        c.beginPath();
+        c.ellipse(0, 0, size * 0.35, size * 0.32, 0, 0, Math.PI * 2);
+        c.fill();
+      }
+      c.restore();
 
       if (m.kind === 'boss') {
-        const pulse = 1 + Math.sin(performance.now() / 180) * 0.04;
-        c.scale(pulse, pulse);
-        shadow(34, 10, 0.35);
-        const body = c.createRadialGradient(-10, -18, 6, 0, 0, 40);
-        body.addColorStop(0, '#ff8a50');
-        body.addColorStop(0.45, '#e65100');
-        body.addColorStop(1, '#7f1d00');
-        c.fillStyle = body;
-        c.strokeStyle = '#ffab40';
-        c.lineWidth = 3;
-        roundRect(c, -30, -32, 60, 54, 16);
-        c.fill();
-        c.stroke();
-        const helm = c.createLinearGradient(0, -44, 0, -24);
-        helm.addColorStop(0, '#ffe082');
-        helm.addColorStop(1, '#ef6c00');
-        c.fillStyle = helm;
-        roundRect(c, -18, -42, 36, 16, 6);
-        c.fill();
-        c.fillStyle = '#fff8e1';
-        roundRect(c, -15, -16, 12, 14, 4);
-        c.fill();
-        roundRect(c, 3, -16, 12, 14, 4);
-        c.fill();
-        c.fillStyle = '#b71c1c';
-        roundRect(c, -11, -10, 5, 6, 2);
-        c.fill();
-        roundRect(c, 7, -10, 5, 6, 2);
-        c.fill();
         c.fillStyle = 'rgba(255, 224, 130, 0.95)';
-        c.font = 'bold 12px "Fredoka", "Nunito", sans-serif';
+        c.font = 'bold 11px "Fredoka", "Nunito", sans-serif';
         c.textAlign = 'center';
-        c.fillText('BOSS', 0, 30);
-      } else if (m.kind === 'slime') {
-        shadow(18, 6);
-        const g = c.createRadialGradient(-6, -10, 4, 0, 2, 24);
-        g.addColorStop(0, '#c8e6c9');
-        g.addColorStop(0.4, '#66bb6a');
-        g.addColorStop(1, '#1b5e20');
-        c.fillStyle = g;
-        c.beginPath();
-        c.ellipse(0, 0, 18, 15, 0, 0, Math.PI * 2);
-        c.fill();
-        c.fillStyle = 'rgba(255,255,255,0.45)';
-        c.beginPath();
-        c.ellipse(-6, -6, 5, 4, -0.3, 0, Math.PI * 2);
-        c.fill();
-        c.fillStyle = '#fff';
-        roundRect(c, -9, -5, 7, 8, 3);
-        c.fill();
-        roundRect(c, 2, -5, 7, 8, 3);
-        c.fill();
-        c.fillStyle = '#1b1b1b';
-        roundRect(c, -7, -2, 3, 4, 1);
-        c.fill();
-        roundRect(c, 4, -2, 3, 4, 1);
-        c.fill();
-      } else if (m.kind === 'bat') {
-        shadow(20, 5, 0.22);
-        const wing = c.createRadialGradient(0, 0, 2, 0, 0, 26);
-        wing.addColorStop(0, '#b39ddb');
-        wing.addColorStop(1, '#4527a0');
-        c.fillStyle = wing;
-        c.beginPath();
-        c.moveTo(-24, 2);
-        c.quadraticCurveTo(-16, -16, -4, -6);
-        c.lineTo(0, 0);
-        c.lineTo(4, -6);
-        c.quadraticCurveTo(16, -16, 24, 2);
-        c.quadraticCurveTo(10, 10, 0, 6);
-        c.quadraticCurveTo(-10, 10, -24, 2);
-        c.closePath();
-        c.fill();
-        const head = c.createRadialGradient(-2, -4, 2, 0, 0, 12);
-        head.addColorStop(0, '#d1c4e9');
-        head.addColorStop(1, '#5e35b1');
-        c.fillStyle = head;
-        roundRect(c, -9, -10, 18, 16, 7);
-        c.fill();
-        c.fillStyle = '#fff';
-        roundRect(c, -6, -5, 4, 4, 2);
-        c.fill();
-        roundRect(c, 2, -5, 4, 4, 2);
-        c.fill();
-        c.fillStyle = '#311b92';
-        c.fillRect(-5, -3, 2, 2);
-        c.fillRect(3, -3, 2, 2);
-      } else {
-        shadow(16, 5);
-        const stone = c.createLinearGradient(-16, -16, 16, 16);
-        stone.addColorStop(0, '#d7ccc8');
-        stone.addColorStop(0.45, '#8d6e63');
-        stone.addColorStop(1, '#3e2723');
-        c.fillStyle = stone;
-        c.strokeStyle = '#4e342e';
-        c.lineWidth = 2.5;
-        roundRect(c, -16, -16, 32, 32, 8);
-        c.fill();
-        c.stroke();
-        c.fillStyle = 'rgba(255, 236, 179, 0.85)';
-        roundRect(c, -7, -7, 6, 6, 2);
-        c.fill();
-        roundRect(c, 2, 1, 6, 6, 2);
-        c.fill();
-        c.fillStyle = '#3e2723';
-        c.fillRect(-5, -5, 2, 2);
-        c.fillRect(4, 3, 2, 2);
+        c.fillText('BOSS', 0, size * 0.48);
+      } else if (m.elite) {
+        c.fillStyle = 'rgba(224, 170, 255, 0.95)';
+        c.font = 'bold 10px "Fredoka", "Nunito", sans-serif';
+        c.textAlign = 'center';
+        c.fillText('정예', 0, size * 0.46);
       }
-      // hp bar
-      const barW = m.kind === 'boss' ? 52 : 34;
-      const barY = m.kind === 'boss' ? -48 : -28;
+
+      const barW = m.kind === 'boss' ? 56 : m.elite ? 40 : 34;
+      const barY = -(size * 0.52);
       c.fillStyle = 'rgba(0,0,0,0.55)';
       roundRect(c, -barW / 2 - 1, barY - 1, barW + 2, 7, 3);
       c.fill();
@@ -1124,6 +1289,9 @@ export default function TodieGame() {
       if (m.kind === 'boss') {
         hpG.addColorStop(0, '#ff6d00');
         hpG.addColorStop(1, '#ffab40');
+      } else if (m.elite) {
+        hpG.addColorStop(0, '#8e24aa');
+        hpG.addColorStop(1, '#ce93d8');
       } else {
         hpG.addColorStop(0, '#e53935');
         hpG.addColorStop(1, '#ef9a9a');
@@ -1403,6 +1571,11 @@ export default function TodieGame() {
           mctx.fillRect(u - 4, v - 4, 8, 8);
           mctx.strokeStyle = '#ffe082';
           mctx.strokeRect(u - 4.5, v - 4.5, 9, 9);
+        } else if (m.elite) {
+          mctx.fillStyle = '#ce93d8';
+          mctx.fillRect(u - 3.5, v - 3.5, 7, 7);
+          mctx.strokeStyle = '#e1bee7';
+          mctx.strokeRect(u - 4, v - 4, 8, 8);
         } else {
           mctx.fillStyle = m.id === targetMobId ? '#ff5252' : '#ef9a9a';
           const sz = m.id === targetMobId ? 5 : 3;
@@ -1569,13 +1742,6 @@ export default function TodieGame() {
       if (!alive) {
         ctx.fillStyle = 'rgba(0,0,0,0.6)';
         ctx.fillRect(0, 0, viewW, viewH);
-        ctx.fillStyle = '#ff8a80';
-        ctx.font = 'bold 42px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('YOU DIED', viewW / 2, viewH / 2 - 10);
-        ctx.fillStyle = '#fff';
-        ctx.font = '18px sans-serif';
-        ctx.fillText('R 키로 다시 시작', viewW / 2, viewH / 2 + 28);
       }
     };
 
@@ -1700,7 +1866,7 @@ export default function TodieGame() {
           const d = Math.hypot(dx, dy) || 1;
           const aggroR = m.kind === 'boss' ? BOSS_AGGRO : AGGRO_RANGE;
           const deaggroR = m.kind === 'boss' ? BOSS_DEAGGRO : DEAGGRO_RANGE;
-          const hitR = m.kind === 'boss' ? 44 : 28;
+          const hitR = m.kind === 'boss' ? 50 : m.elite ? 34 : 28;
 
           if (!m.aggro && d <= aggroR) {
             pullAggro(m);
@@ -1711,7 +1877,13 @@ export default function TodieGame() {
           if (m.aggro) {
             m.x += (dx / d) * m.speed * dt;
             m.y += (dy / d) * m.speed * dt;
-            if (d < hitR) hurtPlayer(bal.mobs[m.kind].touchDamage);
+            if (d < hitR) {
+              const base = bal.mobs[m.kind].touchDamage;
+              const dmgMult = m.elite
+                ? ((bal.mobs as {elite?: {damageMult?: number}}).elite?.damageMult ?? 1.7)
+                : 1;
+              hurtPlayer(Math.round(base * dmgMult));
+            }
           } else {
             // idle: slowly return toward spawn home
             const hx = m.homeX - m.x;
@@ -1818,7 +1990,9 @@ export default function TodieGame() {
             <br />
             직업은 검사 또는 법사입니다.
             <br />
-            시작 장비는 나무작대기 · 복장은 팬티만!
+            {hasGearSave
+              ? '저장된 장비가 있어요. 같은 직업으로 시작하면 이어집니다.'
+              : '시작 장비는 나무작대기 · 복장은 팬티만!'}
           </p>
           <label className="todie__gate-label" htmlFor="todie-name">
             캐릭터 이름 (최대 {NAME_MAX}글자)
@@ -1846,15 +2020,33 @@ export default function TodieGame() {
             <button
               type="button"
               className={`todie__gate-job${pickJobUi === 'warrior' ? ' is-on' : ''}`}
-              onClick={() => setPickJobUi('warrior')}
-              disabled={loadingAssets}
-            >
+              onClick={() => {
+              setPickJobUi('warrior');
+              const gear = readGearCookie();
+              setHasGearSave(
+                Boolean(
+                  gear?.job === 'warrior' &&
+                    EQUIP_SLOTS.some((s) => Boolean(gear.equipped?.[s.id])),
+                ),
+              );
+            }}
+            disabled={loadingAssets}
+          >
               검사
             </button>
             <button
               type="button"
               className={`todie__gate-job${pickJobUi === 'mage' ? ' is-on' : ''}`}
-              onClick={() => setPickJobUi('mage')}
+              onClick={() => {
+                setPickJobUi('mage');
+                const gear = readGearCookie();
+                setHasGearSave(
+                  Boolean(
+                    gear?.job === 'mage' &&
+                      EQUIP_SLOTS.some((s) => Boolean(gear.equipped?.[s.id])),
+                  ),
+                );
+              }}
               disabled={loadingAssets}
             >
               법사
@@ -1883,6 +2075,17 @@ export default function TodieGame() {
         </button>
         <canvas className="todie__minimap" ref={miniRef} />
       </div>
+      {showRestart && (
+        <div className="todie__dead-overlay" onPointerDown={(e) => e.stopPropagation()}>
+          <div className="todie__dead-card">
+            <h2 className="todie__dead-title">YOU DIED</h2>
+            <p className="todie__dead-hint">R 키로 다시 시작</p>
+            <button type="button" className="todie__dead-restart" onClick={restartGame}>
+              게임 다시시작
+            </button>
+          </div>
+        </div>
+      )}
       <InventoryDock
         bag={bagRef.current}
         equipped={equippedRef.current}

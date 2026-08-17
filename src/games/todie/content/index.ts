@@ -38,6 +38,7 @@ export {
   emptyEquipment,
   emptyItem,
   putItemInBag,
+  pickupOrAutoEquip,
   toggleEquipFromBag,
   unequipSlot,
   clearItem,

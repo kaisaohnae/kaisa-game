@@ -193,6 +193,62 @@
   cursor: not-allowed;
 }
 
+/* —— death / restart —— */
+.todie__dead-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+.todie__dead-card {
+  text-align: center;
+  padding: 28px 32px 24px;
+  border-radius: 18px;
+  background: rgba(22, 16, 14, 0.92);
+  border: 2px solid rgba(255, 138, 128, 0.55);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+  min-width: min(280px, calc(100vw - 48px));
+}
+
+.todie__dead-title {
+  margin: 0;
+  font-size: 40px;
+  font-weight: 800;
+  color: #ff8a80;
+  letter-spacing: 0.04em;
+}
+
+.todie__dead-hint {
+  margin: 10px 0 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.todie__dead-restart {
+  margin-top: 18px;
+  width: 100%;
+  padding: 14px 18px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffe082, #ffca28);
+  color: #3e2723;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 17px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.todie__dead-restart:active {
+  transform: scale(0.98);
+}
+
 /* —— inventory dock (always bottom-right) —— */
 .todie__inv-dock {
   position: absolute;

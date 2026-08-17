@@ -279,19 +279,21 @@ function wearNecklace(c) {
   return outlineDots(px);
 }
 
-function wearEarring(side, c) {
+function wearEarring(c) {
   const px = blank();
-  const x = side === 'l' ? 15 : 31;
-  set(px, x, 12, c);
-  set(px, x, 13, C.Wh);
+  for (const x of [15, 31]) {
+    set(px, x, 12, c);
+    set(px, x, 13, C.Wh);
+  }
   return outlineDots(px);
 }
 
-function wearRing(side, c) {
+function wearRing(c) {
   const px = blank();
-  const x = side === 'l' ? 13 : 33;
-  set(px, x, 20, c);
-  set(px, x, 21, C.Wh);
+  for (const x of [13, 33]) {
+    set(px, x, 20, c);
+    set(px, x, 21, C.Wh);
+  }
   return outlineDots(px);
 }
 
@@ -364,10 +366,8 @@ saveGear('warrior', 'ascend', 'iron_gauntlets', wearGloves(C.S, C.Sd));
 saveGear('warrior', 'ascend', 'march_boots', wearShoes(C.Sd));
 
 saveGear('warrior', 'unique', 'courage_pendant', wearNecklace(C.Gold));
-saveGear('warrior', 'unique', 'battle_ear_l', wearEarring('l', C.Or));
-saveGear('warrior', 'unique', 'battle_ear_r', wearEarring('r', C.Y));
-saveGear('warrior', 'unique', 'power_ring_l', wearRing('l', C.Or));
-saveGear('warrior', 'unique', 'power_ring_r', wearRing('r', C.Pink));
+saveGear('warrior', 'unique', 'battle_ear', wearEarring(C.Or));
+saveGear('warrior', 'unique', 'power_ring', wearRing(C.Or));
 
 saveGear('warrior', 'hero', 'wasteland_blade', wearSword(true));
 saveGear('warrior', 'hero', 'war_crown', wearHead('crown'));
@@ -389,10 +389,8 @@ saveGear('mage', 'ascend', 'silk_gloves', wearGloves(C.Ph, C.P));
 saveGear('mage', 'ascend', 'mana_boots', wearShoes(C.P));
 
 saveGear('mage', 'unique', 'wisdom_pendant', wearNecklace(C.Gem));
-saveGear('mage', 'unique', 'mana_ear_l', wearEarring('l', C.G));
-saveGear('mage', 'unique', 'mana_ear_r', wearEarring('r', C.Gem));
-saveGear('mage', 'unique', 'mind_ring_l', wearRing('l', C.Gem));
-saveGear('mage', 'unique', 'mind_ring_r', wearRing('r', C.Bh));
+saveGear('mage', 'unique', 'mana_ear', wearEarring(C.G));
+saveGear('mage', 'unique', 'mind_ring', wearRing(C.Gem));
 
 function saveItem(id, px) {
   const out = path.join(ROOT, '..', '..', '..', 'public', 'todie', 'items', `${id}.png`);
