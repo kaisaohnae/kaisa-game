@@ -9,28 +9,28 @@
     "basic": {
       "label": "기본템",
       "color": "#b0bec5",
-      "dropWeight": 55,
+      "dropWeight": 40,
       "help": "초보 장비. 자주 드랍됩니다.",
       "stats": { "atk": 5, "def": 4, "hp": 30 }
     },
     "ascend": {
       "label": "전승템",
       "color": "#42a5f5",
-      "dropWeight": 28,
+      "dropWeight": 32,
       "help": "전승 등급. 기본보다 강하고 드랍이 줄어듭니다.",
       "stats": { "atk": 14, "def": 12, "hp": 80 }
     },
     "unique": {
       "label": "유일템",
       "color": "#ffd54f",
-      "dropWeight": 12,
+      "dropWeight": 18,
       "help": "유일 등급. 희귀하며 성능이 뛰어납니다.",
       "stats": { "atk": 28, "def": 22, "hp": 150 }
     },
     "hero": {
       "label": "영웅템",
       "color": "#e65100",
-      "dropWeight": 5,
+      "dropWeight": 10,
       "help": "영웅 등급. 가장 희귀하고 성능이 가장 높습니다.",
       "stats": { "atk": 48, "def": 38, "hp": 260 }
     }

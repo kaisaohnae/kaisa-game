@@ -1,15 +1,57 @@
-import type {ActionId, JobId} from './types';
+import type {ActionId, CardinalDir, JobId} from './types';
 
-import warriorIdle from '../jobs/warrior/actions/idle.png';
-import warriorWalk from '../jobs/warrior/actions/walk.png';
-import warriorRoll from '../jobs/warrior/actions/roll.png';
+import warriorIdleDown from '../jobs/warrior/actions/idle_down.png';
+import warriorIdleDownRight from '../jobs/warrior/actions/idle_downRight.png';
+import warriorIdleRight from '../jobs/warrior/actions/idle_right.png';
+import warriorIdleUpRight from '../jobs/warrior/actions/idle_upRight.png';
+import warriorIdleUp from '../jobs/warrior/actions/idle_up.png';
+import warriorIdleUpLeft from '../jobs/warrior/actions/idle_upLeft.png';
+import warriorIdleLeft from '../jobs/warrior/actions/idle_left.png';
+import warriorIdleDownLeft from '../jobs/warrior/actions/idle_downLeft.png';
+import warriorWalkDown from '../jobs/warrior/actions/walk_down.png';
+import warriorWalkDownRight from '../jobs/warrior/actions/walk_downRight.png';
+import warriorWalkRight from '../jobs/warrior/actions/walk_right.png';
+import warriorWalkUpRight from '../jobs/warrior/actions/walk_upRight.png';
+import warriorWalkUp from '../jobs/warrior/actions/walk_up.png';
+import warriorWalkUpLeft from '../jobs/warrior/actions/walk_upLeft.png';
+import warriorWalkLeft from '../jobs/warrior/actions/walk_left.png';
+import warriorWalkDownLeft from '../jobs/warrior/actions/walk_downLeft.png';
+import warriorRollDown from '../jobs/warrior/actions/roll_down.png';
+import warriorRollDownRight from '../jobs/warrior/actions/roll_downRight.png';
+import warriorRollRight from '../jobs/warrior/actions/roll_right.png';
+import warriorRollUpRight from '../jobs/warrior/actions/roll_upRight.png';
+import warriorRollUp from '../jobs/warrior/actions/roll_up.png';
+import warriorRollUpLeft from '../jobs/warrior/actions/roll_upLeft.png';
+import warriorRollLeft from '../jobs/warrior/actions/roll_left.png';
+import warriorRollDownLeft from '../jobs/warrior/actions/roll_downLeft.png';
 import warriorSlash from '../jobs/warrior/skills/slash.png';
 import warriorSpin from '../jobs/warrior/skills/spin.png';
 import warriorBash from '../jobs/warrior/skills/bash.png';
 
-import mageIdle from '../jobs/mage/actions/idle.png';
-import mageWalk from '../jobs/mage/actions/walk.png';
-import mageRoll from '../jobs/mage/actions/roll.png';
+import mageIdleDown from '../jobs/mage/actions/idle_down.png';
+import mageIdleDownRight from '../jobs/mage/actions/idle_downRight.png';
+import mageIdleRight from '../jobs/mage/actions/idle_right.png';
+import mageIdleUpRight from '../jobs/mage/actions/idle_upRight.png';
+import mageIdleUp from '../jobs/mage/actions/idle_up.png';
+import mageIdleUpLeft from '../jobs/mage/actions/idle_upLeft.png';
+import mageIdleLeft from '../jobs/mage/actions/idle_left.png';
+import mageIdleDownLeft from '../jobs/mage/actions/idle_downLeft.png';
+import mageWalkDown from '../jobs/mage/actions/walk_down.png';
+import mageWalkDownRight from '../jobs/mage/actions/walk_downRight.png';
+import mageWalkRight from '../jobs/mage/actions/walk_right.png';
+import mageWalkUpRight from '../jobs/mage/actions/walk_upRight.png';
+import mageWalkUp from '../jobs/mage/actions/walk_up.png';
+import mageWalkUpLeft from '../jobs/mage/actions/walk_upLeft.png';
+import mageWalkLeft from '../jobs/mage/actions/walk_left.png';
+import mageWalkDownLeft from '../jobs/mage/actions/walk_downLeft.png';
+import mageRollDown from '../jobs/mage/actions/roll_down.png';
+import mageRollDownRight from '../jobs/mage/actions/roll_downRight.png';
+import mageRollRight from '../jobs/mage/actions/roll_right.png';
+import mageRollUpRight from '../jobs/mage/actions/roll_upRight.png';
+import mageRollUp from '../jobs/mage/actions/roll_up.png';
+import mageRollUpLeft from '../jobs/mage/actions/roll_upLeft.png';
+import mageRollLeft from '../jobs/mage/actions/roll_left.png';
+import mageRollDownLeft from '../jobs/mage/actions/roll_downLeft.png';
 import mageBolt from '../jobs/mage/skills/bolt.png';
 import mageNova from '../jobs/mage/skills/nova.png';
 import mageShield from '../jobs/mage/skills/shield.png';
@@ -20,17 +62,70 @@ function assetUrl(mod: AssetImport): string {
   return typeof mod === 'string' ? mod : mod.src;
 }
 
+export const CARDINAL_DIRS: CardinalDir[] = [
+  'down',
+  'downRight',
+  'right',
+  'upRight',
+  'up',
+  'upLeft',
+  'left',
+  'downLeft',
+];
+
+type DirActions = Record<ActionId, Record<CardinalDir, string>>;
+
 type JobArt = {
-  actions: Record<ActionId, string>;
+  actions: DirActions;
   skills: Record<string, string>;
 };
+
+function eight(
+  down: string,
+  downRight: string,
+  right: string,
+  upRight: string,
+  up: string,
+  upLeft: string,
+  left: string,
+  downLeft: string,
+): Record<CardinalDir, string> {
+  return {down, downRight, right, upRight, up, upLeft, left, downLeft};
+}
 
 export const JOB_ART: Record<JobId, JobArt> = {
   warrior: {
     actions: {
-      idle: assetUrl(warriorIdle),
-      walk: assetUrl(warriorWalk),
-      roll: assetUrl(warriorRoll),
+      idle: eight(
+        assetUrl(warriorIdleDown),
+        assetUrl(warriorIdleDownRight),
+        assetUrl(warriorIdleRight),
+        assetUrl(warriorIdleUpRight),
+        assetUrl(warriorIdleUp),
+        assetUrl(warriorIdleUpLeft),
+        assetUrl(warriorIdleLeft),
+        assetUrl(warriorIdleDownLeft),
+      ),
+      walk: eight(
+        assetUrl(warriorWalkDown),
+        assetUrl(warriorWalkDownRight),
+        assetUrl(warriorWalkRight),
+        assetUrl(warriorWalkUpRight),
+        assetUrl(warriorWalkUp),
+        assetUrl(warriorWalkUpLeft),
+        assetUrl(warriorWalkLeft),
+        assetUrl(warriorWalkDownLeft),
+      ),
+      roll: eight(
+        assetUrl(warriorRollDown),
+        assetUrl(warriorRollDownRight),
+        assetUrl(warriorRollRight),
+        assetUrl(warriorRollUpRight),
+        assetUrl(warriorRollUp),
+        assetUrl(warriorRollUpLeft),
+        assetUrl(warriorRollLeft),
+        assetUrl(warriorRollDownLeft),
+      ),
     },
     skills: {
       slash: assetUrl(warriorSlash),
@@ -40,9 +135,36 @@ export const JOB_ART: Record<JobId, JobArt> = {
   },
   mage: {
     actions: {
-      idle: assetUrl(mageIdle),
-      walk: assetUrl(mageWalk),
-      roll: assetUrl(mageRoll),
+      idle: eight(
+        assetUrl(mageIdleDown),
+        assetUrl(mageIdleDownRight),
+        assetUrl(mageIdleRight),
+        assetUrl(mageIdleUpRight),
+        assetUrl(mageIdleUp),
+        assetUrl(mageIdleUpLeft),
+        assetUrl(mageIdleLeft),
+        assetUrl(mageIdleDownLeft),
+      ),
+      walk: eight(
+        assetUrl(mageWalkDown),
+        assetUrl(mageWalkDownRight),
+        assetUrl(mageWalkRight),
+        assetUrl(mageWalkUpRight),
+        assetUrl(mageWalkUp),
+        assetUrl(mageWalkUpLeft),
+        assetUrl(mageWalkLeft),
+        assetUrl(mageWalkDownLeft),
+      ),
+      roll: eight(
+        assetUrl(mageRollDown),
+        assetUrl(mageRollDownRight),
+        assetUrl(mageRollRight),
+        assetUrl(mageRollUpRight),
+        assetUrl(mageRollUp),
+        assetUrl(mageRollUpLeft),
+        assetUrl(mageRollLeft),
+        assetUrl(mageRollDownLeft),
+      ),
     },
     skills: {
       bolt: assetUrl(mageBolt),
@@ -53,7 +175,7 @@ export const JOB_ART: Record<JobId, JobArt> = {
 };
 
 export type LoadedImages = {
-  actions: Record<ActionId, HTMLImageElement>;
+  actions: Record<ActionId, Record<CardinalDir, HTMLImageElement>>;
   skills: Record<string, HTMLImageElement>;
 };
 
@@ -66,19 +188,54 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
+/**
+ * atan2 facing → 8 dirs.
+ * 0 = +X (right), π/2 = +Y (down)
+ */
+export function facingToCardinal(facing: number): CardinalDir {
+  const tau = Math.PI * 2;
+  let a = facing % tau;
+  if (a < 0) a += tau;
+  const sector = Math.floor((a + Math.PI / 8) / (Math.PI / 4)) % 8;
+  const map: CardinalDir[] = [
+    'right',
+    'downRight',
+    'down',
+    'downLeft',
+    'left',
+    'upLeft',
+    'up',
+    'upRight',
+  ];
+  return map[sector];
+}
+
 export async function loadJobImages(job: JobId): Promise<LoadedImages> {
   const art = JOB_ART[job];
-  const actions = {} as Record<ActionId, HTMLImageElement>;
+  const actions = {
+    idle: {} as Record<CardinalDir, HTMLImageElement>,
+    walk: {} as Record<CardinalDir, HTMLImageElement>,
+    roll: {} as Record<CardinalDir, HTMLImageElement>,
+  };
   const skills: Record<string, HTMLImageElement> = {};
 
-  await Promise.all([
-    ...(Object.keys(art.actions) as ActionId[]).map(async (id) => {
-      actions[id] = await loadImage(art.actions[id]);
-    }),
-    ...Object.keys(art.skills).map(async (id) => {
-      skills[id] = await loadImage(art.skills[id]);
-    }),
-  ]);
-
+  const loads: Promise<void>[] = [];
+  for (const action of Object.keys(art.actions) as ActionId[]) {
+    for (const dir of CARDINAL_DIRS) {
+      loads.push(
+        loadImage(art.actions[action][dir]).then((img) => {
+          actions[action][dir] = img;
+        }),
+      );
+    }
+  }
+  for (const id of Object.keys(art.skills)) {
+    loads.push(
+      loadImage(art.skills[id]).then((img) => {
+        skills[id] = img;
+      }),
+    );
+  }
+  await Promise.all(loads);
   return {actions, skills};
 }

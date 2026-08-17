@@ -2,28 +2,44 @@
   "art": {
     "format": "png",
     "size": 256,
-    "note": "HQ PNG. 캐릭터 jobs/ 장비 public/todie/gear 소비 items 몹 public/todie/mobs. npm run todie:sprites"
+    "note": "4-dir CraftPix-like pixel. npm run todie:sprites"
   },
   "character": {
     "worldSize": 104,
     "previewSize": 168,
     "anchorX": 0.5,
-    "anchorY": 0.52,
-    "facingOffsetRad": 1.57079632679,
-    "imageSmoothing": true
+    "anchorY": 0.55,
+    "facingOffsetRad": 0,
+    "imageSmoothing": false,
+    "note": "4 cardinal dirs (down/left/right/up), no continuous rotate"
   },
-  "equipLayerOrder": ["shoes", "armor", "gloves", "head", "weapon", "necklace", "earring", "ring"],
+  "attackSwing": {
+    "slash": 0.32,
+    "spin": 0.48,
+    "bash": 0.36,
+    "bolt": 0.22,
+    "nova": 0.2,
+    "shield": 0.2
+  },
+  "weaponGrip": {
+    "x": 0.246,
+    "y": 0.004,
+    "note": "손 위치(캐릭터 중심 기준, worldSize 비율). 스윙 피벗"
+  },
+  "equipLayerOrder": ["shoes", "armor", "head", "necklace", "earring", "weapon", "gloves", "ring"],
+  "equipUnderWeapon": ["shoes", "armor", "head", "necklace", "earring"],
+  "equipOverWeapon": ["gloves", "ring"],
   "actions": {
     "idle": { "fps": 1, "loop": true },
     "walk": { "fps": 8, "loop": true },
     "roll": { "fps": 14, "loop": false }
   },
   "skillFx": {
-    "size": 110,
-    "life": 0.4
+    "size": 128,
+    "life": 0.45
   },
-  "hotbarIconSize": 40,
-  "groundItemSize": 42,
+  "hotbarIconSize": 48,
+  "groundItemSize": 56,
   "gearPublicBase": "/todie/gear",
   "consumablePublicBase": "/todie/items",
   "mobs": {
@@ -33,7 +49,10 @@
       "slime": 70,
       "bat": 78,
       "block": 74,
-      "boss": 140
+      "wolf": 76,
+      "spider": 72,
+      "boss": 140,
+      "bigBoss": 200
     }
   }
 }

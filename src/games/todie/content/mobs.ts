@@ -4,19 +4,29 @@ export type MobSpriteId =
   | 'slime'
   | 'bat'
   | 'block'
+  | 'wolf'
+  | 'spider'
   | 'boss'
+  | 'bigBoss'
   | 'slime_elite'
   | 'bat_elite'
-  | 'block_elite';
+  | 'block_elite'
+  | 'wolf_elite'
+  | 'spider_elite';
 
 const MOB_IDS: MobSpriteId[] = [
   'slime',
   'bat',
   'block',
+  'wolf',
+  'spider',
   'boss',
+  'bigBoss',
   'slime_elite',
   'bat_elite',
   'block_elite',
+  'wolf_elite',
+  'spider_elite',
 ];
 
 export function mobPublicBase(): string {
@@ -30,8 +40,10 @@ export function mobSpriteUrl(id: MobSpriteId): string {
 export function mobDrawSize(kind: string, elite: boolean): number {
   const sizes = (displaySettings as {mobs?: {size?: Record<string, number>; eliteScale?: number}})
     .mobs;
-  const base = sizes?.size?.[kind] ?? (kind === 'boss' ? 120 : 68);
-  if (kind === 'boss') return base;
+  const base =
+    sizes?.size?.[kind] ??
+    (kind === 'bigBoss' ? 200 : kind === 'boss' ? 120 : 68);
+  if (kind === 'boss' || kind === 'bigBoss') return base;
   return Math.round(base * (elite ? (sizes?.eliteScale ?? 1.18) : 1));
 }
 
@@ -59,6 +71,7 @@ export async function loadMobImages(): Promise<Record<string, HTMLImageElement>>
 }
 
 export function mobSpriteKey(kind: string, elite: boolean): MobSpriteId {
+  if (kind === 'bigBoss') return 'bigBoss';
   if (kind === 'boss') return 'boss';
   if (elite) return `${kind}_elite` as MobSpriteId;
   return kind as MobSpriteId;

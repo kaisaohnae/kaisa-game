@@ -1,0 +1,4 @@
+mage 8-dir sprites from:
+Desktop/rotations1 (법사)
+south→down, south-east→downRight, east→right, north-east→upRight,
+north→up, north-west→upLeft, west→left, south-west→downLeft

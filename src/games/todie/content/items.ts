@@ -42,11 +42,22 @@ export function formatGearName(job: JobId, baseName: string): string {
   return pattern.replaceAll('{job}', jobLabel(job)).replaceAll('{name}', baseName);
 }
 
-export function gearImageKey(job: JobId, tier: GearTier, id: string): string {
-  return `${job}:${tier}:${id}`;
+export function gearImageKey(
+  job: JobId,
+  tier: GearTier,
+  id: string,
+  dir?: string,
+): string {
+  return dir ? `${job}:${tier}:${id}:${dir}` : `${job}:${tier}:${id}`;
 }
 
-export function gearPublicPath(job: JobId, tier: GearTier, id: string): string {
+export function gearPublicPath(
+  job: JobId,
+  tier: GearTier,
+  id: string,
+  dir?: string,
+): string {
+  if (dir) return `${gearBase}/${job}/${tier}/${id}_${dir}.png`;
   return `${gearBase}/${job}/${tier}/${id}.png`;
 }
 
@@ -354,25 +365,38 @@ export function itemIconUrl(item: {
   return consumableIconUrl(item.kind);
 }
 
-/** key = `${job}:${tier}:${id}` */
+/** key = `${job}:${tier}:${id}` or with `:dir` for 4-dir weapon overlays */
 export async function loadGearImages(): Promise<Record<string, HTMLImageElement>> {
   const map: Record<string, HTMLImageElement> = {};
   const defs = allGearDefs();
-  await Promise.all(
-    defs.map(
-      (g) =>
-        new Promise<void>((resolve) => {
-          const img = new Image();
-          const key = gearImageKey(g.job, g.tier, g.id);
-          img.onload = () => {
-            map[key] = img;
-            resolve();
-          };
-          img.onerror = () => resolve();
-          img.src = gearPublicPath(g.job, g.tier, g.id);
-        }),
-    ),
-  );
+  const dirs = ['down', 'left', 'right', 'up'] as const;
+
+  const loadOne = (src: string, key: string) =>
+    new Promise<void>((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        map[key] = img;
+        resolve();
+      };
+      img.onerror = () => resolve();
+      img.src = src;
+    });
+
+  const tasks: Promise<void>[] = [];
+  for (const g of defs) {
+    tasks.push(loadOne(gearPublicPath(g.job, g.tier, g.id), gearImageKey(g.job, g.tier, g.id)));
+    if (g.slot === 'weapon') {
+      for (const dir of dirs) {
+        tasks.push(
+          loadOne(
+            gearPublicPath(g.job, g.tier, g.id, dir),
+            gearImageKey(g.job, g.tier, g.id, dir),
+          ),
+        );
+      }
+    }
+  }
+  await Promise.all(tasks);
   return map;
 }
 

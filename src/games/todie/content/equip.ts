@@ -163,8 +163,26 @@ export function putItemInBag(bag: Item[], item: Item): boolean {
   return true;
 }
 
+const TIER_RANK: Record<GearTier, number> = {
+  basic: 1,
+  ascend: 2,
+  unique: 3,
+  hero: 4,
+};
+
+export function tierRank(tier: GearTier | null | undefined): number {
+  if (!tier) return 0;
+  return TIER_RANK[tier] ?? 0;
+}
+
+/** 새 장비가 장착 중보다 높은 등급인지 (빈 슬롯도 더 좋음) */
+export function isBetterGear(incoming: Item, current: Item | null): boolean {
+  if (!current) return true;
+  return tierRank(incoming.tier) > tierRank(current.tier);
+}
+
 /**
- * Pickup: if gear slot is empty and job matches, equip immediately; else bag.
+ * Pickup: empty slot or better-tier gear → auto-equip (old piece goes to bag); else bag.
  */
 export function pickupOrAutoEquip(
   bag: Item[],
@@ -172,24 +190,28 @@ export function pickupOrAutoEquip(
   item: Item,
   job: JobId,
 ): {ok: boolean; autoEquipped: boolean} {
-  if (
-    item.kind === 'gear' &&
-    item.gearSlot &&
-    (!item.job || item.job === job) &&
-    !equipped[item.gearSlot]
-  ) {
-    const wearing = copyItem(item);
-    wearing.qty = 1;
-    equipped[item.gearSlot] = wearing;
-    if (item.qty > 1) {
-      const rest = copyItem(item);
-      rest.qty = item.qty - 1;
-      if (!putItemInBag(bag, rest)) {
-        // keep equipped piece; leftover stays on ground handled by caller
-        return {ok: true, autoEquipped: true};
+  if (item.kind === 'gear' && item.gearSlot && (!item.job || item.job === job)) {
+    const slot = item.gearSlot;
+    const current = equipped[slot];
+    if (isBetterGear(item, current)) {
+      if (current) {
+        const old = copyItem(current);
+        old.qty = 1;
+        if (!putItemInBag(bag, old)) {
+          // 가방 가득 → 교체 불가, 새 템만 가방에
+          return {ok: putItemInBag(bag, item), autoEquipped: false};
+        }
       }
+      const wearing = copyItem(item);
+      wearing.qty = 1;
+      equipped[slot] = wearing;
+      if (item.qty > 1) {
+        const rest = copyItem(item);
+        rest.qty = item.qty - 1;
+        putItemInBag(bag, rest);
+      }
+      return {ok: true, autoEquipped: true};
     }
-    return {ok: true, autoEquipped: true};
   }
   return {ok: putItemInBag(bag, item), autoEquipped: false};
 }

@@ -32,8 +32,13 @@ export function skillsFromBalance(job: JobId): RuntimeSkill[] {
       offset: s.offset,
       dashSpeed: s.dashSpeed,
       invuln: s.invuln,
+      shieldHp: s.shieldHp,
       projectileSpeed: s.projectileSpeed,
       projectileLife: s.projectileLife,
+      projectileCount: s.projectileCount,
+      projectileSpacing: s.projectileSpacing,
+      projectileHitRadius: s.projectileHitRadius,
+      projectileSpread: s.projectileSpread,
       fxColor: s.fxColor,
       fxRadius: s.fxRadius,
     };

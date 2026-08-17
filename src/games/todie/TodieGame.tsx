@@ -26,6 +26,7 @@ import {
   spawnSettings,
   starterGearItem,
   sumEquippedStats,
+  tierMeta,
   toggleEquipFromBag,
   unequipSlot,
   wrongJobColor,
@@ -40,6 +41,8 @@ import {
   type TodieAssetBundle,
 } from './content';
 import {drawJobCharacter, drawSkillSprite} from './render/drawCharacter';
+import {drawDashTrail, drawSkillWorldFx} from './render/skillFx';
+
 import {InventoryDock} from './ui/InventoryDock';
 
 const WORLD = spawnSettings.worldSize ?? 30_000;
@@ -58,6 +61,15 @@ const BOSS_RESPAWN_CD = spawnSettings.bossRespawnCooldownSec ?? 90;
 const BOSS_DROP_COUNT = spawnSettings.bossDropCount ?? 10;
 const BOSS_AGGRO = spawnSettings.bossAggroRange ?? 2800;
 const BOSS_DEAGGRO = spawnSettings.bossDeaggroRange ?? 3200;
+const BIG_BOSS_COUNT = (spawnSettings as {bigBossCount?: number}).bigBossCount ?? 6;
+const BIG_BOSS_RESPAWN_CD =
+  (spawnSettings as {bigBossRespawnCooldownSec?: number}).bigBossRespawnCooldownSec ?? 120;
+const BIG_BOSS_DROP_COUNT =
+  (spawnSettings as {bigBossDropCount?: number}).bigBossDropCount ?? 18;
+const BIG_BOSS_AGGRO =
+  (spawnSettings as {bigBossAggroRange?: number}).bigBossAggroRange ?? 3400;
+const BIG_BOSS_DEAGGRO =
+  (spawnSettings as {bigBossDeaggroRange?: number}).bigBossDeaggroRange ?? 3800;
 const ELITE_CHANCE = spawnSettings.eliteChance ?? 0.12;
 const ELITE_DROP_COUNT = spawnSettings.eliteDropCount ?? 3;
 const NAME_COOKIE = 'todie_char_name';
@@ -84,7 +96,10 @@ type GroundDrop = {
   maxLife: number;
 };
 
-type MobKind = 'slime' | 'bat' | 'block' | 'boss';
+type MobKind = 'slime' | 'bat' | 'block' | 'wolf' | 'spider' | 'boss' | 'bigBoss';
+
+const isAnyBoss = (k: MobKind) => k === 'boss' || k === 'bigBoss';
+const isBigBoss = (k: MobKind) => k === 'bigBoss';
 
 type Mob = {
   id: number;
@@ -111,6 +126,9 @@ type Fx = {
   color: string;
   r?: number;
   skillId?: string;
+  facing?: number;
+  /** procedural world VFX (warrior slash/spin/bash) */
+  worldFx?: boolean;
 };
 
 type Player = {
@@ -130,7 +148,35 @@ type Player = {
   rolling: number;
   invuln: number;
   atkCd: number;
+  /** Remaining swing time (seconds) */
+  swingT: number;
+  swingMax: number;
+  swingKind: string | null;
+  /** Remaining absorb shield HP (mage 보호막) */
+  shieldHp: number;
+  shieldMax: number;
 };
+
+function distPointToSeg(
+  px: number,
+  py: number,
+  ax: number,
+  ay: number,
+  bx: number,
+  by: number,
+) {
+  const abx = bx - ax;
+  const aby = by - ay;
+  const apx = px - ax;
+  const apy = py - ay;
+  const ab2 = abx * abx + aby * aby;
+  if (ab2 < 1e-6) return Math.hypot(apx, apy);
+  let t = (apx * abx + apy * aby) / ab2;
+  t = Math.max(0, Math.min(1, t));
+  const cx = ax + abx * t;
+  const cy = ay + aby * t;
+  return Math.hypot(px - cx, py - cy);
+}
 
 function rand(a: number, b: number) {
   return a + Math.random() * (b - a);
@@ -154,6 +200,27 @@ function canPickupItem(item: Item, job: JobId) {
   return item.job == null || item.job === job;
 }
 
+/** 금연마크처럼 빨간 ○ + ✕ (못 먹는 / 남의 직업 아이템) */
+function drawForbidMark(ctx: CanvasRenderingContext2D, cx: number, cy: number, radius: number) {
+  const color = wrongJobColor();
+  const lw = Math.max(2.2, radius * 0.14);
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lw;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.stroke();
+  const inset = radius * 0.52;
+  ctx.beginPath();
+  ctx.moveTo(cx - inset, cy - inset);
+  ctx.lineTo(cx + inset, cy + inset);
+  ctx.moveTo(cx + inset, cy - inset);
+  ctx.lineTo(cx - inset, cy + inset);
+  ctx.stroke();
+  ctx.restore();
+}
+
 function readNameCookie() {
   if (typeof document === 'undefined') return '';
   const m = document.cookie.match(/(?:^|; )todie_char_name=([^;]*)/);
@@ -163,6 +230,11 @@ function readNameCookie() {
 function writeNameCookie(name: string) {
   const v = encodeURIComponent(name.slice(0, NAME_MAX));
   document.cookie = `${NAME_COOKIE}=${v};path=/;max-age=31536000;SameSite=Lax`;
+}
+
+function clearNameCookie() {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${NAME_COOKIE}=;path=/;max-age=0;SameSite=Lax`;
 }
 
 type SavedGearItem = {
@@ -223,6 +295,11 @@ function writeGearCookie(save: GearSave) {
 function clearGearCookie() {
   if (typeof document === 'undefined') return;
   document.cookie = `${GEAR_COOKIE}=;path=/;max-age=0;SameSite=Lax`;
+}
+
+function clearAllTodieProgress() {
+  clearNameCookie();
+  clearGearCookie();
 }
 
 function readGearCookie(): GearSave | null {
@@ -322,6 +399,13 @@ function confirmExitToMain() {
   }
 }
 
+function confirmFreshStart(wipeRef?: {current: boolean}) {
+  if (!window.confirm('저장한 장비·이름을 모두 지우고 처음부터 시작할까요?')) return;
+  if (wipeRef) wipeRef.current = true;
+  clearAllTodieProgress();
+  window.location.reload();
+}
+
 /** Tiny hash for procedural map tiles */
 function tileSeed(tx: number, ty: number) {
   let n = tx * 374761393 + ty * 668265263;
@@ -351,6 +435,9 @@ export default function TodieGame() {
   const [showRestart, setShowRestart] = useState(false);
   const setShowRestartRef = useRef(setShowRestart);
   setShowRestartRef.current = setShowRestart;
+  const wipeProgressRef = useRef(false);
+  /** 인벤 기본: 최소(접힘) */
+  const [invExpanded, setInvExpanded] = useState(false);
 
   const restartGame = () => {
     window.location.reload();
@@ -369,6 +456,10 @@ export default function TodieGame() {
   useEffect(() => {
     if (!started) return;
     const persist = () => {
+      if (wipeProgressRef.current) {
+        clearAllTodieProgress();
+        return;
+      }
       writeGearCookie(gearSaveFromEquipment(charName, startJob, equippedRef.current));
     };
     const onHide = () => {
@@ -504,6 +595,11 @@ export default function TodieGame() {
       rolling: 0,
       invuln: 0,
       atkCd: 0,
+      swingT: 0,
+      swingMax: 0,
+      swingKind: null,
+      shieldHp: 0,
+      shieldMax: 0,
     };
 
     const skills: RuntimeSkill[] = skillsFromBalance(job);
@@ -519,7 +615,16 @@ export default function TodieGame() {
     let groundDrops: GroundDrop[] = [];
     let nextDropUid = 1;
     let wrongJobToastCd = 0;
-    let projectiles: {x: number; y: number; vx: number; vy: number; life: number; dmg: number; color: string}[] = [];
+    let projectiles: {
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      life: number;
+      dmg: number;
+      color: string;
+      hitR: number;
+    }[] = [];
     let camX = player.x;
     let camY = player.y;
     let camFollow = true;
@@ -532,6 +637,7 @@ export default function TodieGame() {
     /** Absolute gameTime when a world respawn should fire */
     let pendingRespawns: number[] = [];
     let pendingBossRespawns: number[] = [];
+    let pendingBigBossRespawns: number[] = [];
     let moveTarget: {x: number; y: number} | null = null;
     let targetMobId: number | null = null;
     let chaseTarget = false;
@@ -610,7 +716,7 @@ export default function TodieGame() {
       const mb = bal.mobs[k] as {hp: number; speed: number; touchDamage: number};
       const eliteCfg = (bal.mobs as {elite?: {hpMult?: number; speedMult?: number}})
         .elite;
-      const elite = k !== 'boss' && Math.random() < ELITE_CHANCE;
+      const elite = !isAnyBoss(k) && Math.random() < ELITE_CHANCE;
       const hpMult = elite ? (eliteCfg?.hpMult ?? 2.4) : 1;
       const spdMult = elite ? (eliteCfg?.speedMult ?? 1.15) : 1;
       const maxHp = Math.round(mb.hp * hpMult);
@@ -647,12 +753,24 @@ export default function TodieGame() {
       }
     };
 
+    const spawnBigBossesWorld = (count: number) => {
+      for (let i = 0; i < count; i += 1) {
+        const x = rand(margin, WORLD - margin);
+        const y = rand(margin, WORLD - margin);
+        mobs.push(makeMobAt(x, y, 'bigBoss'));
+      }
+    };
+
     const scheduleRespawn = () => {
       pendingRespawns.push(gameTime + RESPAWN_CD);
     };
 
     const scheduleBossRespawn = () => {
       pendingBossRespawns.push(gameTime + BOSS_RESPAWN_CD);
+    };
+
+    const scheduleBigBossRespawn = () => {
+      pendingBigBossRespawns.push(gameTime + BIG_BOSS_RESPAWN_CD);
     };
 
     const pullAggro = (m: Mob) => {
@@ -662,6 +780,7 @@ export default function TodieGame() {
 
     spawnMobsWorld(spawn.initialCount);
     spawnBossesWorld(BOSS_COUNT);
+    spawnBigBossesWorld(BIG_BOSS_COUNT);
 
     const gearPower = () => sumEquippedStats(equippedRef.current);
 
@@ -732,9 +851,45 @@ export default function TodieGame() {
     };
 
     const hurtPlayer = (dmg: number) => {
-      if (player.invuln > 0 || player.rolling > 0) return;
+      if (player.rolling > 0) return;
       const def = gearPower().def;
-      const taken = Math.max(1, Math.round(dmg - def * 0.35));
+      let remaining = Math.max(1, Math.round(dmg - def * 0.35));
+
+      if (player.shieldHp > 0) {
+        const absorbed = Math.min(player.shieldHp, remaining);
+        player.shieldHp -= absorbed;
+        remaining -= absorbed;
+        fx.push({
+          x: player.x,
+          y: player.y - 34,
+          life: 0.55,
+          max: 0.55,
+          text: `막음 ${absorbed}`,
+          color: '#80deea',
+        });
+        if (player.shieldHp <= 0) {
+          player.shieldHp = 0;
+          player.shieldMax = 0;
+          showToast('보호막 파괴!');
+          fx.push({
+            x: player.x,
+            y: player.y,
+            life: 0.35,
+            max: 0.35,
+            color: '#4dd0e1',
+            r: 64,
+            skillId: 'shield-break',
+            worldFx: true,
+          });
+        }
+        if (remaining <= 0) {
+          player.invuln = Math.max(player.invuln, 0.15);
+          return;
+        }
+      }
+
+      if (player.invuln > 0) return;
+      const taken = remaining;
       player.hp = Math.max(0, player.hp - taken);
       player.invuln = 0.55;
       fx.push({
@@ -759,8 +914,13 @@ export default function TodieGame() {
     };
 
     const killMob = (m: Mob) => {
-      const dropN =
-        m.kind === 'boss' ? BOSS_DROP_COUNT : m.elite ? ELITE_DROP_COUNT : 1;
+      const dropN = isBigBoss(m.kind)
+        ? BIG_BOSS_DROP_COUNT
+        : m.kind === 'boss'
+          ? BOSS_DROP_COUNT
+          : m.elite
+            ? ELITE_DROP_COUNT
+            : 1;
       let lastName = '';
       for (let i = 0; i < dropN; i += 1) {
         const loot = draftToItem(rollLootDrop());
@@ -771,7 +931,9 @@ export default function TodieGame() {
       const bossLabel =
         m.kind === 'boss'
           ? ((bal.mobs.boss as {label?: string}).label ?? '보스')
-          : '';
+          : isBigBoss(m.kind)
+            ? (((bal.mobs as {bigBoss?: {label?: string}}).bigBoss?.label) ?? '빅 보스')
+            : '';
       const eliteLabel =
         ((bal.mobs as {elite?: {label?: string}}).elite?.label ?? '정예');
       fx.push({
@@ -779,23 +941,29 @@ export default function TodieGame() {
         y: m.y,
         life: 1.1,
         max: 1.1,
-        text:
-          m.kind === 'boss'
-            ? `${bossLabel} 처치! x${dropN}`
+        text: isAnyBoss(m.kind)
+          ? `${bossLabel} 처치! x${dropN}`
+          : m.elite
+            ? `${eliteLabel} 처치! x${dropN}`
+            : `+${lastName}`,
+        color: isBigBoss(m.kind)
+          ? '#ff1744'
+          : m.kind === 'boss'
+            ? '#ff6d00'
             : m.elite
-              ? `${eliteLabel} 처치! x${dropN}`
-              : `+${lastName}`,
-        color: m.kind === 'boss' ? '#ff6d00' : m.elite ? '#ce93d8' : '#fff59d',
+              ? '#ce93d8'
+              : '#fff59d',
       });
       showToast(
-        m.kind === 'boss'
+        isAnyBoss(m.kind)
           ? `${bossLabel} 처치 · 아이템 ${dropN}개!`
           : m.elite
             ? `${eliteLabel} 처치 · 아이템 ${dropN}개!`
             : `${lastName} 드랍!`,
       );
       mobs = mobs.filter((x) => x.id !== m.id);
-      if (m.kind === 'boss') scheduleBossRespawn();
+      if (isBigBoss(m.kind)) scheduleBigBossRespawn();
+      else if (m.kind === 'boss') scheduleBossRespawn();
       else scheduleRespawn();
       if (targetMobId === m.id) {
         targetMobId = null;
@@ -841,17 +1009,18 @@ export default function TodieGame() {
           continue;
         }
         syncBag();
-        fx.push({
-          x: d.x,
-          y: d.y - 12,
-          life: 0.6,
-          max: 0.6,
-          text: picked.autoEquipped ? `장착 ${d.item.name}` : `+${d.item.name}`,
-          color: d.item.color,
-        });
-        showToast(
-          picked.autoEquipped ? `${d.item.name} 자동 장착!` : `${d.item.name} 획득!`,
-        );
+        // 자동 장착은 머리 위 등급 도트로만 표시 (장착 토스트 생략)
+        if (!picked.autoEquipped) {
+          fx.push({
+            x: d.x,
+            y: d.y - 12,
+            life: 0.6,
+            max: 0.6,
+            text: `+${d.item.name}`,
+            color: d.item.color,
+          });
+          showToast(`${d.item.name} 획득!`);
+        }
       }
       groundDrops = keep;
     };
@@ -881,63 +1050,105 @@ export default function TodieGame() {
       sk.cdLeft = sk.cd;
       const hit = sk.damage + gearPower().atk;
 
-      const pushSkillFx = (x: number, y: number, life = displaySettings.skillFx.life) => {
+      const pushSkillFx = (
+        x: number,
+        y: number,
+        life = displaySettings.skillFx.life,
+        opts?: {worldFx?: boolean; r?: number},
+      ) => {
         fx.push({
           x,
           y,
           life,
           max: life,
           color: sk.fxColor,
-          r: sk.fxRadius,
+          r: opts?.r ?? sk.fxRadius,
           skillId: sk.id,
+          facing: player.facing,
+          worldFx: opts?.worldFx ?? true,
         });
       };
+
+      const swingDur =
+        (displaySettings as {attackSwing?: Record<string, number>}).attackSwing?.[sk.id] ?? 0.28;
+      player.swingKind = sk.id;
+      player.swingMax = swingDur;
+      player.swingT = swingDur;
 
       if (sk.id === 'slash') {
         const offset = sk.offset ?? 36;
         const ax = player.x + Math.cos(player.facing) * offset;
         const ay = player.y + Math.sin(player.facing) * offset;
         damageMobsInCircle(ax, ay, sk.radius ?? 48, hit);
-        pushSkillFx(ax, ay, 0.25);
+        pushSkillFx(ax, ay, 0.32, {r: sk.radius ?? 48});
       } else if (sk.id === 'spin') {
         damageMobsInCircle(player.x, player.y, sk.radius ?? 78, hit);
-        pushSkillFx(player.x, player.y, 0.35);
+        pushSkillFx(player.x, player.y, 0.48, {r: sk.radius ?? 78});
       } else if (sk.id === 'bash') {
         const dash = sk.dashSpeed ?? 520;
         player.vx += Math.cos(player.facing) * dash;
         player.vy += Math.sin(player.facing) * dash;
         player.invuln = Math.max(player.invuln, sk.invuln ?? 0.35);
         const offset = sk.offset ?? 40;
-        damageMobsInCircle(
-          player.x + Math.cos(player.facing) * offset,
-          player.y + Math.sin(player.facing) * offset,
-          sk.radius ?? 55,
-          hit,
-        );
-        pushSkillFx(
-          player.x + Math.cos(player.facing) * offset,
-          player.y + Math.sin(player.facing) * offset,
-          0.3,
-        );
+        const ax = player.x + Math.cos(player.facing) * offset;
+        const ay = player.y + Math.sin(player.facing) * offset;
+        damageMobsInCircle(ax, ay, sk.radius ?? 55, hit);
+        // impact at tip + trail ghosts behind
+        pushSkillFx(ax, ay, 0.38, {r: sk.fxRadius ?? 50});
+        for (let i = 1; i <= 3; i += 1) {
+          const back = offset * 0.35 * i;
+          const life = Math.max(0.12, 0.26 - i * 0.04);
+          fx.push({
+            x: player.x - Math.cos(player.facing) * back,
+            y: player.y - Math.sin(player.facing) * back,
+            life,
+            max: life,
+            color: sk.fxColor,
+            skillId: 'bash-trail',
+            facing: player.facing,
+            worldFx: true,
+          });
+        }
       } else if (sk.id === 'bolt') {
+        // Always fire 3 parallel-ish bolts (clearly separated)
         const spd = sk.projectileSpeed ?? 520;
-        projectiles.push({
-          x: player.x,
-          y: player.y,
-          vx: Math.cos(player.facing) * spd,
-          vy: Math.sin(player.facing) * spd,
-          life: sk.projectileLife ?? 1.4,
-          dmg: hit,
-          color: sk.fxColor,
-        });
-        pushSkillFx(player.x, player.y, 0.2);
+        const count = 3;
+        const spacing = sk.projectileSpacing ?? 34;
+        const hitR = sk.projectileHitRadius ?? 48;
+        const life = sk.projectileLife ?? 1.6;
+        const dirX = Math.cos(player.facing);
+        const dirY = Math.sin(player.facing);
+        const sideX = -dirY;
+        const sideY = dirX;
+        const mid = (count - 1) / 2;
+        for (let i = 0; i < count; i += 1) {
+          const side = (i - mid) * spacing;
+          // tiny fan so outer shots are obvious, still all hit a mid-range target
+          const ang = player.facing + (i - mid) * 0.1;
+          const vx = Math.cos(ang);
+          const vy = Math.sin(ang);
+          projectiles.push({
+            x: player.x + dirX * 32 + sideX * side,
+            y: player.y + dirY * 32 + sideY * side,
+            vx: vx * spd,
+            vy: vy * spd,
+            life,
+            dmg: hit,
+            color: sk.fxColor,
+            hitR,
+          });
+        }
+        pushSkillFx(player.x + dirX * 24, player.y + dirY * 24, 0.18);
       } else if (sk.id === 'nova') {
-        damageMobsInCircle(player.x, player.y, sk.radius ?? 110, hit);
-        pushSkillFx(player.x, player.y, 0.4);
+        const r = sk.radius ?? 190;
+        damageMobsInCircle(player.x, player.y, r, hit);
+        pushSkillFx(player.x, player.y, 0.55, {r: sk.fxRadius ?? r, worldFx: true});
       } else if (sk.id === 'shield') {
-        player.invuln = Math.max(player.invuln, sk.invuln ?? 2.2);
-        pushSkillFx(player.x, player.y, 0.5);
-        showToast('보호막!');
+        const absorb = sk.shieldHp ?? 100;
+        player.shieldHp = absorb;
+        player.shieldMax = absorb;
+        pushSkillFx(player.x, player.y, 0.45);
+        showToast(`보호막 +${absorb}`);
       }
     };
 
@@ -1019,7 +1230,13 @@ export default function TodieGame() {
       let bestD = Infinity;
       for (const m of mobs) {
         const limit =
-          m.kind === 'boss' ? MOB_CLICK_R * 1.8 : m.elite ? MOB_CLICK_R * 1.25 : MOB_CLICK_R;
+          isBigBoss(m.kind)
+            ? MOB_CLICK_R * 2.4
+            : m.kind === 'boss'
+              ? MOB_CLICK_R * 1.8
+              : m.elite
+                ? MOB_CLICK_R * 1.25
+                : MOB_CLICK_R;
         const d = Math.hypot(m.x - wx, m.y - wy);
         if (d <= limit && d < bestD) {
           bestD = d;
@@ -1094,7 +1311,7 @@ export default function TodieGame() {
         chaseTarget = false;
       }
       if (code === 'KeyI') {
-        showToast('인벤은 우측 하단 · 우클릭으로 장착');
+        setInvExpanded((v) => !v);
         return;
       }
       if (code === 'Space' || code === 'ShiftLeft' || code === 'ShiftRight') {
@@ -1169,12 +1386,23 @@ export default function TodieGame() {
       showToast('카메라 추적 ON');
     };
 
+    // hotbar hit boxes (CSS px, match canvas client coords)
+    const hotbarHits: {i: number; x: number; y: number; w: number; h: number}[] = [];
+
     const onCanvasPointerDown = (e: PointerEvent) => {
       if (e.button !== 0) return;
       if (!alive) return;
       const rect = canvas.getBoundingClientRect();
       const sx = e.clientX - rect.left;
       const sy = e.clientY - rect.top;
+
+      for (const h of hotbarHits) {
+        if (sx >= h.x && sx <= h.x + h.w && sy >= h.y && sy <= h.y + h.h) {
+          useItemSlot(h.i);
+          return;
+        }
+      }
+
       const worldX = camX - screenW / 2 + sx;
       const worldY = camY - screenH / 2 + sy;
       const hit = mobAtWorld(worldX, worldY);
@@ -1234,9 +1462,12 @@ export default function TodieGame() {
       const key = mobSpriteKey(m.kind, m.elite);
       const img = mobImages[key];
       const bob =
-        m.kind === 'bat' ? Math.sin(performance.now() / 180 + m.id) * 3 : 0;
-      const pulse =
-        m.kind === 'boss' ? 1 + Math.sin(performance.now() / 180) * 0.035 : 1;
+        m.kind === 'bat' || m.kind === 'spider'
+          ? Math.sin(performance.now() / 180 + m.id) * 3
+          : 0;
+      const pulse = isAnyBoss(m.kind)
+        ? 1 + Math.sin(performance.now() / 180) * (isBigBoss(m.kind) ? 0.05 : 0.035)
+        : 1;
 
       // soft ground shadow
       c.fillStyle = 'rgba(0,0,0,0.3)';
@@ -1252,6 +1483,14 @@ export default function TodieGame() {
         c.beginPath();
         c.arc(0, bob * 0.2, size * 0.55, 0, Math.PI * 2);
         c.fill();
+      } else if (isBigBoss(m.kind)) {
+        const aura = c.createRadialGradient(0, 0, size * 0.2, 0, 0, size * 0.62);
+        aura.addColorStop(0, 'rgba(255, 23, 68, 0.28)');
+        aura.addColorStop(1, 'rgba(255, 23, 68, 0)');
+        c.fillStyle = aura;
+        c.beginPath();
+        c.arc(0, 0, size * 0.6, 0, Math.PI * 2);
+        c.fill();
       }
 
       c.save();
@@ -1263,21 +1502,31 @@ export default function TodieGame() {
         c.drawImage(img, -size / 2, -size / 2, size, size);
       } else {
         // procedural fallback
-        c.fillStyle =
-          m.kind === 'boss'
+        c.fillStyle = isBigBoss(m.kind)
+          ? '#b71c1c'
+          : m.kind === 'boss'
             ? '#e65100'
             : m.kind === 'slime'
-              ? '#66bb6a'
+              ? '#2e7d32'
               : m.kind === 'bat'
-                ? '#7e57c2'
-                : '#8d6e63';
+                ? '#4a148c'
+                : m.kind === 'wolf'
+                  ? '#6d4c41'
+                  : m.kind === 'spider'
+                    ? '#37474f'
+                    : '#5d4037';
         c.beginPath();
         c.ellipse(0, 0, size * 0.35, size * 0.32, 0, 0, Math.PI * 2);
         c.fill();
       }
       c.restore();
 
-      if (m.kind === 'boss') {
+      if (isBigBoss(m.kind)) {
+        c.fillStyle = 'rgba(255, 205, 210, 0.98)';
+        c.font = 'bold 12px "Fredoka", "Nunito", sans-serif';
+        c.textAlign = 'center';
+        c.fillText('BIG', 0, size * 0.48);
+      } else if (m.kind === 'boss') {
         c.fillStyle = 'rgba(255, 224, 130, 0.95)';
         c.font = 'bold 11px "Fredoka", "Nunito", sans-serif';
         c.textAlign = 'center';
@@ -1289,7 +1538,7 @@ export default function TodieGame() {
         c.fillText('정예', 0, size * 0.46);
       }
 
-      const barW = m.kind === 'boss' ? 56 : m.elite ? 40 : 34;
+      const barW = isBigBoss(m.kind) ? 90 : m.kind === 'boss' ? 56 : m.elite ? 40 : 34;
       const barY = -(size * 0.52);
       c.fillStyle = 'rgba(0,0,0,0.55)';
       roundRect(c, -barW / 2 - 1, barY - 1, barW + 2, 7, 3);
@@ -1297,7 +1546,10 @@ export default function TodieGame() {
       c.fillStyle = '#2a2a2a';
       c.fillRect(-barW / 2, barY, barW, 5);
       const hpG = c.createLinearGradient(-barW / 2, 0, barW / 2, 0);
-      if (m.kind === 'boss') {
+      if (isBigBoss(m.kind)) {
+        hpG.addColorStop(0, '#c62828');
+        hpG.addColorStop(1, '#ff5252');
+      } else if (m.kind === 'boss') {
         hpG.addColorStop(0, '#ff6d00');
         hpG.addColorStop(1, '#ffab40');
       } else if (m.elite) {
@@ -1385,8 +1637,10 @@ export default function TodieGame() {
         }
         const bob = Math.sin(performance.now() / 220 + d.uid) * 3;
         const mine = canPickupItem(d.item, player.job);
+        const alreadyOwned = ownsSameUniqueGear(inventory, equippedRef.current, d.item);
+        const blocked = !mine || alreadyOwned;
         const ttlRatio = d.life / d.maxLife;
-        ctx.globalAlpha = mine ? 1 : 0.7;
+        ctx.globalAlpha = 1;
         // shadow
         ctx.fillStyle = 'rgba(0,0,0,0.35)';
         ctx.beginPath();
@@ -1401,44 +1655,23 @@ export default function TodieGame() {
         if (gimg && gimg.complete) {
           ctx.imageSmoothingEnabled = displaySettings.character.imageSmoothing !== false;
           ctx.drawImage(gimg, d.x - sz / 2, d.y - sz / 2 + bob, sz, sz);
-          if (!mine) {
-            ctx.fillStyle = 'rgba(255, 82, 82, 0.35)';
-            ctx.fillRect(d.x - sz / 2, d.y - sz / 2 + bob, sz, sz);
-          }
         } else {
-          ctx.fillStyle = mine ? d.item.color : wrongJobColor();
-          ctx.fillRect(d.x - 8, d.y - 8 + bob, 16, 16);
-          ctx.strokeStyle = '#fff';
-          ctx.strokeRect(d.x - 8.5, d.y - 8.5 + bob, 17, 17);
+          ctx.fillStyle = blocked ? wrongJobColor() : d.item.color;
+          ctx.beginPath();
+          ctx.arc(d.x, d.y + bob, 9, 0, Math.PI * 2);
+          ctx.fill();
         }
-        // tier ring (skipped / dimmed when wrong job — name color carries the signal)
-        if (mine) {
-          if (d.item.tier === 'hero') {
-            ctx.strokeStyle = '#e65100';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(d.x - sz / 2 - 1, d.y - sz / 2 + bob - 1, sz + 2, sz + 2);
-          } else if (d.item.tier === 'unique') {
-            ctx.strokeStyle = '#ffd54f';
-            ctx.lineWidth = 1.5;
-            ctx.strokeRect(d.x - sz / 2 - 1, d.y - sz / 2 + bob - 1, sz + 2, sz + 2);
-          } else if (d.item.tier === 'ascend') {
-            ctx.strokeStyle = '#42a5f5';
-            ctx.lineWidth = 1.5;
-            ctx.strokeRect(d.x - sz / 2 - 1, d.y - sz / 2 + bob - 1, sz + 2, sz + 2);
-          }
-        } else {
-          ctx.strokeStyle = wrongJobColor();
-          ctx.lineWidth = 2;
-          ctx.strokeRect(d.x - sz / 2 - 1, d.y - sz / 2 + bob - 1, sz + 2, sz + 2);
+        if (blocked) {
+          drawForbidMark(ctx, d.x, d.y + bob, sz * 0.38);
         }
-        // ground name (red if wrong job)
+        // ground name (red if blocked)
         if (showNameOnGround() && d.item.name) {
           ctx.font = 'bold 10px sans-serif';
           ctx.textAlign = 'center';
           ctx.lineWidth = 3;
           ctx.strokeStyle = 'rgba(0,0,0,0.65)';
           ctx.strokeText(d.item.name, d.x, d.y - 14 + bob);
-          ctx.fillStyle = mine ? '#fffde7' : wrongJobColor();
+          ctx.fillStyle = blocked ? wrongJobColor() : '#fffde7';
           ctx.fillText(d.item.name, d.x, d.y - 14 + bob);
         }
         // ttl bar
@@ -1451,18 +1684,32 @@ export default function TodieGame() {
       }
 
       for (const p of projectiles) {
-        ctx.fillStyle = p.color;
+        const pr = 11;
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, pr * 2.2);
+        g.addColorStop(0, '#ffffff');
+        g.addColorStop(0.35, p.color);
+        g.addColorStop(1, 'rgba(0,150,255,0)');
+        ctx.fillStyle = g;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 7, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, pr * 2.2, 0, Math.PI * 2);
         ctx.fill();
+        ctx.fillStyle = '#e1f5fe';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, pr * 0.55, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, pr * 0.9, 0, Math.PI * 2);
+        ctx.stroke();
       }
 
+      // damage numbers / non-skill rings only (under character)
       for (const f of fx) {
+        if (f.skillId) continue;
         const a = f.life / f.max;
         ctx.globalAlpha = Math.max(0, a);
-        if (f.skillId) {
-          drawSkillSprite(ctx, jobImages, f.skillId, f.x, f.y, Math.max(0.2, a));
-        } else if (f.r) {
+        if (f.r) {
           ctx.strokeStyle = f.color;
           ctx.lineWidth = 4;
           ctx.beginPath();
@@ -1526,7 +1773,9 @@ export default function TodieGame() {
         ctx.setLineDash([]);
       }
 
-      if (player.invuln > 0) ctx.globalAlpha = 0.55 + 0.45 * Math.sin(performance.now() / 40);
+      if (player.invuln > 0 && player.shieldHp <= 0) {
+        ctx.globalAlpha = 0.55 + 0.45 * Math.sin(performance.now() / 40);
+      }
       const moving =
         Math.hypot(player.vx, player.vy) > 35 ||
         keys.has('KeyW') ||
@@ -1552,8 +1801,149 @@ export default function TodieGame() {
         player.rolling > 0,
         equippedRef.current,
         gearImages,
+        player.swingT > 0 && player.swingKind
+          ? {t: player.swingT / Math.max(0.001, player.swingMax), kind: player.swingKind}
+          : null,
       );
       ctx.globalAlpha = 1;
+
+      // Nickname + equipped gear tier dots above head
+      {
+        const dots: string[] = [];
+        for (const s of EQUIP_SLOTS) {
+          const it = equippedRef.current[s.id];
+          if (!it?.tier) continue;
+          dots.push(tierMeta(it.tier)?.color ?? it.color ?? '#fff');
+          if (dots.length >= 8) break;
+        }
+        const dotsY = player.y - 65;
+        const nameY = dots.length > 0 ? dotsY - 12 : player.y - 58;
+        if (charName) {
+          ctx.font = 'bold 11px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = 'rgba(0,0,0,0.7)';
+          ctx.strokeText(charName, player.x, nameY);
+          ctx.fillStyle = '#fffde7';
+          ctx.fillText(charName, player.x, nameY);
+        }
+        if (dots.length > 0) {
+          const gap = 7;
+          const r = 2.4;
+          const totalW = (dots.length - 1) * gap;
+          const startX = player.x - totalW / 2;
+          for (let i = 0; i < dots.length; i += 1) {
+            const dx = startX + i * gap;
+            ctx.beginPath();
+            ctx.fillStyle = '#000';
+            ctx.globalAlpha = 0.35;
+            ctx.arc(dx, dotsY + 0.8, r + 1.1, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+            ctx.beginPath();
+            ctx.fillStyle = dots[i];
+            ctx.arc(dx, dotsY, r, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(0,0,0,0.55)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Absorb shield ring (above character, no blink)
+      if (player.shieldHp > 0 && player.shieldMax > 0) {
+        const ratio = player.shieldHp / player.shieldMax;
+        const pulse = 0.85 + Math.sin(performance.now() / 220) * 0.15;
+        const baseR = 56 + pulse * 5;
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        // soft fill
+        const glow = ctx.createRadialGradient(player.x, player.y, baseR * 0.2, player.x, player.y, baseR + 10);
+        glow.addColorStop(0, `rgba(128, 222, 234, ${0.12 * ratio})`);
+        glow.addColorStop(0.65, `rgba(77, 208, 225, ${0.2 * ratio})`);
+        glow.addColorStop(1, 'rgba(0, 180, 220, 0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, baseR + 10, 0, Math.PI * 2);
+        ctx.fill();
+        // outer decorative ring
+        ctx.strokeStyle = `rgba(224, 247, 250, ${0.85 * pulse})`;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, baseR + 2, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.strokeStyle = `rgba(0, 188, 212, ${0.75 * pulse})`;
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, baseR - 2, 0, Math.PI * 2);
+        ctx.stroke();
+        // remaining HP arc
+        ctx.strokeStyle = `rgba(178, 235, 242, ${0.95})`;
+        ctx.lineWidth = 3.5;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, baseR + 6, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * ratio);
+        ctx.stroke();
+        // diamonds
+        for (let i = 0; i < 6; i += 1) {
+          const a = (i / 6) * Math.PI * 2 + performance.now() / 900;
+          const dx = player.x + Math.cos(a) * (baseR + 1);
+          const dy = player.y + Math.sin(a) * (baseR + 1);
+          ctx.fillStyle = `rgba(255,255,255,${0.55 + 0.25 * ratio})`;
+          ctx.beginPath();
+          ctx.moveTo(dx, dy - 3);
+          ctx.lineTo(dx + 2.5, dy);
+          ctx.lineTo(dx, dy + 3);
+          ctx.lineTo(dx - 2.5, dy);
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      // Skill VFX above character (spin ring was hidden under the sprite)
+      for (const f of fx) {
+        if (!f.skillId) continue;
+        const a = f.life / f.max;
+        ctx.globalAlpha = Math.max(0, a);
+        if (f.skillId === 'bash-trail') {
+          drawDashTrail(ctx, f.x, f.y, f.facing ?? 0, Math.max(0.15, a));
+        } else if (
+          f.worldFx &&
+          (f.skillId === 'slash' || f.skillId === 'spin' || f.skillId === 'bash' || f.skillId === 'nova')
+        ) {
+          drawSkillWorldFx(ctx, {
+            skillId: f.skillId,
+            x: f.x,
+            y: f.y,
+            progress: a,
+            facing: f.facing,
+            color: f.color,
+            radius: f.r ?? 48,
+          });
+        } else if (f.skillId === 'shield-break') {
+          ctx.strokeStyle = f.color;
+          ctx.lineWidth = 5;
+          ctx.beginPath();
+          ctx.arc(f.x, f.y, (f.r ?? 48) * (1.4 - a * 0.5), 0, Math.PI * 2);
+          ctx.stroke();
+        } else if (jobImages?.skills[f.skillId]) {
+          drawSkillSprite(
+            ctx,
+            jobImages,
+            f.skillId,
+            f.x,
+            f.y,
+            Math.max(0.2, a),
+            displaySettings.skillFx.size,
+            f.facing,
+          );
+        }
+        ctx.globalAlpha = 1;
+      }
+
       ctx.restore();
     };
 
@@ -1577,7 +1967,13 @@ export default function TodieGame() {
       for (const m of mobs) {
         const u = (m.x / WORLD) * miniBox.w;
         const v = (m.y / WORLD) * miniBox.h;
-        if (m.kind === 'boss') {
+        if (isBigBoss(m.kind)) {
+          mctx.fillStyle = '#ff1744';
+          mctx.fillRect(u - 6, v - 6, 12, 12);
+          mctx.strokeStyle = '#ff8a80';
+          mctx.lineWidth = 1.5;
+          mctx.strokeRect(u - 6.5, v - 6.5, 13, 13);
+        } else if (m.kind === 'boss') {
           mctx.fillStyle = '#ff6d00';
           mctx.fillRect(u - 4, v - 4, 8, 8);
           mctx.strokeStyle = '#ffe082';
@@ -1653,6 +2049,9 @@ export default function TodieGame() {
       drawBar('HP', player.hp, player.maxHp, '#e53935');
       drawBar('MP', player.mp, player.maxMp, '#1e88e5');
       drawBar('ST', player.stamina, player.maxStamina, '#43a047');
+      if (player.shieldHp > 0 && player.shieldMax > 0) {
+        drawBar('SH', player.shieldHp, player.shieldMax, '#26c6da');
+      }
 
       ctx.fillStyle = 'rgba(0,0,0,0.4)';
       ctx.fillRect(barX, barY, 220, 44);
@@ -1662,50 +2061,50 @@ export default function TodieGame() {
       ctx.font = '11px sans-serif';
       ctx.fillText(`처치 ${killCount} · I 인벤 · Tab 타겟 · Space 구르기`, barX + 8, barY + 34);
 
-      // hotbar — prefer left shift away from inv; lift only if still no room
-      const slot = 52;
-      const gap = 6;
-      const total = HOTBAR * slot + (HOTBAR - 1) * gap;
-      const invW = Math.min(560, viewW - 24);
-      const invH =
-        viewW <= 900
-          ? Math.min(330, viewH * 0.42)
-          : Math.min(390, Math.max(180, viewH - 100));
-      const invLeft = viewW - 12 - invW;
-      const padLeft = 16;
-      const gapToInv = 14;
-      const maxRight = invLeft - gapToInv;
-      const centerX = (viewW - total) / 2;
-      let hx = centerX;
-      let hy = viewH - 70;
-      if (hx + total > maxRight) {
-        hx = Math.max(padLeft, maxRight - total);
-      }
-      if (hx + total > maxRight) {
-        // inventory too wide (e.g. full-bleed) — raise above it, then recenter
-        hy = Math.max(96, viewH - invH - 12 - slot - 16);
-        hx = centerX;
-      }
-      const iconSz = displaySettings.hotbarIconSize ?? 32;
+      // hotbar 5 — horizontal bottom-right (tablet-friendly size)
+      const slot = viewW < 900 ? 64 : 58;
+      const gap = 10;
+      const totalW = HOTBAR * slot + (HOTBAR - 1) * gap;
+      const hx = Math.max(16, viewW - 14 - totalW);
+      const hy = viewH - 14 - slot;
+      hotbarHits.length = 0;
+      const iconSz = Math.min(displaySettings.hotbarIconSize ?? 32, slot - 16);
       for (let i = 0; i < HOTBAR; i += 1) {
         const x = hx + i * (slot + gap);
-        ctx.fillStyle = 'rgba(0,0,0,0.55)';
-        ctx.fillRect(x, hy, slot, slot);
-        ctx.strokeStyle = i < 3 ? '#ffe082' : 'rgba(255,255,255,0.25)';
-        ctx.lineWidth = i < 3 ? 2 : 1;
-        ctx.strokeRect(x + 0.5, hy + 0.5, slot - 1, slot - 1);
+        const y = hy;
+        hotbarHits.push({i, x, y, w: slot, h: slot});
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        roundRect(ctx, x, y, slot, slot, 12);
+        ctx.fill();
+        ctx.strokeStyle = i < 3 ? '#ffe082' : 'rgba(255,255,255,0.3)';
+        ctx.lineWidth = i < 3 ? 2.5 : 1.5;
+        roundRect(ctx, x + 0.5, y + 0.5, slot - 1, slot - 1, 12);
+        ctx.stroke();
 
         if (i < 3) {
           const sk = skills[i];
-          ctx.fillStyle = sk.cdLeft > 0 ? '#777' : '#fff';
-          ctx.font = 'bold 11px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText(sk.name, x + slot / 2, hy + 22);
-          ctx.font = '10px sans-serif';
-          ctx.fillText(`MP${sk.mp}`, x + slot / 2, hy + 36);
-          if (sk.cdLeft > 0) {
-            ctx.fillStyle = 'rgba(0,0,0,0.55)';
-            ctx.fillRect(x, hy, slot, slot * (sk.cdLeft / sk.cd));
+          if (sk) {
+            const simg = jobImages?.skills[sk.id];
+            if (simg && simg.complete && simg.naturalWidth > 0) {
+              ctx.imageSmoothingEnabled = false;
+              const pad = 10;
+              ctx.globalAlpha = sk.cdLeft > 0 ? 0.45 : 1;
+              ctx.drawImage(simg, x + pad, y + pad - 2, slot - pad * 2, slot - pad * 2 - 4);
+              ctx.globalAlpha = 1;
+            } else {
+              ctx.fillStyle = sk.cdLeft > 0 ? '#9e9e9e' : '#fff';
+              ctx.font = 'bold 12px sans-serif';
+              ctx.textAlign = 'center';
+              ctx.fillText(sk.name, x + slot / 2, y + slot * 0.42);
+            }
+            ctx.fillStyle = '#ffe082';
+            ctx.font = 'bold 10px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(sk.name, x + slot / 2, y + slot - 8);
+            if (sk.cdLeft > 0) {
+              ctx.fillStyle = 'rgba(0,0,0,0.55)';
+              ctx.fillRect(x, y, slot, slot * (sk.cdLeft / sk.cd));
+            }
           }
         } else {
           const it = inventory[i - 3];
@@ -1719,25 +2118,25 @@ export default function TodieGame() {
               ctx.drawImage(
                 cimg,
                 x + (slot - iconSz) / 2,
-                hy + (slot - iconSz) / 2 - 2,
+                y + (slot - iconSz) / 2 - 2,
                 iconSz,
                 iconSz,
               );
             } else {
               ctx.fillStyle = it.color;
-              roundRect(ctx, x + 12, hy + 10, 28, 28, 6);
+              roundRect(ctx, x + 14, y + 12, slot - 28, slot - 28, 8);
               ctx.fill();
             }
             ctx.fillStyle = '#fff';
-            ctx.font = 'bold 12px sans-serif';
+            ctx.font = 'bold 13px sans-serif';
             ctx.textAlign = 'right';
-            ctx.fillText(String(it.qty), x + slot - 6, hy + slot - 8);
+            ctx.fillText(String(it.qty), x + slot - 8, y + slot - 10);
           }
         }
         ctx.fillStyle = '#ffe082';
-        ctx.font = 'bold 11px sans-serif';
+        ctx.font = 'bold 12px sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText(String(i + 1), x + 4, hy + 12);
+        ctx.fillText(String(i + 1), x + 6, y + 16);
       }
 
       if (toastT > 0) {
@@ -1772,6 +2171,8 @@ export default function TodieGame() {
         player.rolling = Math.max(0, player.rolling - dt);
         player.invuln = Math.max(0, player.invuln - dt);
         player.atkCd = Math.max(0, player.atkCd - dt);
+        player.swingT = Math.max(0, player.swingT - dt);
+        if (player.swingT <= 0) player.swingKind = null;
         for (const sk of skills) sk.cdLeft = Math.max(0, sk.cdLeft - dt);
         toastT = Math.max(0, toastT - dt);
         wrongJobToastCd = Math.max(0, wrongJobToastCd - dt);
@@ -1875,9 +2276,17 @@ export default function TodieGame() {
           const dx = player.x - m.x;
           const dy = player.y - m.y;
           const d = Math.hypot(dx, dy) || 1;
-          const aggroR = m.kind === 'boss' ? BOSS_AGGRO : AGGRO_RANGE;
-          const deaggroR = m.kind === 'boss' ? BOSS_DEAGGRO : DEAGGRO_RANGE;
-          const hitR = m.kind === 'boss' ? 50 : m.elite ? 34 : 28;
+          const aggroR = isBigBoss(m.kind)
+            ? BIG_BOSS_AGGRO
+            : m.kind === 'boss'
+              ? BOSS_AGGRO
+              : AGGRO_RANGE;
+          const deaggroR = isBigBoss(m.kind)
+            ? BIG_BOSS_DEAGGRO
+            : m.kind === 'boss'
+              ? BOSS_DEAGGRO
+              : DEAGGRO_RANGE;
+          const hitR = isBigBoss(m.kind) ? 72 : m.kind === 'boss' ? 50 : m.elite ? 34 : 28;
 
           if (!m.aggro && d <= aggroR) {
             pullAggro(m);
@@ -1920,25 +2329,52 @@ export default function TodieGame() {
           pendingBossRespawns.shift();
           spawnBossesWorld(1);
         }
+        while (pendingBigBossRespawns.length > 0 && pendingBigBossRespawns[0] <= gameTime) {
+          pendingBigBossRespawns.shift();
+          spawnBigBossesWorld(1);
+        }
         // safety: if underpopulated and nothing queued, schedule catch-up (normal only)
-        const normalAlive = mobs.filter((m) => m.kind !== 'boss').length;
+        const normalAlive = mobs.filter((m) => !isAnyBoss(m.kind)).length;
         const need =
           (spawn.minAlive ?? 0) - normalAlive - pendingRespawns.length;
         for (let i = 0; i < need; i += 1) scheduleRespawn();
         const bossesAlive = mobs.filter((m) => m.kind === 'boss').length;
         const bossNeed = BOSS_COUNT - bossesAlive - pendingBossRespawns.length;
         for (let i = 0; i < bossNeed; i += 1) scheduleBossRespawn();
+        const bigBossesAlive = mobs.filter((m) => m.kind === 'bigBoss').length;
+        const bigBossNeed =
+          BIG_BOSS_COUNT - bigBossesAlive - pendingBigBossRespawns.length;
+        for (let i = 0; i < bigBossNeed; i += 1) scheduleBigBossRespawn();
 
         projectiles = projectiles.filter((p) => {
+          const ox = p.x;
+          const oy = p.y;
           p.x += p.vx * dt;
           p.y += p.vy * dt;
           p.life -= dt;
+          // mob body ~28–50 + bolt hitR; swept segment prevents tunneling at high speed
+          const hitR = p.hitR ?? 48;
           for (const m of mobs) {
-            if (Math.hypot(m.x - p.x, m.y - p.y) < 22) {
+            const body = isBigBoss(m.kind)
+              ? 60
+              : m.kind === 'boss'
+                ? 42
+                : m.elite
+                  ? 30
+                  : 26;
+            const need = hitR + body;
+            if (distPointToSeg(m.x, m.y, ox, oy, p.x, p.y) < need) {
               pullAggro(m);
               m.hp -= p.dmg;
               m.hurt = 0.2;
-              fx.push({x: m.x, y: m.y - 18, life: 0.45, max: 0.45, text: `-${p.dmg}`, color: '#81d4fa'});
+              fx.push({
+                x: m.x,
+                y: m.y - 18,
+                life: 0.45,
+                max: 0.45,
+                text: `-${p.dmg}`,
+                color: '#81d4fa',
+              });
               if (m.hp <= 0) killMob(m);
               return false;
             }
@@ -1991,9 +2427,18 @@ export default function TodieGame() {
   if (!started) {
     return (
       <div className="todie todie--gate">
-        <button type="button" className="todie__exit" onClick={confirmExitToMain}>
-          게임 종료
-        </button>
+        <div className="todie__top-actions">
+          <button
+            type="button"
+            className="todie__fresh"
+            onClick={() => confirmFreshStart()}
+          >
+            처음부터
+          </button>
+          <button type="button" className="todie__exit" onClick={confirmExitToMain}>
+            게임 종료
+          </button>
+        </div>
         <div className="todie__gate-card">
           <h1>todie</h1>
           <p>
@@ -2071,9 +2516,18 @@ export default function TodieGame() {
     <div className="todie" ref={wrapRef}>
       <canvas className="todie__canvas" ref={canvasRef} />
       <div className="todie__minimap-wrap">
-        <button type="button" className="todie__exit" onClick={confirmExitToMain}>
-          게임 종료
-        </button>
+        <div className="todie__top-actions">
+          <button
+            type="button"
+            className="todie__fresh"
+            onClick={() => confirmFreshStart(wipeProgressRef)}
+          >
+            처음부터
+          </button>
+          <button type="button" className="todie__exit" onClick={confirmExitToMain}>
+            게임 종료
+          </button>
+        </div>
         <canvas className="todie__minimap" ref={miniRef} />
       </div>
       {showRestart && (
@@ -2094,6 +2548,8 @@ export default function TodieGame() {
         charName={charName}
         images={assetsRef.current?.jobs[startJob] ?? null}
         gearImages={assetsRef.current?.gear ?? null}
+        expanded={invExpanded}
+        onToggleExpand={() => setInvExpanded((v) => !v)}
         onMutate={syncBag}
         onToast={(msg) => toastFnRef.current(msg)}
         onToggleEquip={(bagIndex) => {

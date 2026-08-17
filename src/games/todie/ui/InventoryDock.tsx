@@ -48,7 +48,7 @@ function CharPreview({
   );
 }
 
-function ItemIcon({item}: {item: Item}) {
+function ItemIcon({item, forbidden = false}: {item: Item; forbidden?: boolean}) {
   if (item.kind === 'empty') return null;
   const src = itemIconUrl(item);
   const tier = tierMeta(item.tier);
@@ -67,6 +67,7 @@ function ItemIcon({item}: {item: Item}) {
           {tier.label}
         </span>
       )}
+      {forbidden && <span className="todie__forbid-mark" aria-hidden title="사용 불가" />}
     </>
   );
 }
@@ -128,6 +129,8 @@ export function InventoryDock({
   charName,
   images,
   gearImages,
+  expanded,
+  onToggleExpand,
   onMutate,
   onToast,
   onToggleEquip,
@@ -139,6 +142,8 @@ export function InventoryDock({
   charName: string;
   images: LoadedImages | null;
   gearImages: Record<string, HTMLImageElement> | null;
+  expanded: boolean;
+  onToggleExpand: () => void;
   onMutate: () => void;
   onToast: (msg: string) => void;
   onToggleEquip: (bagIndex: number) => void;
@@ -214,16 +219,44 @@ export function InventoryDock({
   };
 
   const power = sumEquippedStats(equipped);
+  const worn = EQUIP_SLOTS.filter((s) => Boolean(equipped[s.id])).length;
+  const bagUsed = bag.filter((it) => it.kind !== 'empty').length;
+
+  if (!expanded) {
+    return (
+      <button
+        type="button"
+        className="todie__inv-fab"
+        onClick={onToggleExpand}
+        onPointerDown={(e) => e.stopPropagation()}
+        title="인벤 열기 (I)"
+        aria-label="인벤 열기"
+      >
+        <span className="todie__inv-fab-icon" aria-hidden />
+        <span className="todie__inv-fab-badge">{bagUsed}</span>
+      </button>
+    );
+  }
 
   return (
     <div
-      className="todie__inv-dock"
+      className="todie__inv-dock is-max"
       onContextMenu={(e) => e.preventDefault()}
       onPointerDown={(e) => e.stopPropagation()}
     >
       {tip &&
         typeof document !== 'undefined' &&
         createPortal(<ItemBubble info={tip.info} x={tip.x} y={tip.y} />, document.body)}
+
+      <button
+        type="button"
+        className="todie__inv-close"
+        onClick={onToggleExpand}
+        title="인벤 닫기 (I)"
+        aria-label="인벤 닫기"
+      >
+        −
+      </button>
 
       <aside className="todie__inv-equip">
         <div className="todie__inv-equip-head">
@@ -245,6 +278,9 @@ export function InventoryDock({
               <span className="todie__tier-badge todie__tier-badge--ascend">전승템</span>
               <span className="todie__tier-badge todie__tier-badge--unique">유일템</span>
               <span className="todie__tier-badge todie__tier-badge--hero">영웅템</span>
+            </div>
+            <div className="todie__inv-toolbar-sub">
+              장비 {worn} · 가방 {bagUsed}
             </div>
           </div>
         </div>
@@ -298,12 +334,13 @@ export function InventoryDock({
           <div className="todie__inv-grid">
             {bag.map((it, i) => {
               const wrongJob = Boolean(it.job && it.job !== job);
+              const blocked = wrongJob;
               return (
                 <div
                   key={`${it.id}-${i}`}
                   className={`todie__slot${dragFrom === i ? ' is-drag' : ''}${
                     over === i ? ' is-over' : ''
-                  }${it.tier ? ` is-tier-${it.tier}` : ''}${wrongJob ? ' is-wrong-job' : ''}`}
+                  }${it.tier ? ` is-tier-${it.tier}` : ''}${blocked ? ' is-blocked' : ''}`}
                   draggable={it.kind !== 'empty'}
                   onMouseEnter={(e) => showTip(it, e.currentTarget)}
                   onMouseLeave={hideTipSoon}
@@ -346,8 +383,8 @@ export function InventoryDock({
                   <span className="todie__slot-idx">{i + 1}</span>
                   {it.kind !== 'empty' && (
                     <>
-                      <ItemIcon item={it} />
-                      <span className={`todie__slot-qty${wrongJob ? ' is-wrong-job' : ''}`}>
+                      <ItemIcon item={it} forbidden={blocked} />
+                      <span className={`todie__slot-qty${blocked ? ' is-blocked' : ''}`}>
                         {it.qty}
                       </span>
                     </>

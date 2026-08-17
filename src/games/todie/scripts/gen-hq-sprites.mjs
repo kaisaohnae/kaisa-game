@@ -194,160 +194,224 @@ function savePublic(rel, px) {
   console.log('wrote public/todie/' + rel);
 }
 
+/** Shared top-down paper-doll anchors (48-space). Face = UP. */
+const L = {
+  cx: 24,
+  cy: 24,
+  headX: 24,
+  headY: 16.2,
+  headR: 7.6,
+  torsoY: 25.2,
+  torsoRx: 10.2,
+  torsoRy: 8.6,
+  handLY: 24.2,
+  handLX: 12.2,
+  handRX: 35.8,
+  handRY: 24.2,
+  handR: 3.4,
+  footLY: 35.2,
+  footLX: 18.4,
+  footRX: 29.6,
+  footRY: 35.2,
+  /** weapon grip sits in right hand */
+  gripX: 35.8,
+  gripY: 22.5,
+  tipY: 2.5,
+};
+
+/** Top-down warrior/mage body — underwear only; gear overlays use same anchors. */
 function bodyBase({pant, leg = 0, roll = false}) {
   const px = blank();
-  const cy = 24 * U + leg * U;
-  const skin = hex('#f0c2a0');
-  const skinD = hex('#d49a78');
-  const skinH = hex('#ffe0c8');
-  const hair = hex('#3d2a1f');
+  const cx = L.cx * U;
+  const cy = L.cy * U;
+  const skin = hex('#f2c4a0');
+  const skinD = hex('#c98a68');
+  const skinH = hex('#ffe6d0');
+  const hair = hex('#3a281c');
+  const hairH = hex('#5c4030');
   const pantC = pant;
-  const pantD = pant.map((v, i) => (i < 3 ? Math.max(0, v - 40) : v));
+  const pantD = pant.map((v, i) => (i < 3 ? Math.max(0, v - 45) : v));
+  const pantH = pant.map((v, i) => (i < 3 ? Math.min(255, v + 35) : v));
+  const lo = leg * 0.85 * U;
 
-  // soft ground shadow
-  softEllipse(px, 23 * U, 38 * U, 11 * U, 3.2 * U, hex('#000000', 0.22), 0.6);
+  // feet (rear) — shoes layer replaces these pads
+  shadeBody(px, L.footLX * U + lo, L.footLY * U, 3.6 * U, 2.3 * U, skinD, skin, skinH);
+  shadeBody(px, L.footRX * U - lo, L.footRY * U, 3.6 * U, 2.3 * U, skinD, skin, skinH);
+  softEllipse(px, L.footLX * U + lo, (L.footLY + 0.6) * U, 3.8 * U, 1.6 * U, pantD, 0.28);
+  softEllipse(px, L.footRX * U - lo, (L.footRY + 0.6) * U, 3.8 * U, 1.6 * U, pantD, 0.28);
 
-  // legs
-  shadeBody(px, 19 * U, cy + 9 * U, 3.2 * U, 5.5 * U, skinD, skin, skinH);
-  shadeBody(px, 27 * U, cy + 9 * U, 3.2 * U, 5.5 * U, skinD, skin, skinH);
+  // hip / underwear disk (armor covers this)
+  shadeBody(px, cx, L.torsoY * U, L.torsoRx * U, L.torsoRy * U, pantD, pantC, pantH);
+  // bare shoulders / upper chest peek (armor has neckline)
+  shadeBody(px, cx, (L.torsoY - 3.2) * U, 8.8 * U, 5.2 * U, skinD, skin, skinH);
+  softEllipse(px, cx - 2.2 * U, (L.torsoY - 4.5) * U, 3.6 * U, 2.4 * U, hex('#ffffff', 0.22), 0.4);
 
-  // pants
-  shadeBody(px, 23 * U, cy + 4.5 * U, 9 * U, 5.5 * U, pantD, pantC, hex('#ffffff', 0.35));
+  // arms connected into hands (gloves sit on hands)
+  softCapsule(px, (L.handLX + 2) * U, (L.handLY - 0.5) * U, (cx - 7) * U, (L.torsoY - 1) * U, 2.4 * U, skinD);
+  softCapsule(px, (L.handLX + 2) * U, (L.handLY - 0.5) * U, (cx - 7) * U, (L.torsoY - 1) * U, 1.6 * U, skin);
+  softCapsule(px, (L.handRX - 2) * U, (L.handRY - 0.5) * U, (cx + 7) * U, (L.torsoY - 1) * U, 2.4 * U, skinD);
+  softCapsule(px, (L.handRX - 2) * U, (L.handRY - 0.5) * U, (cx + 7) * U, (L.torsoY - 1) * U, 1.6 * U, skin);
+  shadeBody(px, L.handLX * U, L.handLY * U, L.handR * U, L.handR * U, skinD, skin, skinH);
+  shadeBody(px, L.handRX * U, L.handRY * U, L.handR * U, L.handR * U, skinD, skin, skinH);
 
-  // torso (underwear)
-  shadeBody(px, 23 * U, cy + 0.5 * U, 8.5 * U, 6.5 * U, skinD, skin, skinH);
-  softEllipse(px, 23 * U, cy - 0.5 * U, 6 * U, 2.2 * U, hex('#ffffff', 0.28), 0.4);
-
-  // arms
-  shadeBody(px, 13.5 * U, cy - 1 * U, 3.4 * U, 6.2 * U, skinD, skin, skinH);
-  shadeBody(px, 32.5 * U, cy - 1 * U, 3.4 * U, 6.2 * U, skinD, skin, skinH);
-
-  // head
-  shadeBody(px, 23 * U, cy - 12 * U, 8.2 * U, 7.6 * U, skinD, skin, skinH);
-  softEllipse(px, 20.2 * U, cy - 13.2 * U, 1.3 * U, 1.6 * U, hex('#2b211c'), 0.25);
-  softEllipse(px, 25.8 * U, cy - 13.2 * U, 1.3 * U, 1.6 * U, hex('#2b211c'), 0.25);
-  softEllipse(px, 20 * U, cy - 13.6 * U, 0.45 * U, 0.45 * U, hex('#ffffff'), 0.2);
-  softEllipse(px, 25.6 * U, cy - 13.6 * U, 0.45 * U, 0.45 * U, hex('#ffffff'), 0.2);
-  softEllipse(px, 23 * U, cy - 10.2 * U, 1.6 * U, 0.9 * U, hex('#e89a8a', 0.7), 0.35);
-
-  // hair
-  softEllipse(px, 23 * U, cy - 17.5 * U, 8 * U, 4.2 * U, hair, 0.25);
-  softEllipse(px, 18 * U, cy - 15 * U, 2.4 * U, 3.5 * U, hair, 0.3);
-  softEllipse(px, 28 * U, cy - 15 * U, 2.4 * U, 3.5 * U, hair, 0.3);
-  softEllipse(px, 21 * U, cy - 18.5 * U, 3 * U, 1.6 * U, hex('#5a4030'), 0.35);
+  // head (helm covers this)
+  shadeBody(px, L.headX * U, L.headY * U, L.headR * U, L.headR * 0.95 * U, skinD, skin, skinH);
+  softEllipse(px, L.headX * U, (L.headY - 4.2) * U, 7.4 * U, 3.4 * U, hair, 0.22);
+  softEllipse(px, (L.headX - 6.2) * U, (L.headY - 1.2) * U, 2.4 * U, 3.8 * U, hair, 0.28);
+  softEllipse(px, (L.headX + 6.2) * U, (L.headY - 1.2) * U, 2.4 * U, 3.8 * U, hair, 0.28);
+  softEllipse(px, L.headX * U, (L.headY - 5.2) * U, 3.2 * U, 1.6 * U, hairH, 0.35);
+  // face toward UP
+  softEllipse(px, (L.headX - 2.6) * U, (L.headY - 1.8) * U, 1.35 * U, 1.55 * U, hex('#2a2018'), 0.2);
+  softEllipse(px, (L.headX + 2.6) * U, (L.headY - 1.8) * U, 1.35 * U, 1.55 * U, hex('#2a2018'), 0.2);
+  softEllipse(px, (L.headX - 2.9) * U, (L.headY - 2.2) * U, 0.45 * U, 0.45 * U, hex('#ffffff'), 0.15);
+  softEllipse(px, (L.headX + 2.3) * U, (L.headY - 2.2) * U, 0.45 * U, 0.45 * U, hex('#ffffff'), 0.15);
+  softEllipse(px, L.headX * U, (L.headY + 1.4) * U, 1.5 * U, 0.85 * U, hex('#e09080', 0.7), 0.3);
 
   if (roll) {
     for (let a = 0; a < 18; a += 1) {
       const ang = (a / 18) * Math.PI * 2;
       softEllipse(
         px,
-        23 * U + Math.cos(ang) * 18 * U,
-        24 * U + Math.sin(ang) * 18 * U,
-        1.6 * U,
-        1.6 * U,
-        hex('#ffcc80', 0.55),
-        0.5,
+        cx + Math.cos(ang) * 15.5 * U,
+        cy + Math.sin(ang) * 15.5 * U,
+        1.5 * U,
+        1.5 * U,
+        hex('#ffcc80', 0.5),
+        0.45,
       );
     }
   }
   return px;
 }
 
+/** Grip in right hand → tip toward UP. */
 function wearStick() {
   const px = blank();
-  softCapsule(px, 35.5 * U, 10 * U, 36.5 * U, 32 * U, 2.2 * U, hex('#8d5a2b'));
-  softCapsule(px, 35.5 * U, 10 * U, 36.5 * U, 32 * U, 1.4 * U, hex('#c4894a'));
-  softEllipse(px, 36 * U, 11 * U, 1.8 * U, 1.8 * U, hex('#e8b878'), 0.3);
-  softEllipse(px, 36 * U, 30 * U, 2 * U, 1.4 * U, hex('#6d4220'), 0.3);
+  const gx = L.gripX * U;
+  const gy = L.gripY * U;
+  softCapsule(px, gx, gy, gx - 0.4 * U, L.tipY * U, 2.15 * U, hex('#6d4220'));
+  softCapsule(px, gx, gy, gx - 0.4 * U, L.tipY * U, 1.35 * U, hex('#c4894a'));
+  softEllipse(px, gx - 0.4 * U, (L.tipY + 1.2) * U, 1.8 * U, 1.8 * U, hex('#e8b878'), 0.25);
+  // grip nub under glove
+  softEllipse(px, gx, gy + 0.8 * U, 2.6 * U, 2.2 * U, hex('#5d4037'), 0.28);
   return px;
 }
 
 function wearSword({hero = false} = {}) {
   const px = blank();
-  const blade = hero ? hex('#ffe082') : hex('#e8eef5');
-  const edge = hero ? hex('#ff9800') : hex('#90a4ae');
-  softCapsule(px, 36 * U, 5 * U, 36 * U, 28 * U, 2.6 * U, edge);
-  softCapsule(px, 36 * U, 5 * U, 36 * U, 28 * U, 1.6 * U, blade);
-  softEllipse(px, 36 * U, 6.5 * U, 2.2 * U, 2.8 * U, hex('#ffffff', 0.85), 0.35);
-  softCapsule(px, 32 * U, 27 * U, 40 * U, 27 * U, 1.8 * U, hex('#6d4c41'));
-  softCapsule(px, 32 * U, 27 * U, 40 * U, 27 * U, 1.1 * U, hex('#a1887f'));
-  softCapsule(px, 36 * U, 28 * U, 36 * U, 34 * U, 1.5 * U, hex('#5d4037'));
+  const gx = L.gripX * U;
+  const gy = L.gripY * U;
+  const tipX = gx - 0.3 * U;
+  const tipY = L.tipY * U;
+  const blade = hero ? hex('#ffe082') : hex('#eceff1');
+  const edge = hero ? hex('#ff9800') : hex('#78909c');
+  softCapsule(px, gx, gy - 1.5 * U, tipX, tipY, 2.7 * U, edge);
+  softCapsule(px, gx, gy - 1.5 * U, tipX, tipY, 1.65 * U, blade);
+  softEllipse(px, tipX, tipY + 1.2 * U, 2.2 * U, 2.6 * U, hex('#ffffff', 0.85), 0.3);
+  // crossguard at hand
+  softCapsule(px, gx - 5.2 * U, gy - 0.2 * U, gx + 5.2 * U, gy - 0.2 * U, 1.7 * U, hex('#5d4037'));
+  softCapsule(px, gx - 5.2 * U, gy - 0.2 * U, gx + 5.2 * U, gy - 0.2 * U, 1.05 * U, hex('#a1887f'));
+  softCapsule(px, gx, gy - 0.2 * U, gx, gy + 4.5 * U, 1.45 * U, hex('#4e342e'));
   if (hero) {
-    glow(px, 36 * U, 10 * U, 6 * U, hex('#ff6d00', 0.35));
-    softEllipse(px, 36 * U, 8 * U, 2.2 * U, 2.2 * U, hex('#ffd54f'), 0.25);
+    glow(px, tipX, tipY + 5 * U, 7 * U, hex('#ff6d00', 0.32));
+    softEllipse(px, tipX, tipY + 4 * U, 2 * U, 2 * U, hex('#ffd54f'), 0.22);
   }
   return px;
 }
 
 function wearStaff({hero = false, crystal = false} = {}) {
   const px = blank();
-  softCapsule(px, 36 * U, 14 * U, 36 * U, 34 * U, 2 * U, hex('#6d4c41'));
-  softCapsule(px, 36 * U, 14 * U, 36 * U, 34 * U, 1.2 * U, hex('#a1887f'));
+  const gx = L.gripX * U;
+  const gy = L.gripY * U;
+  softCapsule(px, gx, gy + 1 * U, gx - 0.3 * U, (L.tipY + 3) * U, 2 * U, hex('#5d4037'));
+  softCapsule(px, gx, gy + 1 * U, gx - 0.3 * U, (L.tipY + 3) * U, 1.15 * U, hex('#a1887f'));
   const gem = hero ? hex('#ff9100') : crystal ? hex('#4fc3f7') : hex('#80deea');
-  glow(px, 36 * U, 9 * U, hero ? 9 * U : 7 * U, [...gem.slice(0, 3), 90]);
-  softEllipse(px, 36 * U, 9 * U, 4.5 * U, 4.5 * U, gem, 0.22);
-  softEllipse(px, 34.5 * U, 7.5 * U, 1.6 * U, 1.6 * U, hex('#ffffff', 0.9), 0.3);
+  const gx2 = gx - 0.3 * U;
+  const gy2 = (L.tipY + 2) * U;
+  glow(px, gx2, gy2, hero ? 9 * U : 7 * U, [...gem.slice(0, 3), 90]);
+  softEllipse(px, gx2, gy2, 4.4 * U, 4.4 * U, gem, 0.2);
+  softEllipse(px, gx2 - 1.4 * U, gy2 - 1.4 * U, 1.4 * U, 1.4 * U, hex('#ffffff', 0.9), 0.28);
   return px;
 }
 
 function wearHead(kind) {
   const px = blank();
+  const hx = L.headX * U;
+  const hy = L.headY * U;
   if (kind === 'cloth') {
-    softEllipse(px, 23 * U, 8.5 * U, 9 * U, 4.5 * U, hex('#78909c'), 0.25);
-    softEllipse(px, 23 * U, 7.5 * U, 8 * U, 3.2 * U, hex('#b0bec5'), 0.25);
-    softEllipse(px, 20 * U, 6.5 * U, 3 * U, 1.4 * U, hex('#eceff1', 0.7), 0.4);
+    // bandana over hair only
+    softEllipse(px, hx, hy - 3.2 * U, 8.2 * U, 4.2 * U, hex('#607d8b'), 0.22);
+    softEllipse(px, hx, hy - 4 * U, 7 * U, 3 * U, hex('#90a4ae'), 0.22);
+    softEllipse(px, hx - 2.2 * U, hy - 5 * U, 2.8 * U, 1.2 * U, hex('#cfd8dc', 0.75), 0.35);
+    softCapsule(px, hx + 5 * U, hy - 1 * U, hx + 8.5 * U, hy + 3 * U, 1.2 * U, hex('#78909c'));
   } else if (kind === 'cap') {
-    softEllipse(px, 23 * U, 8 * U, 8.5 * U, 4.2 * U, hex('#7e57c2'), 0.25);
-    softEllipse(px, 23 * U, 7 * U, 7.5 * U, 3 * U, hex('#b39ddb'), 0.25);
-    softEllipse(px, 29 * U, 10 * U, 3.5 * U, 1.5 * U, hex('#9575cd'), 0.35);
+    softEllipse(px, hx, hy - 2.8 * U, 8 * U, 4.8 * U, hex('#7e57c2'), 0.22);
+    softEllipse(px, hx, hy - 3.8 * U, 6.6 * U, 3.2 * U, hex('#b39ddb'), 0.22);
+    softEllipse(px, hx + 6.5 * U, hy + 0.8 * U, 3.2 * U, 1.5 * U, hex('#9575cd'), 0.3);
   } else if (kind === 'helm') {
-    softEllipse(px, 23 * U, 9 * U, 9 * U, 6.5 * U, hex('#546e7a'), 0.22);
-    softEllipse(px, 23 * U, 8 * U, 8 * U, 5.5 * U, hex('#90a4ae'), 0.2);
-    softCapsule(px, 16 * U, 10 * U, 30 * U, 10 * U, 1.2 * U, hex('#37474f'));
-    softEllipse(px, 23 * U, 4.5 * U, 3.2 * U, 2.4 * U, hex('#5c6bc0'), 0.25);
-    softEllipse(px, 21 * U, 7 * U, 2.5 * U, 1.2 * U, hex('#cfd8dc', 0.75), 0.4);
+    // full helm dome — face slit near top
+    softEllipse(px, hx, hy - 0.4 * U, 8.6 * U, 8.2 * U, hex('#455a64'), 0.2);
+    softEllipse(px, hx, hy - 1.2 * U, 7.4 * U, 7 * U, hex('#90a4ae'), 0.18);
+    softEllipse(px, hx, hy - 4.8 * U, 3.2 * U, 2.4 * U, hex('#5c6bc0'), 0.22);
+    softCapsule(px, hx - 5.5 * U, hy - 1.2 * U, hx + 5.5 * U, hy - 1.2 * U, 1.15 * U, hex('#263238'));
+    softEllipse(px, hx - 2.4 * U, hy - 1.6 * U, 2 * U, 1 * U, hex('#cfd8dc', 0.8), 0.35);
+    softEllipse(px, hx + 2.4 * U, hy - 1.6 * U, 2 * U, 1 * U, hex('#cfd8dc', 0.8), 0.35);
   } else if (kind === 'hat') {
-    softEllipse(px, 23 * U, 12 * U, 13 * U, 3.5 * U, hex('#4527a0'), 0.3);
-    softEllipse(px, 23 * U, 6 * U, 5.5 * U, 7 * U, hex('#7e57c2'), 0.22);
-    softEllipse(px, 23 * U, 2.5 * U, 1.8 * U, 1.8 * U, hex('#ce93d8'), 0.25);
-    softEllipse(px, 21 * U, 5 * U, 2.2 * U, 2 * U, hex('#b39ddb', 0.7), 0.4);
+    softEllipse(px, hx, hy + 1.5 * U, 12 * U, 3.4 * U, hex('#4527a0'), 0.28);
+    softEllipse(px, hx, hy - 3.5 * U, 5.6 * U, 7.2 * U, hex('#7e57c2'), 0.2);
+    softEllipse(px, hx, hy - 8 * U, 1.8 * U, 1.8 * U, hex('#ce93d8'), 0.22);
   } else if (kind === 'crown') {
-    softCapsule(px, 15 * U, 9 * U, 31 * U, 9 * U, 2.4 * U, hex('#ef6c00'));
-    softCapsule(px, 15 * U, 9 * U, 31 * U, 9 * U, 1.5 * U, hex('#ffd54f'));
-    softEllipse(px, 17 * U, 5.5 * U, 2 * U, 2.6 * U, hex('#ffca28'), 0.25);
-    softEllipse(px, 23 * U, 4 * U, 2.4 * U, 3.2 * U, hex('#fff59d'), 0.25);
-    softEllipse(px, 29 * U, 5.5 * U, 2 * U, 2.6 * U, hex('#ffca28'), 0.25);
-    glow(px, 23 * U, 7 * U, 8 * U, hex('#ff6d00', 0.28));
+    softCapsule(px, hx - 7.5 * U, hy - 2.2 * U, hx + 7.5 * U, hy - 2.2 * U, 2.2 * U, hex('#ef6c00'));
+    softCapsule(px, hx - 7.5 * U, hy - 2.2 * U, hx + 7.5 * U, hy - 2.2 * U, 1.35 * U, hex('#ffd54f'));
+    softEllipse(px, hx - 5.5 * U, hy - 5.2 * U, 1.9 * U, 2.5 * U, hex('#ffca28'), 0.22);
+    softEllipse(px, hx, hy - 6.4 * U, 2.2 * U, 3 * U, hex('#fff59d'), 0.22);
+    softEllipse(px, hx + 5.5 * U, hy - 5.2 * U, 1.9 * U, 2.5 * U, hex('#ffca28'), 0.22);
+    glow(px, hx, hy - 3 * U, 7 * U, hex('#ff6d00', 0.25));
   } else if (kind === 'circlet') {
-    softCapsule(px, 15 * U, 9 * U, 31 * U, 9 * U, 1.6 * U, hex('#ce93d8'));
-    softEllipse(px, 23 * U, 7 * U, 2.8 * U, 2.8 * U, hex('#80deea'), 0.22);
-    softEllipse(px, 22 * U, 6 * U, 1 * U, 1 * U, hex('#ffffff'), 0.25);
-    glow(px, 23 * U, 7 * U, 6 * U, hex('#80deea', 0.3));
+    softCapsule(px, hx - 7.2 * U, hy - 2 * U, hx + 7.2 * U, hy - 2 * U, 1.5 * U, hex('#ce93d8'));
+    softEllipse(px, hx, hy - 3.6 * U, 2.6 * U, 2.6 * U, hex('#80deea'), 0.2);
+    glow(px, hx, hy - 3.6 * U, 5.5 * U, hex('#80deea', 0.28));
   }
   return px;
 }
 
+/** Vest only — neckline leaves head free; arm notches leave hands free. */
 function wearArmor(kind) {
   const px = blank();
+  const cx = L.cx * U;
+  const ty = L.torsoY * U;
+  const paint = (d, m, h) => {
+    // main plate below neck
+    shadeBody(px, cx, ty + 0.6 * U, 10.6 * U, 7.8 * U, d, m, h);
+    // shoulders
+    softEllipse(px, cx - 7.5 * U, ty - 3.2 * U, 4.2 * U, 3.2 * U, m, 0.28);
+    softEllipse(px, cx + 7.5 * U, ty - 3.2 * U, 4.2 * U, 3.2 * U, m, 0.28);
+    softEllipse(px, cx - 7.5 * U, ty - 3.2 * U, 3.2 * U, 2.4 * U, h, 0.4);
+    softEllipse(px, cx + 7.5 * U, ty - 3.2 * U, 3.2 * U, 2.4 * U, h, 0.4);
+    // neckline cut (transparent feel via darker inset, not covering head)
+    softEllipse(px, cx, ty - 5.5 * U, 4.5 * U, 2.2 * U, hex('#000000', 0.0), 0.01);
+  };
   if (kind === 'ragged') {
-    shadeBody(px, 23 * U, 20 * U, 10 * U, 8 * U, hex('#5d4037'), hex('#8d6e63'), hex('#bcaaa4'));
+    paint(hex('#4e342e'), hex('#8d6e63'), hex('#bcaaa4'));
+    softEllipse(px, cx - 3 * U, ty + 1 * U, 2.5 * U, 3.5 * U, hex('#6d4c41', 0.55), 0.4);
   } else if (kind === 'blue') {
-    shadeBody(px, 23 * U, 20 * U, 10.5 * U, 8.5 * U, hex('#3949ab'), hex('#5c6bc0'), hex('#9fa8da'));
-    softEllipse(px, 23 * U, 16 * U, 6 * U, 2 * U, hex('#e8eaf6', 0.75), 0.4);
+    paint(hex('#283593'), hex('#5c6bc0'), hex('#9fa8da'));
+    softCapsule(px, cx - 4 * U, ty - 2 * U, cx + 4 * U, ty - 2 * U, 1.1 * U, hex('#e8eaf6', 0.8));
+    softEllipse(px, cx, ty + 1.5 * U, 3.2 * U, 3.2 * U, hex('#7986cb', 0.7), 0.35);
   } else if (kind === 'plain') {
-    shadeBody(px, 23 * U, 21 * U, 10.5 * U, 9.5 * U, hex('#6a1b9a'), hex('#9575cd'), hex('#ce93d8'));
+    paint(hex('#4a148c'), hex('#9575cd'), hex('#ce93d8'));
   } else if (kind === 'arcane') {
-    shadeBody(px, 23 * U, 21 * U, 11 * U, 10 * U, hex('#311b92'), hex('#5e35b1'), hex('#b39ddb'));
-    softEllipse(px, 23 * U, 18 * U, 3 * U, 3 * U, hex('#80deea', 0.85), 0.3);
-    glow(px, 23 * U, 18 * U, 5 * U, hex('#80deea', 0.25));
+    paint(hex('#311b92'), hex('#5e35b1'), hex('#b39ddb'));
+    softEllipse(px, cx, ty + 0.5 * U, 3 * U, 3 * U, hex('#80deea', 0.85), 0.28);
+    glow(px, cx, ty + 0.5 * U, 5 * U, hex('#80deea', 0.22));
   } else if (kind === 'hero_plate') {
-    shadeBody(px, 23 * U, 20 * U, 11 * U, 9 * U, hex('#bf360c'), hex('#ef6c00'), hex('#ffcc80'));
-    softCapsule(px, 17 * U, 15 * U, 29 * U, 15 * U, 1.4 * U, hex('#ffd54f'));
-    glow(px, 23 * U, 18 * U, 8 * U, hex('#ff6d00', 0.3));
+    paint(hex('#bf360c'), hex('#ef6c00'), hex('#ffcc80'));
+    softCapsule(px, cx - 5 * U, ty - 2.2 * U, cx + 5 * U, ty - 2.2 * U, 1.3 * U, hex('#ffd54f'));
+    glow(px, cx, ty, 7 * U, hex('#ff6d00', 0.26));
   } else if (kind === 'hero_robe') {
-    shadeBody(px, 23 * U, 21 * U, 11.5 * U, 10.5 * U, hex('#4a148c'), hex('#7b1fa2'), hex('#e1bee7'));
-    softEllipse(px, 23 * U, 17 * U, 3.5 * U, 3.5 * U, hex('#ff9100'), 0.25);
-    glow(px, 23 * U, 17 * U, 7 * U, hex('#ff6d00', 0.28));
+    paint(hex('#4a148c'), hex('#7b1fa2'), hex('#e1bee7'));
+    softEllipse(px, cx, ty, 3.2 * U, 3.2 * U, hex('#ff9100'), 0.22);
+    glow(px, cx, ty, 6 * U, hex('#ff6d00', 0.24));
   }
   return px;
 }
@@ -356,63 +420,77 @@ function wearGloves(c1, c2 = c1) {
   const px = blank();
   const d1 = c1.map((v, i) => (i < 3 ? Math.max(0, v - 35) : v));
   const d2 = c2.map((v, i) => (i < 3 ? Math.max(0, v - 35) : v));
-  shadeBody(px, 13 * U, 19 * U, 4 * U, 4.2 * U, d1, c1, hex('#ffffff', 0.4));
-  shadeBody(px, 33 * U, 19 * U, 4 * U, 4.2 * U, d2, c2, hex('#ffffff', 0.4));
+  // slightly larger than body hands → covers grip
+  shadeBody(px, L.handLX * U, L.handLY * U, 4.1 * U, 4.1 * U, d1, c1, hex('#ffffff', 0.4));
+  shadeBody(px, L.handRX * U, L.handRY * U, 4.1 * U, 4.1 * U, d2, c2, hex('#ffffff', 0.4));
+  softEllipse(px, L.handLX * U - 0.8 * U, L.handLY * U - 1 * U, 1.4 * U, 1.2 * U, hex('#ffffff', 0.45), 0.4);
+  softEllipse(px, L.handRX * U - 0.8 * U, L.handRY * U - 1 * U, 1.4 * U, 1.2 * U, hex('#ffffff', 0.45), 0.4);
   return px;
 }
 
 function wearShoes(c1) {
   const px = blank();
   const d = c1.map((v, i) => (i < 3 ? Math.max(0, v - 40) : v));
-  shadeBody(px, 18.5 * U, 34 * U, 4.5 * U, 2.8 * U, d, c1, hex('#ffffff', 0.35));
-  shadeBody(px, 27.5 * U, 34 * U, 4.5 * U, 2.8 * U, d, c1, hex('#ffffff', 0.35));
+  shadeBody(px, L.footLX * U, L.footLY * U, 4.4 * U, 2.5 * U, d, c1, hex('#ffffff', 0.35));
+  shadeBody(px, L.footRX * U, L.footRY * U, 4.4 * U, 2.5 * U, d, c1, hex('#ffffff', 0.35));
   return px;
 }
 
 function wearNecklace(c) {
   const px = blank();
-  softCapsule(px, 19 * U, 15.5 * U, 27 * U, 15.5 * U, 0.9 * U, hex('#fff8e1', 0.7));
-  glow(px, 23 * U, 17.5 * U, 4.5 * U, [...c.slice(0, 3), 100]);
-  softEllipse(px, 23 * U, 17.5 * U, 2.6 * U, 2.6 * U, c, 0.22);
-  softEllipse(px, 22 * U, 16.5 * U, 0.9 * U, 0.9 * U, hex('#ffffff'), 0.25);
+  // sits on armor chest, below neckline
+  softCapsule(px, 20 * U, 21.2 * U, 28 * U, 21.2 * U, 0.85 * U, hex('#fff8e1', 0.75));
+  glow(px, L.cx * U, 23.2 * U, 4.2 * U, [...c.slice(0, 3), 100]);
+  softEllipse(px, L.cx * U, 23.2 * U, 2.5 * U, 2.5 * U, c, 0.2);
+  softEllipse(px, L.cx * U - 0.9 * U, 22.3 * U, 0.85 * U, 0.85 * U, hex('#ffffff'), 0.22);
   return px;
 }
 
 function wearEarring(c) {
   const px = blank();
-  for (const x of [15 * U, 31 * U]) {
-    softEllipse(px, x, 11.5 * U, 1.6 * U, 1.6 * U, hex('#ffe082'), 0.25);
-    softEllipse(px, x, 14 * U, 2 * U, 2.4 * U, c, 0.22);
-    softEllipse(px, x - 0.5 * U, 13 * U, 0.7 * U, 0.7 * U, hex('#ffffff'), 0.25);
+  // beside head, below helm rim
+  for (const x of [(L.headX - 8.2) * U, (L.headX + 8.2) * U]) {
+    softEllipse(px, x, (L.headY + 1.5) * U, 1.5 * U, 1.5 * U, hex('#ffe082'), 0.22);
+    softEllipse(px, x, (L.headY + 3.6) * U, 1.9 * U, 2.1 * U, c, 0.2);
+    softEllipse(px, x - 0.4 * U, (L.headY + 2.8) * U, 0.65 * U, 0.65 * U, hex('#ffffff'), 0.22);
   }
   return px;
 }
 
 function wearRing(c) {
   const px = blank();
-  for (const x of [12.5 * U, 33.5 * U]) {
-    softEllipse(px, x, 20.5 * U, 2.2 * U, 2.2 * U, hex('#ffd54f'), 0.25);
-    softEllipse(px, x, 20.5 * U, 1.2 * U, 1.2 * U, hex('#fff8e1'), 0.3);
-    softEllipse(px, x, 20.5 * U, 0.7 * U, 0.7 * U, c, 0.25);
+  // on glove knuckles
+  for (const [x, y] of [
+    [L.handLX, L.handLY],
+    [L.handRX, L.handRY],
+  ]) {
+    softEllipse(px, x * U, (y - 1.2) * U, 1.7 * U, 1.7 * U, hex('#ffd54f'), 0.22);
+    softEllipse(px, x * U, (y - 1.2) * U, 0.95 * U, 0.95 * U, hex('#fff8e1'), 0.28);
+    softEllipse(px, x * U, (y - 1.2) * U, 0.55 * U, 0.55 * U, c, 0.22);
   }
   return px;
 }
 
+/** Slash arc in front (top) — EvoWars-style sweep */
 function skillSlash() {
   const px = blank();
-  for (let i = 0; i < 22; i += 1) {
-    const t = i / 21;
+  const cx = 24 * U;
+  const cy = 24 * U;
+  for (let i = 0; i < 28; i += 1) {
+    const t = i / 27;
+    const ang = -Math.PI * 0.75 + t * Math.PI * 1.5;
+    const rr = 14 * U;
     softEllipse(
       px,
-      (8 + t * 30) * U,
-      (34 - t * 24) * U,
-      (2.2 - t) * U,
-      (2.2 - t) * U,
-      hex(i % 2 ? '#fff59d' : '#ffb74d', 0.85),
+      cx + Math.cos(ang) * rr,
+      cy + Math.sin(ang) * rr - 2 * U,
+      (2.6 - t * 1.2) * U,
+      (2.6 - t * 1.2) * U,
+      hex(i % 2 ? '#fff59d' : '#ffb74d', 0.88),
       0.45,
     );
   }
-  glow(px, 24 * U, 20 * U, 14 * U, hex('#ff9800', 0.25));
+  glow(px, cx, cy - 6 * U, 12 * U, hex('#ff9800', 0.28));
   return px;
 }
 
@@ -434,11 +512,12 @@ function skillSpin() {
   return px;
 }
 
+/** Bash thrust forward (up) */
 function skillBash() {
   const px = blank();
-  softCapsule(px, 6 * U, 23 * U, 26 * U, 23 * U, 4 * U, hex('#ff9800', 0.85));
-  softEllipse(px, 32 * U, 23 * U, 8 * U, 8 * U, hex('#ffe082', 0.9), 0.35);
-  glow(px, 28 * U, 23 * U, 14 * U, hex('#ff6d00', 0.35));
+  softCapsule(px, 24 * U, 28 * U, 24 * U, 8 * U, 4.2 * U, hex('#ff9800', 0.85));
+  softEllipse(px, 24 * U, 5 * U, 8 * U, 8 * U, hex('#ffe082', 0.9), 0.35);
+  glow(px, 24 * U, 10 * U, 14 * U, hex('#ff6d00', 0.35));
   return px;
 }
 

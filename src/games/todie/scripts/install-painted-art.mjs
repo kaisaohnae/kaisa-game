@@ -330,41 +330,13 @@ function nudge(px, dy) {
 }
 
 console.log('Installing painted HQ art (v2, chroma key)…');
-const warrior = processBody('warrior-v2.png');
-saveJob('warrior', 'idle', warrior);
-saveJob('warrior', 'walk', nudge(warrior, 4));
-saveJob('warrior', 'roll', nudge(warrior, -3));
-
-const mage = processBody('mage-v2.png');
-saveJob('mage', 'idle', mage);
-saveJob('mage', 'walk', nudge(mage, 4));
-saveJob('mage', 'roll', nudge(mage, -3));
+// 4-dir pixel bodies come from gen-dir-sprites — do not overwrite with front-view paints.
+console.log('skip bodies (4-dir from gen-dir-sprites)');
 
 saveItem('potion', processIcon('potion-v2.png'));
 saveItem('mana', processIcon('mana-v2.png'));
 
-function saveMob(name, px) {
-  const out = path.join(PUBLIC, 'mobs', `${name}.png`);
-  fs.mkdirSync(path.dirname(out), {recursive: true});
-  fs.writeFileSync(out, encodePng(px, OUT, OUT));
-  console.log('mob', name);
-}
+// Mobs come from gen-mobs.mjs (fiercer pixel art) — do not overwrite.
+console.log('skip mobs (use npm run todie:mobs)');
 
-const mobFiles = [
-  ['slime', 'slime-v2.png'],
-  ['bat', 'bat-v2.png'],
-  ['block', 'block-v2.png'],
-  ['boss', 'boss-v2.png'],
-  ['slime_elite', 'slime-elite-v2.png'],
-  ['bat_elite', 'bat-elite-v2.png'],
-  ['block_elite', 'block-elite-v2.png'],
-];
-for (const [id, file] of mobFiles) {
-  if (!fs.existsSync(path.join(ASSETS, file))) {
-    console.warn('missing mob source', file);
-    continue;
-  }
-  saveMob(id, processIcon(file));
-}
-
-console.log('Done bodies + consumables + mobs.');
+console.log('Done bodies + consumables.');

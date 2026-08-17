@@ -2,11 +2,10 @@ import spawnJson from '../settings/spawn.json';
 
 export const spawnSettings = spawnJson;
 
-export function pickSpawnKind(): 'slime' | 'bat' | 'block' {
-  const entries = Object.entries(spawnJson.kindWeights) as [
-    'slime' | 'bat' | 'block',
-    number,
-  ][];
+export type SpawnMobKind = 'slime' | 'bat' | 'block' | 'wolf' | 'spider';
+
+export function pickSpawnKind(): SpawnMobKind {
+  const entries = Object.entries(spawnJson.kindWeights) as [SpawnMobKind, number][];
   const total = entries.reduce((s, [, w]) => s + w, 0);
   let r = Math.random() * total;
   for (const [k, w] of entries) {

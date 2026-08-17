@@ -5,8 +5,8 @@
   "wrongJobToastCooldown": 1.2,
   "alwaysDrop": true,
   "rolls": {
-    "gearChance": 0.34,
-    "consumableChance": 0.66
+    "gearChance": 0.52,
+    "consumableChance": 0.48
   },
   "jobWeights": {
     "warrior": 50,

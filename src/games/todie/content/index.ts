@@ -6,7 +6,7 @@ export {
   jobSpeed,
   skillsFromBalance,
 } from './settings';
-export {JOB_ART, loadJobImages} from './jobAssets';
+export {JOB_ART, loadJobImages, facingToCardinal, CARDINAL_DIRS} from './jobAssets';
 export {
   itemSettings,
   dropSettings,
@@ -45,9 +45,11 @@ export {
   ownsSameUniqueGear,
   alreadyOwnedToast,
   isUniqueOwnGearSlot,
+  tierRank,
+  isBetterGear,
 } from './equip';
 export type {GearSlot, Item, Equipment, ItemKind} from './equip';
 export {preloadAllTodieAssets} from './preload';
-export type {JobId, ActionId, RuntimeSkill, SkillBalance} from './types';
+export type {JobId, ActionId, CardinalDir, RuntimeSkill, SkillBalance} from './types';
 export type {LoadedImages} from './jobAssets';
 export type {TodieAssetBundle} from './preload';
