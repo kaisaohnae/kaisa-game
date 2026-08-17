@@ -16,6 +16,12 @@ export {
   gearIconUrl,
   consumableIconUrl,
   itemIconUrl,
+  formatGearName,
+  wrongJobColor,
+  showNameOnGround,
+  buildItemHelp,
+  gearStatsFor,
+  sumEquippedStats,
   gearImageKey,
   gearPublicPath,
   tierMeta,
@@ -24,7 +30,9 @@ export {
   draftToItem,
 } from './items';
 export {spawnSettings, pickSpawnKind} from './spawn';
-export type {GearDef, LootItemDraft, GearTier} from './items';
+export {loadMobImages, mobSpriteKey, mobDrawSize} from './mobs';
+export type {MobSpriteId} from './mobs';
+export type {GearDef, LootItemDraft, GearTier, ItemHelpInfo, GearStats} from './items';
 export {
   EQUIP_SLOTS,
   emptyEquipment,
@@ -33,6 +41,9 @@ export {
   toggleEquipFromBag,
   unequipSlot,
   clearItem,
+  ownsSameUniqueGear,
+  alreadyOwnedToast,
+  isUniqueOwnGearSlot,
 } from './equip';
 export type {GearSlot, Item, Equipment, ItemKind} from './equip';
 export {preloadAllTodieAssets} from './preload';

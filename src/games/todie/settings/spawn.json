@@ -1,14 +1,22 @@
-{
-  "initialCount": 280,
-  "minAlive": 240,
-  "respawnCooldownSec": 30,
-  "worldMargin": 80,
-  "aggroRange": 2000,
-  "deaggroRange": 2200,
-  "kinds": ["slime", "bat", "block"],
-  "kindWeights": {
-    "slime": 45,
-    "bat": 35,
-    "block": 20
-  }
-}
+{
+  "worldSize": 30000,
+  "initialCount": 280,
+  "minAlive": 240,
+  "respawnCooldownSec": 30,
+  "worldMargin": 80,
+  "aggroRange": 2000,
+  "deaggroRange": 2200,
+  "bossCount": 5,
+  "bossRespawnCooldownSec": 90,
+  "bossDropCount": 10,
+  "bossAggroRange": 2800,
+  "bossDeaggroRange": 3200,
+  "eliteChance": 0.12,
+  "eliteDropCount": 3,
+  "kinds": ["slime", "bat", "block"],
+  "kindWeights": {
+    "slime": 45,
+    "bat": 35,
+    "block": 20
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "note": "기본템 자주 / 유일템 중간 / 영웅템 희귀",
+  "note": "드랍 확률·직업비중·슬롯비중. 등급 비중은 items.json tiers.dropWeight 사용",
   "groundTtlSec": 180,
   "pickupRadius": 42,
   "wrongJobToastCooldown": 1.2,
@@ -8,15 +8,14 @@
     "gearChance": 0.34,
     "consumableChance": 0.66
   },
+  "jobWeights": {
+    "warrior": 50,
+    "mage": 50
+  },
   "consumableWeights": {
     "potion": 48,
     "mana": 40,
     "scroll": 12
-  },
-  "tierWeights": {
-    "basic": 58,
-    "unique": 32,
-    "hero": 10
   },
   "slotWeights": {
     "weapon": 14,

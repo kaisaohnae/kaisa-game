@@ -60,6 +60,11 @@ export function drawJobCharacter(
   ctx.save();
   applyPixelScale(ctx);
   ctx.translate(x, y);
+  // ground shadow stays world-aligned
+  ctx.fillStyle = 'rgba(0,0,0,0.28)';
+  ctx.beginPath();
+  ctx.ellipse(0, size * 0.22, size * 0.28, size * 0.1, 0, 0, Math.PI * 2);
+  ctx.fill();
   ctx.rotate(facing + char.facingOffsetRad);
   if (rollingSpin) ctx.rotate(performance.now() / 40);
   if (img && img.complete && img.naturalWidth > 0) {
@@ -82,13 +87,21 @@ export function drawJobPreview(
   gearImages?: Record<string, HTMLImageElement> | null,
 ) {
   ctx.clearRect(0, 0, w, h);
-  ctx.fillStyle = '#0f1512';
+  const g = ctx.createRadialGradient(w * 0.45, h * 0.35, 8, w * 0.5, h * 0.55, w * 0.75);
+  g.addColorStop(0, '#2a241c');
+  g.addColorStop(0.55, '#161310');
+  g.addColorStop(1, '#0a0908');
+  ctx.fillStyle = g;
   ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = 'rgba(255, 224, 130, 0.06)';
+  ctx.beginPath();
+  ctx.ellipse(w * 0.5, h * 0.82, w * 0.32, h * 0.08, 0, 0, Math.PI * 2);
+  ctx.fill();
   applyPixelScale(ctx);
   const img = images?.actions.idle;
-  const size = Math.min(w, h) * 0.78;
+  const size = Math.min(w, h) * 0.86;
   const ox = (w - size) / 2;
-  const oy = (h - size) / 2 + 4;
+  const oy = (h - size) / 2 + 2;
   if (img && img.complete && img.naturalWidth > 0) {
     ctx.drawImage(img, ox, oy, size, size);
   } else {

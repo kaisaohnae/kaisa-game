@@ -5,7 +5,9 @@
   overflow: hidden;
   font-family: Fredoka, Nunito, 'Segoe UI', sans-serif;
   user-select: none;
+  -webkit-user-select: none;
   touch-action: none;
+  overscroll-behavior: none;
   /* cute sword cursor — hotspot near tip */
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M6 26l4-4 2 2-4 4-2-2z' fill='%235d4037'/%3E%3Cpath d='M9 23L22 10l3 3L12 26z' fill='%23b0bec5' stroke='%233e2723' stroke-width='1.5'/%3E%3Cpath d='M21 9l4 4 3-7z' fill='%23ffe082' stroke='%233e2723' stroke-width='1.2'/%3E%3Ccircle cx='24.5' cy='7.5' r='2.2' fill='%23ff8a65'/%3E%3C/svg%3E") 6 26, crosshair;
 }
@@ -207,6 +209,9 @@
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
   pointer-events: auto;
   cursor: default;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .todie__inv-equip {
@@ -244,12 +249,116 @@
   color: #ffe082;
 }
 
+.todie__power-mini {
+  margin-top: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #a5d6a7;
+  letter-spacing: -0.02em;
+}
+
+.todie__item-bubble {
+  position: fixed;
+  z-index: 60;
+  width: max-content;
+  max-width: min(240px, calc(100vw - 24px));
+  padding: 10px 12px 12px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #2a241c 0%, #161310 100%);
+  border: 1.5px solid rgba(255, 224, 130, 0.55);
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(0, 0, 0, 0.35);
+  color: #cfd8dc;
+  font-size: 11px;
+  line-height: 1.35;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 12px));
+  animation: todie-bubble-in 0.12s ease-out;
+}
+
+.todie__item-bubble.is-locked {
+  border-color: rgba(255, 82, 82, 0.65);
+  background: linear-gradient(180deg, #2a1616 0%, #1a1010 100%);
+}
+
+.todie__item-bubble-tail {
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  background: #161310;
+  border-right: 1.5px solid rgba(255, 224, 130, 0.55);
+  border-bottom: 1.5px solid rgba(255, 224, 130, 0.55);
+  transform: rotate(45deg);
+}
+
+.todie__item-bubble.is-locked .todie__item-bubble-tail {
+  border-color: rgba(255, 82, 82, 0.65);
+  background: #1a1010;
+}
+
+.todie__item-bubble-title {
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  color: #ffe082;
+  word-break: keep-all;
+}
+
+.todie__item-bubble-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin: 3px 0;
+}
+
+.todie__item-bubble-row span {
+  color: #90a4ae;
+  flex-shrink: 0;
+  font-size: 10px;
+}
+
+.todie__item-bubble-row strong {
+  text-align: right;
+  font-weight: 700;
+  color: #eceff1;
+  font-size: 10px;
+  word-break: keep-all;
+}
+
+.todie__item-bubble-row strong.is-bad {
+  color: #ff5252;
+}
+
+.todie__item-bubble-desc {
+  margin: 7px 0 0;
+  font-size: 10px;
+  color: #b0bec5;
+  line-height: 1.4;
+}
+
+@keyframes todie-bubble-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% - 4px));
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, calc(-100% - 12px));
+  }
+}
+
 .todie__char-preview {
-  width: 72px;
-  height: 76px;
-  border-radius: 8px;
-  background: #0f1512;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 78px;
+  height: 82px;
+  border-radius: 12px;
+  background: radial-gradient(circle at 40% 30%, #2a241c 0%, #12100e 70%);
+  border: 1px solid rgba(255, 224, 130, 0.28);
+  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.45);
 }
 
 .todie__equip-grid {
@@ -260,10 +369,12 @@
 
 .todie__equip-slot {
   position: relative;
-  min-height: 48px;
-  border-radius: 8px;
-  border: 1px dashed rgba(255, 255, 255, 0.2);
-  background: #12100e;
+  min-height: 52px;
+  border-radius: 10px;
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  background:
+    radial-gradient(circle at 50% 40%, rgba(255, 224, 130, 0.08), transparent 65%),
+    #12100e;
   color: #90a4ae;
   font-family: inherit;
   cursor: pointer;
@@ -271,11 +382,20 @@
   align-items: center;
   justify-content: center;
   padding: 4px;
+  overflow: hidden;
+  touch-action: manipulation;
 }
 
 .todie__equip-slot.has-item {
   border-style: solid;
-  border-color: rgba(255, 224, 130, 0.45);
+  border-color: rgba(255, 224, 130, 0.5);
+  box-shadow: inset 0 0 12px rgba(255, 224, 130, 0.08);
+}
+
+.todie__equip-slot .todie__slot-icon-img {
+  width: 78%;
+  height: 78%;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.45));
 }
 
 .todie__equip-label {
@@ -317,6 +437,7 @@
   overflow-x: hidden;
   padding-right: 6px;
   overscroll-behavior: contain;
+  touch-action: pan-y;
   scrollbar-width: thin;
   scrollbar-color: #c9a227 transparent;
 }
@@ -324,6 +445,7 @@
 .todie__inv-equip {
   scrollbar-width: thin;
   scrollbar-color: #c9a227 transparent;
+  touch-action: pan-y;
 }
 
 /* game-style scrollbar (Chromium / Safari) */
@@ -391,8 +513,10 @@
 
 .todie__slot {
   aspect-ratio: 1;
-  border-radius: 7px;
-  background: #151210;
+  border-radius: 9px;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.06), transparent 60%),
+    #151210;
   border: 1px solid rgba(255, 255, 255, 0.12);
   position: relative;
   cursor: grab;
@@ -400,6 +524,8 @@
   align-items: center;
   justify-content: center;
   min-height: 36px;
+  overflow: hidden;
+  touch-action: manipulation;
 }
 
 .todie__slot:active {
@@ -424,11 +550,12 @@
 }
 
 .todie__slot-icon-img {
-  width: 70%;
-  height: 70%;
+  width: 78%;
+  height: 78%;
   object-fit: contain;
   image-rendering: auto;
   pointer-events: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 }
 
 .todie__slot-qty {
@@ -440,6 +567,18 @@
   color: #fff;
   text-shadow: 0 1px 2px #000;
   pointer-events: none;
+}
+
+.todie__slot.is-wrong-job {
+  box-shadow: inset 0 0 0 2px rgba(255, 82, 82, 0.85) !important;
+}
+
+.todie__slot.is-wrong-job .todie__slot-icon-img {
+  filter: sepia(0.4) saturate(2.2) hue-rotate(-35deg) brightness(0.95);
+}
+
+.todie__slot-qty.is-wrong-job {
+  color: #ff5252;
 }
 
 .todie__slot-idx {
@@ -486,26 +625,35 @@
   box-shadow: inset 0 0 0 1px rgba(176, 190, 197, 0.55);
 }
 
+.todie__slot.is-tier-ascend,
+.todie__equip-slot.is-tier-ascend {
+  box-shadow: inset 0 0 0 1.5px rgba(66, 165, 245, 0.85);
+}
+
 .todie__slot.is-tier-unique,
 .todie__equip-slot.is-tier-unique {
-  box-shadow: inset 0 0 0 1.5px rgba(79, 195, 247, 0.75);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 213, 79, 0.9);
 }
 
 .todie__slot.is-tier-hero,
 .todie__equip-slot.is-tier-hero {
-  box-shadow: inset 0 0 0 2px rgba(255, 213, 79, 0.9);
+  box-shadow: inset 0 0 0 2px rgba(230, 81, 0, 0.95);
 }
 
 .todie__tier-badge--basic {
   color: #b0bec5;
 }
 
+.todie__tier-badge--ascend {
+  color: #42a5f5;
+}
+
 .todie__tier-badge--unique {
-  color: #4fc3f7;
+  color: #ffd54f;
 }
 
 .todie__tier-badge--hero {
-  color: #ffd54f;
+  color: #e65100;
 }
 
 .todie__minimap.is-disabled {
@@ -533,7 +681,7 @@
     bottom: 8px;
   }
   .todie__inv-equip {
-    width: 150px;
+    width: 168px;
   }
   .todie__inv-grid {
     grid-template-columns: repeat(6, 1fr);

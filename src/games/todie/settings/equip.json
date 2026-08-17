@@ -10,5 +10,7 @@
     { "id": "earring_r", "label": "귀걸이(오른)", "group": "accessory" },
     { "id": "ring_l", "label": "반지(왼)", "group": "accessory" },
     { "id": "ring_r", "label": "반지(오른)", "group": "accessory" }
-  ]
+  ],
+  "uniqueOwnGroups": ["armor", "weapon"],
+  "alreadyOwnedToast": "이미 가지고 있는 장비예요"
 }

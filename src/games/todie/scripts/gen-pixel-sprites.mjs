@@ -357,11 +357,12 @@ saveGear('warrior', 'basic', 'ragged_vest', wearArmor('ragged'));
 saveGear('warrior', 'basic', 'wrap_gloves', wearGloves(C.Br));
 saveGear('warrior', 'basic', 'straw_shoes', wearShoes(C.Br));
 
-saveGear('warrior', 'unique', 'iron_sword', wearSword(false));
-saveGear('warrior', 'unique', 'knight_helm', wearHead('helm'));
-saveGear('warrior', 'unique', 'blue_plate', wearArmor('blue'));
-saveGear('warrior', 'unique', 'iron_gauntlets', wearGloves(C.S, C.Sd));
-saveGear('warrior', 'unique', 'march_boots', wearShoes(C.Sd));
+saveGear('warrior', 'ascend', 'iron_sword', wearSword(false));
+saveGear('warrior', 'ascend', 'knight_helm', wearHead('helm'));
+saveGear('warrior', 'ascend', 'blue_plate', wearArmor('blue'));
+saveGear('warrior', 'ascend', 'iron_gauntlets', wearGloves(C.S, C.Sd));
+saveGear('warrior', 'ascend', 'march_boots', wearShoes(C.Sd));
+
 saveGear('warrior', 'unique', 'courage_pendant', wearNecklace(C.Gold));
 saveGear('warrior', 'unique', 'battle_ear_l', wearEarring('l', C.Or));
 saveGear('warrior', 'unique', 'battle_ear_r', wearEarring('r', C.Y));
@@ -381,11 +382,12 @@ saveGear('mage', 'basic', 'plain_robe', wearArmor('plain'));
 saveGear('mage', 'basic', 'soft_gloves', wearGloves(C.Ph));
 saveGear('mage', 'basic', 'cloth_shoes', wearShoes(C.Pd));
 
-saveGear('mage', 'unique', 'crystal_staff', wearStaff(false));
-saveGear('mage', 'unique', 'wizard_hat', wearHead('hat'));
-saveGear('mage', 'unique', 'arcane_robe', wearArmor('robe'));
-saveGear('mage', 'unique', 'silk_gloves', wearGloves(C.Ph, C.P));
-saveGear('mage', 'unique', 'mana_boots', wearShoes(C.P));
+saveGear('mage', 'ascend', 'crystal_staff', wearStaff(false));
+saveGear('mage', 'ascend', 'wizard_hat', wearHead('hat'));
+saveGear('mage', 'ascend', 'arcane_robe', wearArmor('robe'));
+saveGear('mage', 'ascend', 'silk_gloves', wearGloves(C.Ph, C.P));
+saveGear('mage', 'ascend', 'mana_boots', wearShoes(C.P));
+
 saveGear('mage', 'unique', 'wisdom_pendant', wearNecklace(C.Gem));
 saveGear('mage', 'unique', 'mana_ear_l', wearEarring('l', C.G));
 saveGear('mage', 'unique', 'mana_ear_r', wearEarring('r', C.Gem));

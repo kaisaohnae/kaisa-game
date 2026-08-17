@@ -16,7 +16,7 @@
         "rollSpeed": 720
       },
       "mage": {
-        "label": "마법사",
+        "label": "법사",
         "speed": 480,
         "rollInvuln": 0.32,
         "rollDuration": 0.28,
@@ -106,6 +106,13 @@
   "mobs": {
     "slime": { "hp": 90, "speed": 55, "touchDamage": 18 },
     "bat": { "hp": 70, "speed": 95, "touchDamage": 18 },
-    "block": { "hp": 120, "speed": 40, "touchDamage": 28 }
+    "block": { "hp": 120, "speed": 40, "touchDamage": 28 },
+    "boss": { "hp": 2200, "speed": 70, "touchDamage": 45, "label": "필드 보스" },
+    "elite": {
+      "hpMult": 2.4,
+      "speedMult": 1.15,
+      "damageMult": 1.7,
+      "label": "정예"
+    }
   }
 }

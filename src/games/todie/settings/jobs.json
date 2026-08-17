@@ -9,7 +9,7 @@
     },
     "mage": {
       "id": "mage",
-      "label": "마법사",
+      "label": "법사",
       "folder": "mage",
       "actions": ["idle", "walk", "roll"],
       "skills": ["bolt", "nova", "shield"]

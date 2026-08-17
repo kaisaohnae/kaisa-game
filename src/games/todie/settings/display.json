@@ -1,14 +1,14 @@
 {
   "art": {
     "format": "png",
-    "size": 48,
-    "note": "도트 필수 아님. PNG면 됨. 캐릭터: jobs/<job>/actions. 장비: public/todie/gear/... 소비: public/todie/items/<kind>.png"
+    "size": 256,
+    "note": "HQ PNG. 캐릭터 jobs/ 장비 public/todie/gear 소비 items 몹 public/todie/mobs. npm run todie:sprites"
   },
   "character": {
-    "worldSize": 72,
-    "previewSize": 160,
+    "worldSize": 104,
+    "previewSize": 168,
     "anchorX": 0.5,
-    "anchorY": 0.5,
+    "anchorY": 0.52,
     "facingOffsetRad": 1.57079632679,
     "imageSmoothing": true
   },
@@ -19,11 +19,21 @@
     "roll": { "fps": 14, "loop": false }
   },
   "skillFx": {
-    "size": 72,
-    "life": 0.35
+    "size": 110,
+    "life": 0.4
   },
-  "hotbarIconSize": 32,
-  "groundItemSize": 36,
+  "hotbarIconSize": 40,
+  "groundItemSize": 42,
   "gearPublicBase": "/todie/gear",
-  "consumablePublicBase": "/todie/items"
+  "consumablePublicBase": "/todie/items",
+  "mobs": {
+    "publicBase": "/todie/mobs",
+    "eliteScale": 1.2,
+    "size": {
+      "slime": 70,
+      "bat": 78,
+      "block": 74,
+      "boss": 140
+    }
+  }
 }
