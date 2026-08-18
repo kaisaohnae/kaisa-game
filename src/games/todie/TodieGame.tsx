@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import './todie.css';
 import {
   balanceSettings,
@@ -478,6 +478,85 @@ function biomeWasteland(tx: number, ty: number): number {
   return Math.min(1, Math.max(0, w));
 }
 
+function VirtualJoystick({
+  joystickRef,
+  knobElRef,
+}: {
+  joystickRef: React.RefObject<{dx: number; dy: number; active: boolean}>;
+  knobElRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  const baseRef = useRef<HTMLDivElement>(null);
+  const ptrId = useRef<number | null>(null);
+  const baseRect = useRef({cx: 0, cy: 0, r: 0});
+
+  const moveKnob = (dx: number, dy: number) => {
+    const el = knobElRef.current;
+    const base = baseRef.current;
+    if (!el || !base) return;
+    const r = base.offsetWidth / 2;
+    const len = Math.hypot(dx, dy);
+    const clamped = Math.min(len, 1);
+    const nx = len > 0 ? (dx / len) * clamped : 0;
+    const ny = len > 0 ? (dy / len) * clamped : 0;
+    el.style.left = `${r + nx * r}px`;
+    el.style.top = `${r + ny * r}px`;
+  };
+
+  const update = (clientX: number, clientY: number) => {
+    const {cx, cy, r} = baseRect.current;
+    let dx = (clientX - cx) / r;
+    let dy = (clientY - cy) / r;
+    const len = Math.hypot(dx, dy);
+    if (len > 1) { dx /= len; dy /= len; }
+    joystickRef.current.dx = dx;
+    joystickRef.current.dy = dy;
+    joystickRef.current.active = true;
+    moveKnob(dx, dy);
+  };
+
+  const onDown = (e: React.PointerEvent) => {
+    if (ptrId.current != null) return;
+    ptrId.current = e.pointerId;
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    const el = baseRef.current!;
+    const rect = el.getBoundingClientRect();
+    baseRect.current = {cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2, r: rect.width / 2};
+    update(e.clientX, e.clientY);
+  };
+
+  const onMove = (e: React.PointerEvent) => {
+    if (e.pointerId !== ptrId.current) return;
+    update(e.clientX, e.clientY);
+  };
+
+  const onUp = (e: React.PointerEvent) => {
+    if (e.pointerId !== ptrId.current) return;
+    ptrId.current = null;
+    joystickRef.current.dx = 0;
+    joystickRef.current.dy = 0;
+    joystickRef.current.active = false;
+    moveKnob(0, 0);
+  };
+
+  return (
+    <div
+      className="todie__joystick-zone"
+      ref={baseRef}
+      onPointerDown={onDown}
+      onPointerMove={onMove}
+      onPointerUp={onUp}
+      onPointerCancel={onUp}
+    >
+      <div className="todie__joystick-base" />
+      <div
+        className="todie__joystick-knob"
+        ref={knobElRef}
+        style={{left: '50%', top: '50%'}}
+      />
+    </div>
+  );
+}
+
 export default function TodieGame() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const miniRef = useRef<HTMLCanvasElement>(null);
@@ -503,6 +582,9 @@ export default function TodieGame() {
   const wipeProgressRef = useRef(false);
   /** 인벤 기본: 최소(접힘) */
   const [invExpanded, setInvExpanded] = useState(false);
+  /** Virtual joystick direction (normalized -1..1) for mobile */
+  const joystickRef = useRef({dx: 0, dy: 0, active: false});
+  const knobElRef = useRef<HTMLDivElement | null>(null);
   const bgmRef = useRef<TodieBgm | null>(null);
   const [bgmMuted, setBgmMuted] = useState(() => readBgmMuted());
 
@@ -765,6 +847,11 @@ export default function TodieGame() {
     let moveTarget: {x: number; y: number} | null = null;
     let targetMobId: number | null = null;
     let chaseTarget = false;
+
+    /** Canvas drag-to-move (acts like a joystick centered on drag start point) */
+    const canvasDrag = {active: false, pointerId: -1, startX: 0, startY: 0, dx: 0, dy: 0};
+    const DRAG_DEAD = 12;
+    const DRAG_MAX = 120;
     let screenW = 800;
     let screenH = 600;
 
@@ -1541,6 +1628,23 @@ export default function TodieGame() {
     // hotbar hit boxes (CSS px, match canvas client coords)
     const hotbarHits: {i: number; x: number; y: number; w: number; h: number}[] = [];
 
+    const isInGuardZone = (sx: number, sy: number, canvasH: number) => {
+      const guardPad = 45;
+      for (const h of hotbarHits) {
+        if (
+          sx >= h.x - guardPad && sx <= h.x + h.w + guardPad &&
+          sy >= h.y - guardPad && sy <= h.y + h.h + guardPad
+        ) return true;
+      }
+      const phone = canvasH <= 500 || (typeof window !== 'undefined' && window.innerWidth <= 500);
+      const joySize = phone ? (window.innerWidth <= 400 ? 100 : 120) : 180;
+      const joyLeft = phone ? (window.innerWidth <= 400 ? 8 : 10) : 18;
+      const joyBottom = phone ? (window.innerWidth <= 400 ? 10 : 14) : 24;
+      const joyGuard = 35;
+      if (sx < joyLeft + joySize + joyGuard && sy > canvasH - joyBottom - joySize - joyGuard) return true;
+      return false;
+    };
+
     const onCanvasPointerDown = (e: PointerEvent) => {
       if (e.button !== 0) return;
       if (!alive) return;
@@ -1555,6 +1659,9 @@ export default function TodieGame() {
         }
       }
 
+      if (isInGuardZone(sx, sy, rect.height)) return;
+
+      // Check mob click
       const worldX = camX - screenW / 2 + sx;
       const worldY = camY - screenH / 2 + sy;
       const hit = mobAtWorld(worldX, worldY);
@@ -1564,13 +1671,42 @@ export default function TodieGame() {
         camFollow = true;
         return;
       }
+
+      // Start drag-to-move
+      canvasDrag.active = true;
+      canvasDrag.pointerId = e.pointerId;
+      canvasDrag.startX = e.clientX;
+      canvasDrag.startY = e.clientY;
+      canvasDrag.dx = 0;
+      canvasDrag.dy = 0;
       targetMobId = null;
       chaseTarget = false;
-      moveTarget = {
-        x: Math.max(PLAYER_R, Math.min(WORLD - PLAYER_R, worldX)),
-        y: Math.max(PLAYER_R, Math.min(WORLD - PLAYER_R, worldY)),
-      };
+      moveTarget = null;
+      canvas.setPointerCapture(e.pointerId);
       camFollow = true;
+    };
+
+    const onCanvasPointerMove = (e: PointerEvent) => {
+      if (!canvasDrag.active || e.pointerId !== canvasDrag.pointerId) return;
+      const rawDx = e.clientX - canvasDrag.startX;
+      const rawDy = e.clientY - canvasDrag.startY;
+      const dist = Math.hypot(rawDx, rawDy);
+      if (dist < DRAG_DEAD) {
+        canvasDrag.dx = 0;
+        canvasDrag.dy = 0;
+        return;
+      }
+      const effective = Math.min(dist, DRAG_MAX);
+      const scale = effective / DRAG_MAX;
+      canvasDrag.dx = (rawDx / dist) * scale;
+      canvasDrag.dy = (rawDy / dist) * scale;
+    };
+
+    const onCanvasPointerUp = (e: PointerEvent) => {
+      if (!canvasDrag.active || e.pointerId !== canvasDrag.pointerId) return;
+      canvasDrag.active = false;
+      canvasDrag.dx = 0;
+      canvasDrag.dy = 0;
     };
 
     const onContextMenu = (e: Event) => {
@@ -1594,6 +1730,9 @@ export default function TodieGame() {
     window.addEventListener('blur', onBlur);
     document.addEventListener('visibilitychange', onVisibility);
     canvas.addEventListener('pointerdown', onCanvasPointerDown);
+    canvas.addEventListener('pointermove', onCanvasPointerMove);
+    canvas.addEventListener('pointerup', onCanvasPointerUp);
+    canvas.addEventListener('pointercancel', onCanvasPointerUp);
     wrap.addEventListener('contextmenu', onContextMenu);
     document.addEventListener('gesturestart', blockZoomGesture, {passive: false});
     document.addEventListener('gesturechange', blockZoomGesture, {passive: false});
@@ -1971,6 +2110,8 @@ export default function TodieGame() {
         keys.has('KeyA') ||
         keys.has('KeyS') ||
         keys.has('KeyD') ||
+        joystickRef.current.active ||
+        canvasDrag.active ||
         Boolean(moveTarget) ||
         chaseTarget;
       let action: ActionId = 'idle';
@@ -2265,19 +2406,19 @@ export default function TodieGame() {
     const drawHud = (viewW: number, viewH: number) => {
       /** Phone HUD: shrink HP panel + stack hotbar 4·5 above 1·2·3 to clear inv FAB. */
       const phone = viewW <= 500;
-      const pad = phone ? 7 : 10;
+      const pad = phone ? 6 : 10;
       const panelX = phone ? 8 : 12;
       const panelY = phone ? 8 : 12;
-      const barW = phone ? 128 : 196;
-      const barH = phone ? 11 : 14;
-      const barGap = phone ? 5 : 8;
-      const labelW = phone ? 22 : 26;
+      const barW = phone ? 116 : 196;
+      const barH = phone ? 10 : 14;
+      const barGap = phone ? 4 : 8;
+      const labelW = phone ? 20 : 26;
       const contentX = panelX + pad;
       const contentY = panelY + pad;
       const labelFont = phone
-        ? 'bold 10px "Fredoka", "Nunito", sans-serif'
+        ? 'bold 9px "Fredoka", "Nunito", sans-serif'
         : 'bold 11px "Fredoka", "Nunito", sans-serif';
-      const valueFont = phone ? 'bold 9px sans-serif' : 'bold 10px sans-serif';
+      const valueFont = phone ? 'bold 8px sans-serif' : 'bold 10px sans-serif';
 
       const rows: {label: string; v: number; max: number; c0: string; c1: string}[] = [
         {label: 'HP', v: player.hp, max: player.maxHp, c0: '#c62828', c1: '#ef5350'},
@@ -2297,7 +2438,7 @@ export default function TodieGame() {
       const panelW = pad + labelW + barW + pad;
       const panelH =
         pad + rows.length * barH + Math.max(0, rows.length - 1) * barGap + pad;
-      const panelR = phone ? 8 : 10;
+      const panelR = phone ? 7 : 10;
 
       ctx.fillStyle = 'rgba(12, 10, 8, 0.55)';
       roundRect(ctx, panelX, panelY, panelW, panelH, panelR);
@@ -2509,6 +2650,21 @@ export default function TodieGame() {
         if (keys.has('KeyA') || keys.has('ArrowLeft')) mx -= 1;
         if (keys.has('KeyD') || keys.has('ArrowRight')) mx += 1;
 
+        const joy = joystickRef.current;
+        if (joy.active && (Math.abs(joy.dx) > 0.15 || Math.abs(joy.dy) > 0.15)) {
+          mx += joy.dx;
+          my += joy.dy;
+          moveTarget = null;
+          targetMobId = null;
+          chaseTarget = false;
+        }
+
+        if (canvasDrag.active && (Math.abs(canvasDrag.dx) > 0.05 || Math.abs(canvasDrag.dy) > 0.05)) {
+          mx += canvasDrag.dx;
+          my += canvasDrag.dy;
+          moveTarget = null;
+        }
+
         // chase targeted mob / click-to-move when no WASD
         if (!mx && !my && player.rolling <= 0) {
           if (chaseTarget && targetMobId != null) {
@@ -2541,6 +2697,26 @@ export default function TodieGame() {
             } else {
               mx = cdx / dist;
               my = cdy / dist;
+            }
+          }
+        }
+
+        // Sync joystick knob visual with combined movement direction
+        {
+          const knob = knobElRef.current;
+          if (knob) {
+            const mlen = Math.hypot(mx, my);
+            if (mlen > 0.01) {
+              const nmx = mx / mlen;
+              const nmy = my / mlen;
+              const intensity = Math.min(mlen, 1);
+              const r = (knob.parentElement?.offsetWidth ?? 180) / 2;
+              knob.style.left = `${r + nmx * intensity * r}px`;
+              knob.style.top = `${r + nmy * intensity * r}px`;
+            } else if (!joy.active && !canvasDrag.active) {
+              const r0 = (knob.parentElement?.offsetWidth ?? 180) / 2;
+              knob.style.left = `${r0}px`;
+              knob.style.top = `${r0}px`;
             }
           }
         }
@@ -2754,6 +2930,9 @@ export default function TodieGame() {
       window.removeEventListener('blur', onBlur);
       document.removeEventListener('visibilitychange', onVisibility);
       canvas.removeEventListener('pointerdown', onCanvasPointerDown);
+      canvas.removeEventListener('pointermove', onCanvasPointerMove);
+      canvas.removeEventListener('pointerup', onCanvasPointerUp);
+      canvas.removeEventListener('pointercancel', onCanvasPointerUp);
       wrap.removeEventListener('contextmenu', onContextMenu);
       document.removeEventListener('gesturestart', blockZoomGesture);
       document.removeEventListener('gesturechange', blockZoomGesture);
@@ -2922,6 +3101,7 @@ export default function TodieGame() {
           </div>
         </div>
       )}
+      <VirtualJoystick joystickRef={joystickRef} knobElRef={knobElRef} />
       <InventoryDock
         bag={bagRef.current}
         equipped={equippedRef.current}

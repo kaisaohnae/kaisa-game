@@ -337,14 +337,14 @@
 .todie__inv-fab {
   position: absolute;
   left: 12px;
-  bottom: 12px;
+  top: 110px;
   z-index: 20;
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   border: 2px solid rgba(255, 224, 130, 0.65);
   background: rgba(28, 25, 22, 0.94);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
   color: #ffe082;
   cursor: pointer;
   pointer-events: auto;
@@ -403,7 +403,7 @@
 .todie__inv-dock {
   position: absolute;
   left: 12px;
-  bottom: 12px;
+  top: 110px;
   z-index: 20;
   display: flex;
   flex-direction: row;
@@ -983,18 +983,25 @@
   }
 }
 
+@media (min-width: 501px) and (max-width: 999px) {
+  .todie__minimap {
+    width: 128px !important;
+    height: 128px !important;
+  }
+}
+
 @media (max-width: 900px) {
   .todie__inv-dock {
     width: calc(100vw - 16px);
     height: min(430px, 48vh);
     left: 8px;
-    bottom: 8px;
+    top: 95px;
   }
   .todie__inv-fab {
     left: 8px;
-    bottom: 8px;
-    width: 60px;
-    height: 60px;
+    top: 95px;
+    width: 48px;
+    height: 48px;
   }
   .todie__inv-equip {
     width: 168px;
@@ -1006,16 +1013,35 @@
 
 /* Phone: match canvas HUD edge (8px) + keep FAB clear of stacked hotbar */
 @media (max-width: 500px) {
+  .todie__top-actions {
+    gap: 5px;
+  }
+  .todie__exit,
+  .todie__fresh,
+  .todie__mute {
+    height: 30px;
+    padding: 0 10px;
+    border-radius: 8px;
+    font-size: 11px;
+  }
+  .todie__mute {
+    width: 30px;
+    padding: 0;
+  }
+  .todie__mute-icon {
+    width: 13px;
+    height: 13px;
+  }
   .todie__inv-fab {
     left: 8px;
-    bottom: 8px;
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
+    top: 80px;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
   }
   .todie__inv-fab-icon {
-    width: 22px;
-    height: 18px;
+    width: 18px;
+    height: 15px;
   }
   .todie__inv-fab-icon::before {
     width: 10px;
@@ -1025,8 +1051,84 @@
   }
   .todie__inv-dock {
     left: 8px;
-    bottom: 8px;
+    top: 80px;
     width: calc(100vw - 16px);
-    height: min(400px, 52vh);
+    height: min(520px, 68vh);
+  }
+}
+
+/* —— virtual joystick —— */
+.todie__joystick-zone {
+  position: absolute;
+  left: 18px;
+  bottom: 24px;
+  z-index: 15;
+  width: 180px;
+  height: 180px;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.todie__joystick-base {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(255, 224, 130, 0.35);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.todie__joystick-knob {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 224, 130, 0.6), rgba(255, 224, 130, 0.25));
+  border: 2px solid rgba(255, 224, 130, 0.7);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* Phone: smaller joystick + minimap */
+@media (max-width: 500px) {
+  .todie__joystick-zone {
+    left: 10px;
+    bottom: 14px;
+    width: 120px;
+    height: 120px;
+  }
+  .todie__joystick-knob {
+    width: 46px;
+    height: 46px;
+  }
+  .todie__minimap {
+    width: 120px !important;
+    height: 120px !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .todie__joystick-zone {
+    left: 8px;
+    bottom: 10px;
+    width: 100px;
+    height: 100px;
+  }
+  .todie__joystick-knob {
+    width: 38px;
+    height: 38px;
+  }
+  .todie__minimap {
+    width: 100px !important;
+    height: 100px !important;
+  }
+}
+
+/* —— minimap: disable touch on mobile —— */
+@media (hover: none), (pointer: coarse) {
+  .todie__minimap {
+    pointer-events: none !important;
+    cursor: default;
   }
 }
