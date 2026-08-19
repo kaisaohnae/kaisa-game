@@ -5,4 +5,4 @@
 :HL["/_next/static/chunks/1nfi00nzm53vo.css","style"]
 :HL["/_next/static/chunks/2e4k9_vuu52gw.css","style"]
 :HL["/_next/static/chunks/12ps68nzni0a8.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"games","param":null,"prefetchHints":0,"slots":{"children":{"name":"id","param":{"type":"d","key":"balloon-pop","siblings":null},"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"zh9ePbDRHQyXfoLcUVyMn"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"games","param":null,"prefetchHints":0,"slots":{"children":{"name":"id","param":{"type":"d","key":"balloon-pop","siblings":null},"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"DC115-4vQaQGNfMCDqzoP"}
