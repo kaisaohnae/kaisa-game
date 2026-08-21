@@ -1,0 +1,26 @@
+.stage-time-log {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  width: 100%;
+  max-width: 380px;
+  overflow-x: auto;
+  padding: 2px 4px;
+  scrollbar-width: none;
+}
+
+.stage-time-log::-webkit-scrollbar {
+  display: none;
+}
+
+.stage-time-log__chip {
+  flex: 0 0 auto;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #fff3e0;
+  border: 2px solid #ffcc80;
+  font-size: clamp(11px, 2.6vw, 13px);
+  font-weight: 700;
+  color: #ef6c00;
+  white-space: nowrap;
+}

@@ -26,11 +26,12 @@ function makePattern(salt: number, length: number): Tone[] {
   return Array.from({length}, () => TONES[Math.floor(rand() * TONES.length)]);
 }
 
-const START_LEN = 6;
+const START_LEN = 2;
 const MAX_LEN = 10;
 
+/** 1단계 2개 → 2단계 3개 … 단계마다 1개씩 늘어남 (score는 0부터, 최대 MAX_LEN) */
 function patternLenForScore(score: number) {
-  return Math.min(START_LEN + Math.floor(score / 2), MAX_LEN);
+  return Math.min(START_LEN + score, MAX_LEN);
 }
 
 export default function PatternCopyGame() {
@@ -40,6 +41,7 @@ export default function PatternCopyGame() {
   const [step, setStep] = useState(0);
   const [score, setScore] = useState(0);
   const [celebrate, setCelebrate] = useState(false);
+  const [showHint, setShowHint] = useState(false);
   const {triggerWrong, shakeClass} = useWrongShake();
 
   const startRound = useCallback((salt: number, len: number) => {
@@ -48,6 +50,7 @@ export default function PatternCopyGame() {
     setPhase('show');
     setStep(0);
     setHighlight(null);
+    setShowHint(false);
   }, []);
 
   useEffect(() => {
@@ -112,6 +115,33 @@ export default function PatternCopyGame() {
       <p className="pattern-copy__help">
         {phase === 'show' ? '반짝이는 순서를 봐!' : '같은 순서로 눌러봐!'}
       </p>
+
+      <div className="pattern-copy__hint-bar">
+        <button
+          type="button"
+          className="pattern-copy__hint-toggle"
+          onClick={() => setShowHint((v) => !v)}
+        >
+          {showHint ? '힌트 감추기' : '힌트 보기'}
+        </button>
+      </div>
+
+      {showHint && (
+        <div className="pattern-copy__hint" aria-label="힌트: 전체 순서">
+          {pattern.map((tone, i) => (
+            <span
+              key={i}
+              className={`pattern-copy__hint-dot${
+                phase === 'play' && i === step ? ' is-current' : ''
+              }`}
+              style={{background: tone.color}}
+              aria-label={tone.id}
+            >
+              <KidsIcon id={tone.icon} size="1em" />
+            </span>
+          ))}
+        </div>
+      )}
 
       <div className="pattern-copy__grid" role="group" aria-label="색깔 패드">
         {TONES.map((tone) => (

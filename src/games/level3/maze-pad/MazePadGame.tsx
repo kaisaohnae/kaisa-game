@@ -3,6 +3,9 @@
 import {useCallback, useEffect, useState} from 'react';
 import SuccessBurst from '@/games/shared/SuccessBurst';
 import ScoreHud from '@/games/shared/ScoreHud';
+import StageTimer from '@/games/shared/StageTimer';
+import StageTimeLog from '@/games/shared/StageTimeLog';
+import {useStageTimer} from '@/games/shared/useStageTimer';
 import {useWrongShake} from '@/games/shared/useWrongShake';
 import './maze-pad.css';
 
@@ -47,15 +50,21 @@ export default function MazePadGame() {
   const [score, setScore] = useState(0);
   const [celebrate, setCelebrate] = useState(false);
   const {triggerWrong, shakeClass} = useWrongShake();
+  const stageTimer = useStageTimer();
+  const [stageTimes, setStageTimes] = useState<number[]>([]);
 
   const maze = MAZES[mazeIndex % MAZES.length];
   const goal = goalOf(maze);
 
-  const resetTo = useCallback((index: number) => {
-    const next = MAZES[index % MAZES.length];
-    setMazeIndex(index);
-    setPos(startOf(next));
-  }, []);
+  const resetTo = useCallback(
+    (index: number) => {
+      const next = MAZES[index % MAZES.length];
+      setMazeIndex(index);
+      setPos(startOf(next));
+      stageTimer.reset();
+    },
+    [stageTimer],
+  );
 
   useEffect(() => {
     resetTo(0);
@@ -74,6 +83,8 @@ export default function MazePadGame() {
     setPos(next);
 
     if (next.r === goal.r && next.c === goal.c) {
+      const clearSec = stageTimer.capture();
+      setStageTimes((prev) => [...prev, clearSec]);
       setCelebrate(true);
       setScore((n) => n + 1);
       window.setTimeout(() => {
@@ -87,7 +98,9 @@ export default function MazePadGame() {
     <div className={`maze-pad${shakeClass}`}>
       <SuccessBurst show={celebrate} />
       <ScoreHud score={score} />
+      <StageTimer seconds={stageTimer.elapsed} />
       <p className="maze-pad__help">길을 따라 별로 가요</p>
+      <StageTimeLog times={stageTimes} />
 
       <div className="maze-pad__board" role="grid" aria-label="미로">
         {maze.map((row, r) =>

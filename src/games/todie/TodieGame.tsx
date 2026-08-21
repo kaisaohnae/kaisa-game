@@ -89,6 +89,24 @@ const FINAL_BOSS_DEAGGRO =
   (spawnSettings as {finalBossDeaggroRange?: number}).finalBossDeaggroRange ?? 4500;
 const ELITE_CHANCE = spawnSettings.eliteChance ?? 0.12;
 const ELITE_DROP_COUNT = spawnSettings.eliteDropCount ?? 3;
+/** 몹 강화: 플레이 1분마다 레벨 +1, 20분(레벨 20)에서 최대치로 고정 */
+const MOB_SCALE_MAX_MINUTES = 20;
+/** 레벨 1당 체력·공격력 배율 증가폭(10%) / 이동속도는 더 완만하게(2%) */
+const MOB_SCALE_HP_DMG_PER_LEVEL = 0.1;
+const MOB_SCALE_SPEED_PER_LEVEL = 0.02;
+
+/** 경과 시간(초) → 몹 강화 레벨 (1분당 1, 20레벨에서 고정) */
+function mobLevelAt(gameTimeSec: number) {
+  return Math.min(Math.floor(gameTimeSec / 60), MOB_SCALE_MAX_MINUTES);
+}
+
+/** 초 → "시:분:초" (예: 1:05:07) */
+function formatPlayTime(totalSeconds: number) {
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
 const NAME_COOKIE = 'todie_char_name';
 const GEAR_COOKIE = 'todie_gear';
 const MAP_NAME = '죽음의 황무지';
@@ -587,6 +605,8 @@ export default function TodieGame() {
   const knobElRef = useRef<HTMLDivElement | null>(null);
   const bgmRef = useRef<TodieBgm | null>(null);
   const [bgmMuted, setBgmMuted] = useState(() => readBgmMuted());
+  /** 플레이 시간 (초 단위, 시작 후 1초마다 증가) */
+  const [playSeconds, setPlaySeconds] = useState(0);
 
   const ensureBgm = () => {
     if (!bgmRef.current) {
@@ -641,6 +661,14 @@ export default function TodieGame() {
       persist();
     };
   }, [started, charName, startJob]);
+
+  useEffect(() => {
+    if (!started) return;
+    const id = window.setInterval(() => {
+      setPlaySeconds((s) => s + 1);
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [started]);
 
   /** Block browser back / forward while on this game page */
   useEffect(() => {
@@ -930,7 +958,10 @@ export default function TodieGame() {
       const elite = !isAnyBoss(k) && Math.random() < ELITE_CHANCE;
       const hpMult = elite ? (eliteCfg?.hpMult ?? 2.4) : 1;
       const spdMult = elite ? (eliteCfg?.speedMult ?? 1.15) : 1;
-      const maxHp = Math.round(mb.hp * hpMult);
+      const mobLevel = mobLevelAt(gameTime);
+      const scaleHpDmg = 1 + mobLevel * MOB_SCALE_HP_DMG_PER_LEVEL;
+      const scaleSpeed = 1 + mobLevel * MOB_SCALE_SPEED_PER_LEVEL;
+      const maxHp = Math.round(mb.hp * hpMult * scaleHpDmg);
       return {
         id: nextMobId++,
         x,
@@ -939,7 +970,7 @@ export default function TodieGame() {
         homeY: y,
         hp: maxHp,
         maxHp,
-        speed: mb.speed * spdMult,
+        speed: mb.speed * spdMult * scaleSpeed,
         kind: k,
         elite,
         hurt: 0,
@@ -2808,7 +2839,8 @@ export default function TodieGame() {
               const dmgMult = m.elite
                 ? ((bal.mobs as {elite?: {damageMult?: number}}).elite?.damageMult ?? 1.7)
                 : 1;
-              hurtPlayer(Math.round(base * dmgMult));
+              const scaleDmg = 1 + mobLevelAt(gameTime) * MOB_SCALE_HP_DMG_PER_LEVEL;
+              hurtPlayer(Math.round(base * dmgMult * scaleDmg));
             }
           } else {
             // idle: slowly return toward spawn home
@@ -3035,6 +3067,9 @@ export default function TodieGame() {
   return (
     <div className="todie" ref={wrapRef}>
       <canvas className="todie__canvas" ref={canvasRef} />
+      <div className="todie__play-timer" aria-label="플레이 시간">
+        ⏱ {formatPlayTime(playSeconds)}
+      </div>
       <div className="todie__minimap-wrap">
         <div className="todie__top-actions">
           <button

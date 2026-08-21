@@ -43,7 +43,7 @@
 
 .balloon-pop__balloon {
   position: absolute;
-  bottom: 8%;
+  bottom: -20%;
   display: grid;
   place-items: center;
   border: 4px solid #fff;
@@ -52,20 +52,21 @@
   font-size: 28px;
   cursor: pointer;
   touch-action: manipulation;
-  animation: balloonFloat 3.6s ease-in-out infinite;
+  animation-name: balloonRise;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
 }
 
 .balloon-pop__balloon:active {
   transform: scale(0.85);
 }
 
-@keyframes balloonFloat {
-  0%,
-  100% {
-    transform: translateY(0);
+@keyframes balloonRise {
+  from {
+    bottom: -20%;
   }
-  50% {
-    transform: translateY(-18px);
+  to {
+    bottom: 130%;
   }
 }
 

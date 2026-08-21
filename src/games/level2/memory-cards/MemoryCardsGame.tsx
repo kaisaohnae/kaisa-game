@@ -4,6 +4,9 @@ import {useEffect, useState} from 'react';
 import {KidsIcon} from '@/components/kids-icon';
 import type {KidsIconId} from '@/assets/kids-icons';
 import ScoreHud from '@/games/shared/ScoreHud';
+import StageTimer from '@/games/shared/StageTimer';
+import StageTimeLog from '@/games/shared/StageTimeLog';
+import {useStageTimer} from '@/games/shared/useStageTimer';
 import {useWrongShake} from '@/games/shared/useWrongShake';
 import './memory-cards.css';
 
@@ -67,6 +70,8 @@ export default function MemoryCardsGame() {
   const [moves, setMoves] = useState(0);
   const [message, setMessage] = useState('같은 그림을 찾아요');
   const {triggerWrong, shakeClass} = useWrongShake();
+  const stageTimer = useStageTimer();
+  const [stageTimes, setStageTimes] = useState<number[]>([]);
 
   const startBoard = (stage: number) => {
     const count = pairsForStage(stage);
@@ -77,6 +82,7 @@ export default function MemoryCardsGame() {
     setLock(false);
     setMoves(0);
     setMessage('같은 그림을 찾아요');
+    stageTimer.reset();
   };
 
   useEffect(() => {
@@ -106,7 +112,9 @@ export default function MemoryCardsGame() {
       setFlipped([]);
       setLock(false);
       if (nextMatched.length === pairCount) {
-        setMessage('모두 찾았어요! 대단해');
+        const clearSec = stageTimer.capture();
+        setStageTimes((prev) => [...prev, clearSec]);
+        setMessage(`모두 찾았어요! ${clearSec}초 만에 클리어`);
         setScore((s) => {
           const ns = s + 1;
           window.setTimeout(() => startBoard(ns), 1000);
@@ -130,6 +138,7 @@ export default function MemoryCardsGame() {
   return (
     <div className={`memory-cards${done ? ' memory-cards--done' : ''}${shakeClass}`}>
       <ScoreHud score={score} />
+      <StageTimer seconds={stageTimer.elapsed} />
       <div className="memory-cards__bar">
         <span>시도 {moves}</span>
         <button type="button" className="memory-cards__reset" onClick={() => startBoard(score)}>
@@ -137,6 +146,7 @@ export default function MemoryCardsGame() {
         </button>
       </div>
       <p className="memory-cards__message">{message}</p>
+      <StageTimeLog times={stageTimes} />
       <div
         className={`memory-cards__grid${pairCount >= 8 ? ' is-wide' : ''}`}
         role="group"
