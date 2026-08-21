@@ -27,13 +27,14 @@ export default async function GamePage({params}: PageProps) {
 
   const Game = game.Component;
 
+  const isCarRun = id === 'car-run';
+
   return (
-    <main className="game-page">
+    <main className={`game-page${isCarRun ? ' game-page--car-run' : ''}`}>
       <header className="game-page__header">
         <Link href="/" className="game-page__back">
-          🏠 처음으로
+          🏠 홈으로
         </Link>
-        <h1 className="game-page__title">{game.title}</h1>
       </header>
       <section className="game-page__stage">
         <Game />

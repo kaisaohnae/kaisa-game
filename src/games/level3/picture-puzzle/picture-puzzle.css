@@ -1,0 +1,223 @@
+.picture-puzzle {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 2.5vh, 18px);
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 4px 0 12px;
+  position: relative;
+}
+
+.picture-puzzle__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: min(100%, 320px);
+  font-size: clamp(16px, 3.5vw, 20px);
+  font-weight: 800;
+  color: #6a1b9a;
+}
+
+.picture-puzzle__reset {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 3px solid #fff;
+  border-radius: 999px;
+  background: #e1bee7;
+  box-shadow: 0 4px 0 #ce93d8;
+  font-weight: 800;
+  color: #6a1b9a;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.picture-puzzle__reset:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #ce93d8;
+}
+
+.picture-puzzle__message {
+  margin: 0;
+  font-family: var(--font-kids-display), var(--font-kids-body), sans-serif;
+  font-size: clamp(18px, 4.5vw, 26px);
+  font-weight: 700;
+  color: #5d4037;
+  text-align: center;
+}
+
+.picture-puzzle__layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(14px, 3vh, 22px);
+  width: 100%;
+}
+
+.picture-puzzle__board {
+  width: min(100%, 300px);
+  padding: 10px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #f3e5f5 0%, #e1bee7 100%);
+  border: 4px solid #fff;
+  box-shadow: 0 10px 0 #ce93d8;
+}
+
+.picture-puzzle__board--4 {
+  width: min(100%, 320px);
+}
+
+.picture-puzzle__playfield {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 14px;
+  background: #fff8e1;
+  overflow: hidden;
+}
+
+.picture-puzzle__piece,
+.picture-puzzle__empty {
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.picture-puzzle__piece {
+  z-index: 2;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  border: 2px solid #fff;
+  border-radius: 10px;
+  background: #fff8e1;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 3px 0 rgba(186, 104, 200, 0.35);
+  transition:
+    left 0.42s ease,
+    top 0.42s ease;
+}
+
+.picture-puzzle__piece:active {
+  filter: brightness(0.97);
+}
+
+.picture-puzzle__empty {
+  z-index: 1;
+  border: 2px dashed #d1a4e0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.picture-puzzle__slice {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.picture-puzzle__slice .kids-icon {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.picture-puzzle__slice .kids-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.picture-puzzle__preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.picture-puzzle__preview-label {
+  font-size: clamp(14px, 3.2vw, 18px);
+  font-weight: 800;
+  color: #8e24aa;
+}
+
+.picture-puzzle__preview-frame {
+  display: grid;
+  place-items: center;
+  width: clamp(64px, 16vw, 84px);
+  height: clamp(64px, 16vw, 84px);
+  padding: 8px;
+  border-radius: 18px;
+  background: #fff8e1;
+  border: 3px solid #fff;
+  box-shadow: 0 6px 0 #ffcc80;
+}
+
+.picture-puzzle__preview-frame .kids-icon {
+  width: 100%;
+  height: 100%;
+}
+
+.picture-puzzle--done .picture-puzzle__message {
+  color: #2e7d32;
+}
+
+.picture-puzzle--done .picture-puzzle__board {
+  box-shadow: 0 10px 0 #81c784;
+}
+
+@media (min-width: 768px) {
+  .picture-puzzle__layout {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 24px;
+  }
+
+  .picture-puzzle__board--3 {
+    width: min(100%, 300px);
+  }
+
+  .picture-puzzle__board--4 {
+    width: min(100%, 320px);
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .picture-puzzle {
+    max-width: 680px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+  }
+
+  .picture-puzzle__bar,
+  .picture-puzzle__message {
+    width: 100%;
+  }
+
+  .picture-puzzle__layout {
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .picture-puzzle__board--3 {
+    width: min(38vw, 260px);
+  }
+
+  .picture-puzzle__board--4 {
+    width: min(42vw, 280px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .picture-puzzle__piece {
+    transition: none;
+  }
+}

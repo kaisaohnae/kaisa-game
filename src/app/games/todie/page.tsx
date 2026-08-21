@@ -1,5 +1,6 @@
 import type {Metadata, Viewport} from 'next';
 import TodieGame from '@/games/todie/TodieGame';
+import '@/app/games/[id]/game-page.css';
 
 export const metadata: Metadata = {
   title: 'todie',

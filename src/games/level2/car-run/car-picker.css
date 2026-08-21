@@ -1,0 +1,127 @@
+.car-picker {
+  width: min(100%, 360px);
+  margin: 0 auto;
+}
+
+.car-picker__label {
+  margin: 0 0 clamp(12px, 2.5vh, 18px);
+  text-align: center;
+  font-family: var(--font-kids-display), var(--font-kids-body), sans-serif;
+  font-size: clamp(17px, 4vw, 22px);
+  font-weight: 800;
+  color: #5d4037;
+}
+
+.car-picker__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(10px, 2.5vw, 14px);
+}
+
+.car-picker__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: clamp(108px, 22vw, 128px);
+  padding: 10px 8px 12px;
+  border: 3px solid #fff;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #fffdf5 0%, #fff3e0 100%);
+  box-shadow: 0 5px 0 #ffcc80;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.car-picker__item.is-selected {
+  border-color: #ffb74d;
+  background: linear-gradient(180deg, #fff8e1 0%, #ffe0b2 100%);
+  box-shadow:
+    0 0 0 3px rgba(255, 183, 77, 0.45),
+    0 6px 0 #fb8c00;
+  transform: translateY(-2px);
+}
+
+.car-picker__item:active {
+  transform: translateY(2px);
+  box-shadow: 0 3px 0 #fb8c00;
+}
+
+.car-picker__item.is-selected:active {
+  transform: translateY(0);
+}
+
+.car-picker__thumb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(56px, 14vw, 72px);
+  height: clamp(56px, 14vw, 72px);
+}
+
+.car-picker__thumb img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.12));
+}
+
+.car-picker__badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  font-size: clamp(14px, 3.5vw, 18px);
+  line-height: 1;
+}
+
+.car-picker__name {
+  font-size: clamp(13px, 3.2vw, 15px);
+  font-weight: 800;
+  color: #5d4037;
+  text-align: center;
+  line-height: 1.2;
+}
+
+@media (min-width: 480px) {
+  .car-picker {
+    width: min(100%, 480px);
+  }
+
+  .car-picker__grid {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: clamp(10px, 2vw, 14px);
+  }
+
+  .car-picker__item {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .car-picker__grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .car-picker__item {
+    min-height: 92px;
+    padding: 8px 6px 10px;
+  }
+
+  .car-picker__thumb {
+    width: 44px;
+    height: 44px;
+  }
+
+  .car-picker__label {
+    margin-bottom: 8px;
+    font-size: 16px;
+  }
+}

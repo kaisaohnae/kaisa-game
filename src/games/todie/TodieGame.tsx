@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import React, {useEffect, useRef, useState} from 'react';
 import './todie.css';
 import {
@@ -2981,18 +2982,16 @@ export default function TodieGame() {
   if (!started) {
     return (
       <div className="todie todie--gate">
-        <div className="todie__top-actions">
-          <button
-            type="button"
-            className="todie__fresh"
-            onClick={() => confirmFreshStart()}
-          >
-            초기화
-          </button>
-          <button type="button" className="todie__exit" onClick={confirmExitToMain}>
-            게임 종료
-          </button>
-        </div>
+        <Link href="/" className="game-page__back todie__gate-home">
+          🏠 홈으로
+        </Link>
+        <button
+          type="button"
+          className="todie__fresh todie__gate-fresh"
+          onClick={() => confirmFreshStart()}
+        >
+          초기화
+        </button>
         <div className="todie__gate-card">
           <h1>todie</h1>
           <p>

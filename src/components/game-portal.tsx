@@ -1,9 +1,11 @@
 import Link from 'next/link';
 import {KidsIcon} from '@/components/kids-icon';
 import {GAME_CARD_ICONS} from '@/assets/kids-icons';
-import {GAMES} from '@/games';
+import {getPortalGames} from '@/games';
 import type {GameLevel} from '@/games';
 import warriorCardIcon from '@/games/todie/jobs/warrior/actions/idle_down.png';
+
+const CAR_RUN_CARD_ICON = '/car-run/vehicles/Police_animation/1.png';
 
 function starsLabel(level: GameLevel) {
   return '★'.repeat(level);
@@ -14,11 +16,7 @@ function pngSrc(mod: string | {src: string}) {
 }
 
 export default function GamePortal() {
-  const games = [...GAMES].sort((a, b) => {
-    if (a.id === 'todie') return -1;
-    if (b.id === 'todie') return 1;
-    return b.level - a.level;
-  });
+  const games = getPortalGames();
 
   return (
     <main className="game-portal">
@@ -39,6 +37,13 @@ export default function GamePortal() {
                     <img
                       className="game-portal__char-icon"
                       src={pngSrc(warriorCardIcon)}
+                      alt=""
+                      draggable={false}
+                    />
+                  ) : game.id === 'car-run' ? (
+                    <img
+                      className="game-portal__char-icon"
+                      src={CAR_RUN_CARD_ICON}
                       alt=""
                       draggable={false}
                     />

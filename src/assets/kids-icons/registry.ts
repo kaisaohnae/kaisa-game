@@ -229,6 +229,7 @@ export const GAME_CARD_ICONS: Record<string, KidsIconId> = {
   'memory-cards': 'shape-star',
   'maze-pad': 'item-map',
   'pattern-copy': 'item-sparkle',
+  'picture-puzzle': 'item-teddy',
   'hangul-study': 'item-book',
   'add-play': 'item-plus',
   'sub-play': 'item-minus',

@@ -1,6 +1,6 @@
 'use client';
 
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useEffect, useRef, useState, type PointerEvent} from 'react';
 import {KidsIcon} from '@/components/kids-icon';
 import type {KidsIconId} from '@/assets/kids-icons';
 import SuccessBurst from '@/games/shared/SuccessBurst';
@@ -64,6 +64,7 @@ export default function BalloonPopGame() {
   const [failing, setFailing] = useState(false);
   const [message, setMessage] = useState('풍선을 톡! 톡! 터뜨려요');
   const {triggerWrong, shakeClass} = useWrongShake();
+  const poppingRef = useRef<Set<number>>(new Set());
 
   const spawn = useCallback((r: number) => {
     const count = Math.min(4 + Math.floor(r / 2), 8);
@@ -77,9 +78,15 @@ export default function BalloonPopGame() {
 
   const pop = (id: number) => {
     if (!ready || celebrate || failing) return;
+    if (poppingRef.current.has(id)) return;
+    poppingRef.current.add(id);
     setBalloons((prev) => {
-      if (!prev.some((b) => b.id === id)) return prev;
+      if (!prev.some((b) => b.id === id)) {
+        poppingRef.current.delete(id);
+        return prev;
+      }
       const next = prev.filter((b) => b.id !== id);
+      poppingRef.current.delete(id);
       if (next.length === 0) {
         setCelebrate(true);
         setMessage('모두 터뜨렸어요!');
@@ -97,7 +104,13 @@ export default function BalloonPopGame() {
     });
   };
 
-  /** 풍선이 터지지 않고 위로 다 올라가버리면 이번 단계는 실패 → 같은 단계 다시 도전 */
+  const handleBalloonPress = (id: number, e: PointerEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    pop(id);
+  };
+
+  /** 풍선이 터지지 않고 위로 다 올라가버리면 이번 단계 실패 */
   const escape = (id: number) => {
     if (!ready || celebrate || failing) return;
     setBalloons((prev) => {
@@ -106,16 +119,24 @@ export default function BalloonPopGame() {
     });
     setFailing(true);
     triggerWrong();
-    setMessage('앗! 풍선이 날아갔어요. 다시 도전!');
-    window.setTimeout(() => {
-      setFailing(false);
-      setMessage('풍선을 톡! 톡! 터뜨려요');
-      spawn(round);
-    }, 900);
+    setMessage('앗! 풍선이 날아갔어요');
+  };
+
+  const retryRound = () => {
+    setFailing(false);
+    setMessage('풍선을 톡! 톡! 터뜨려요');
+    spawn(round);
+  };
+
+  const restartFromBeginning = () => {
+    setFailing(false);
+    setRound(1);
+    setMessage('풍선을 톡! 톡! 터뜨려요');
+    spawn(1);
   };
 
   return (
-    <div className={`balloon-pop${shakeClass}`}>
+    <div className={`balloon-pop${shakeClass}${failing ? ' balloon-pop--failing' : ''}`}>
       <SuccessBurst show={celebrate} />
       <ScoreHud score={round} />
       <p className="balloon-pop__help">{message}</p>
@@ -129,17 +150,42 @@ export default function BalloonPopGame() {
               left: `${b.left}%`,
               animationDelay: `${b.delay}s`,
               animationDuration: `${b.duration}s`,
-              width: b.size,
-              height: b.size,
+              ['--balloon-size' as string]: `${b.size}px`,
               background: b.color,
             }}
             aria-label="풍선 터뜨리기"
-            onClick={() => pop(b.id)}
+            onPointerDown={(e) => handleBalloonPress(b.id, e)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                pop(b.id);
+              }
+            }}
             onAnimationEnd={() => escape(b.id)}
           >
             <KidsIcon id={b.icon} size="85%" />
           </button>
         ))}
+
+        {failing ? (
+          <div className="balloon-pop__fail-panel" role="dialog" aria-labelledby="balloon-pop-fail-title">
+            <p id="balloon-pop-fail-title" className="balloon-pop__fail-title">
+              풍선을 놓쳤어요!
+            </p>
+            <div className="balloon-pop__fail-actions">
+              <button type="button" className="balloon-pop__btn balloon-pop__btn--retry" onClick={retryRound}>
+                다시 도전
+              </button>
+              <button
+                type="button"
+                className="balloon-pop__btn balloon-pop__btn--restart"
+                onClick={restartFromBeginning}
+              >
+                처음부터
+              </button>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );

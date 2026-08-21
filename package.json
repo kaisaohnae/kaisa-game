@@ -15,7 +15,8 @@
     "todie:warrior-skills": "node src/games/todie/scripts/gen-warrior-skills.mjs",
     "todie:gear-icons": "node src/games/todie/scripts/gen-gear-icons.mjs",
     "todie:mobs": "node src/games/todie/scripts/gen-mobs.mjs",
-    "todie:big-boss": "node src/games/todie/scripts/gen-big-boss.mjs"
+    "todie:big-boss": "node src/games/todie/scripts/gen-big-boss.mjs",
+    "car-run:sprites": "node scripts/install-car-sprites.mjs"
   },
   "dependencies": {
     "next": "16.2.9",
