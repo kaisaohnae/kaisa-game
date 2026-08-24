@@ -13,15 +13,39 @@ import './car-run.css';
 
 type Phase = 'ready' | 'playing' | 'over';
 
+type ObstacleKind = 'cone' | 'rock' | 'crate' | 'barrel' | 'tire' | 'barrier' | 'puddle' | 'sign';
+
 type Obstacle = {
   id: number;
   x: number;
   y: number;
   w: number;
   h: number;
-  kind: 'cone' | 'rock' | 'crate';
+  kind: ObstacleKind;
   /** 도로 기준 속도 배율 — 장애물마다 다르게 */
   speedMul: number;
+};
+
+const OBSTACLE_KINDS: ObstacleKind[] = [
+  'cone',
+  'rock',
+  'crate',
+  'barrel',
+  'tire',
+  'barrier',
+  'puddle',
+  'sign',
+];
+
+const OBSTACLE_SIZE: Record<ObstacleKind, {w: number; h: number}> = {
+  cone: {w: 34, h: 38},
+  rock: {w: 40, h: 36},
+  crate: {w: 44, h: 40},
+  barrel: {w: 36, h: 42},
+  tire: {w: 42, h: 34},
+  barrier: {w: 56, h: 28},
+  puddle: {w: 52, h: 24},
+  sign: {w: 38, h: 44},
 };
 
 type GameState = {
@@ -41,17 +65,16 @@ const CAR_DISPLAY_H = 81;
 const ROAD_RATIO = 0.74;
 const VEHICLE_STORAGE_KEY = 'kaisa-car-run-vehicle';
 
-function obstacleSpeedMul(kind: Obstacle['kind']) {
-  if (kind === 'cone') return 0.68 + Math.random() * 0.2;
-  if (kind === 'rock') return 0.86 + Math.random() * 0.22;
+function obstacleSpeedMul(kind: ObstacleKind) {
+  if (kind === 'cone' || kind === 'sign') return 0.68 + Math.random() * 0.2;
+  if (kind === 'rock' || kind === 'puddle') return 0.86 + Math.random() * 0.22;
+  if (kind === 'tire' || kind === 'barrier') return 0.94 + Math.random() * 0.28;
   return 1.02 + Math.random() * 0.32;
 }
 
 function spawnObstacle(roadLeft: number, roadWidth: number, nextId: number): Obstacle {
-  const kinds: Obstacle['kind'][] = ['cone', 'rock', 'crate'];
-  const kind = kinds[Math.floor(Math.random() * kinds.length)]!;
-  const w = kind === 'cone' ? 34 : kind === 'rock' ? 40 : 44;
-  const h = kind === 'cone' ? 38 : kind === 'rock' ? 36 : 40;
+  const kind = OBSTACLE_KINDS[Math.floor(Math.random() * OBSTACLE_KINDS.length)]!;
+  const {w, h} = OBSTACLE_SIZE[kind];
   const minX = roadLeft + w * 0.6;
   const maxX = roadLeft + roadWidth - w * 0.6;
   return {
@@ -151,7 +174,7 @@ function drawObstacle(ctx: CanvasRenderingContext2D, o: Obstacle) {
     ctx.beginPath();
     ctx.ellipse(o.x - 6, top + o.h / 2 - 4, 8, 5, -0.4, 0, Math.PI * 2);
     ctx.fill();
-  } else {
+  } else if (o.kind === 'crate') {
     ctx.fillStyle = '#8d6e63';
     roundRect(ctx, left, top + 6, o.w, o.h - 6, 8);
     ctx.fill();
@@ -161,6 +184,72 @@ function drawObstacle(ctx: CanvasRenderingContext2D, o: Obstacle) {
     ctx.fillStyle = '#fff8e1';
     ctx.fillRect(left + 10, top + 16, o.w - 20, 4);
     ctx.fillRect(left + 10, top + 24, o.w - 20, 4);
+  } else if (o.kind === 'barrel') {
+    ctx.fillStyle = '#ef5350';
+    roundRect(ctx, left, top + 4, o.w, o.h - 4, 10);
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(left + 4, top + o.h * 0.35, o.w - 8, 6);
+    ctx.fillRect(left + 4, top + o.h * 0.58, o.w - 8, 6);
+    ctx.fillStyle = '#c62828';
+    roundRect(ctx, left + 6, top, o.w - 12, 10, 4);
+    ctx.fill();
+  } else if (o.kind === 'tire') {
+    ctx.fillStyle = '#37474f';
+    ctx.beginPath();
+    ctx.ellipse(o.x, top + o.h / 2, o.w / 2, o.h / 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#90a4ae';
+    ctx.beginPath();
+    ctx.ellipse(o.x, top + o.h / 2, o.w * 0.28, o.h * 0.28, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#263238';
+    ctx.beginPath();
+    ctx.ellipse(o.x, top + o.h / 2, o.w * 0.12, o.h * 0.12, 0, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (o.kind === 'barrier') {
+    ctx.fillStyle = '#ffeb3b';
+    roundRect(ctx, left, top + 4, o.w, o.h - 8, 6);
+    ctx.fill();
+    ctx.fillStyle = '#212121';
+    for (let i = 0; i < 3; i++) {
+      const bx = left + 6 + i * ((o.w - 12) / 3);
+      ctx.beginPath();
+      ctx.moveTo(bx, top + 6);
+      ctx.lineTo(bx + 10, top + 6);
+      ctx.lineTo(bx + 18, top + o.h - 6);
+      ctx.lineTo(bx + 8, top + o.h - 6);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.fillStyle = '#ff7043';
+    ctx.fillRect(left + 4, top + o.h - 6, 8, 6);
+    ctx.fillRect(left + o.w - 12, top + o.h - 6, 8, 6);
+  } else if (o.kind === 'puddle') {
+    ctx.fillStyle = 'rgba(33, 150, 243, 0.55)';
+    ctx.beginPath();
+    ctx.ellipse(o.x, top + o.h / 2, o.w / 2, o.h / 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(227, 242, 253, 0.7)';
+    ctx.beginPath();
+    ctx.ellipse(o.x - 8, top + o.h / 2 - 2, 10, 5, -0.3, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    // caution sign
+    ctx.fillStyle = '#78909c';
+    ctx.fillRect(o.x - 3, top + 18, 6, o.h - 18);
+    ctx.fillStyle = '#ffeb3b';
+    ctx.beginPath();
+    ctx.moveTo(o.x, top);
+    ctx.lineTo(left + o.w, top + 22);
+    ctx.lineTo(left, top + 22);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#212121';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('!', o.x, top + 14);
   }
 }
 
