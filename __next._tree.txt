@@ -6,4 +6,4 @@
 :HL["/_next/static/chunks/0luc-ypy6bvzy.css","style"]
 :HL["/car-run/vehicles/Police_animation/1.png","image"]
 :HL["/_next/static/media/idle_down.1byqqv44ymul8.png","image"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"CfRzytu_vOZA3OSDcDB_Q"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}},"staleTime":300,"buildId":"gn4XVhaKNrmyepGVl4knZ"}
