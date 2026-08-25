@@ -3,6 +3,6 @@
 :HL["/_next/static/media/5d52bd6c4cb3f315-s.p.0ez3bnoxb63ra.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
 :HL["/_next/static/chunks/3vx8r3zwppu-4.css","style"]
 :HL["/_next/static/chunks/3dwdrrdzjqgib.css","style"]
-:HL["/_next/static/chunks/0luc-ypy6bvzy.css","style"]
+:HL["/_next/static/chunks/116v6syssp7gg.css","style"]
 :HL["/_next/static/chunks/305p-b4wf-arr.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"games","param":null,"prefetchHints":0,"slots":{"children":{"name":"id","param":{"type":"d","key":"maze-pad","siblings":null},"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"gn4XVhaKNrmyepGVl4knZ"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"games","param":null,"prefetchHints":0,"slots":{"children":{"name":"id","param":{"type":"d","key":"maze-pad","siblings":null},"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"gABmln3aXY8SsDOE7BMIs"}
