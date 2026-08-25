@@ -2,6 +2,7 @@ import type {Metadata, Viewport} from 'next';
 import {Fredoka, Nunito} from 'next/font/google';
 import '@/app/globals.css';
 import GoogleAnalytics from '@/components/google-analytics';
+import GoogleAdsense from '@/components/google-adsense';
 
 const fredoka = Fredoka({
   subsets: ['latin'],
@@ -38,8 +39,13 @@ export const viewport: Viewport = {
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="ko" className={`${fredoka.variable} ${nunito.variable}`}>
-      <GoogleAnalytics />
-      <body>{children}</body>
+      <head>
+        <GoogleAdsense />
+      </head>
+      <body>
+        <GoogleAnalytics />
+        {children}
+      </body>
     </html>
   );
 }
