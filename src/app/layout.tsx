@@ -3,6 +3,7 @@ import {Fredoka, Nunito} from 'next/font/google';
 import '@/app/globals.css';
 import GoogleAnalytics from '@/components/google-analytics';
 import GoogleAdsense from '@/components/google-adsense';
+import {LocaleProvider} from '@/i18n/locale-context';
 
 const fredoka = Fredoka({
   subsets: ['latin'],
@@ -18,7 +19,7 @@ const nunito = Nunito({
 
 export const metadata: Metadata = {
   title: 'Kaisa Kids',
-  description: '폰·태블릿에서 즐기는 터치 놀이터',
+  description: 'A touch playground for phones and tablets',
   appleWebApp: {
     capable: true,
     title: 'Kaisa Kids',
@@ -38,13 +39,13 @@ export const viewport: Viewport = {
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
-    <html lang="ko" className={`${fredoka.variable} ${nunito.variable}`}>
+    <html lang="en" className={`${fredoka.variable} ${nunito.variable}`}>
       <head>
         <GoogleAdsense />
       </head>
       <body>
         <GoogleAnalytics />
-        {children}
+        <LocaleProvider>{children}</LocaleProvider>
       </body>
     </html>
   );
