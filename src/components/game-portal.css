@@ -170,6 +170,49 @@
   font-weight: 800;
 }
 
+.game-portal__footer {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  margin-top: auto;
+  margin-inline: auto;
+  padding: 36px 0 8px;
+  max-width: 1100px;
+  width: 100%;
+}
+
+.game-portal__copy {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: #8d6e63;
+}
+
+.game-portal__copy-link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.game-portal__copy-link:hover {
+  color: #5d4037;
+}
+
+.game-portal__mail {
+  font-size: 13px;
+  color: #5d4037;
+  text-decoration: none;
+}
+
+.game-portal__mail:hover {
+  color: #ff8a65;
+}
+
 @media (min-width: 600px) {
   .game-portal__item {
     flex: 1 1 calc(50% - 14px);

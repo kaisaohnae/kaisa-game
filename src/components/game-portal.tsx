@@ -62,6 +62,24 @@ export default function GamePortal() {
           ))}
         </ul>
       </section>
+
+      <footer className="game-portal__footer">
+        <p className="game-portal__copy">
+          © 2005 Kaisa ·{' '}
+          <a
+            href="https://kaisa.co.kr"
+            className="game-portal__copy-link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            kaisa.co.kr
+          </a>
+          . All Rights Reserved.
+        </p>
+        <a href="mailto:kaisa@kaisa.co.kr" className="game-portal__mail">
+          kaisa@kaisa.co.kr
+        </a>
+      </footer>
     </main>
   );
 }
