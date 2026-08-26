@@ -44,6 +44,9 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
   },
   robots: {index: true, follow: true},
+  other: {
+    'naver-site-verification': '23f0b8d4af5ee5ef89c26dea4c387517014dc8c0',
+  },
 };
 
 export const viewport: Viewport = {
