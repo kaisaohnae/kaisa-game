@@ -1,6 +1,14 @@
 import GamePortal from '@/components/game-portal';
-import '@/components/game-portal.css';
+import JsonLd from '@/components/seo/json-ld';
+import {homeJsonLd, homePageMetadata} from '@/lib/seo';
+
+export const metadata = homePageMetadata();
 
 export default function Page() {
-  return <GamePortal />;
+  return (
+    <>
+      <JsonLd data={homeJsonLd()} />
+      <GamePortal />
+    </>
+  );
 }

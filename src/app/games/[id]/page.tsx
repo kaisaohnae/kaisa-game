@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
+import JsonLd from '@/components/seo/json-ld';
 import {getGame, getGameIds} from '@/games';
+import {gameJsonLd, gamePageMetadata} from '@/lib/seo';
 import '@/components/game-portal.css';
 import './game-page.css';
 
@@ -9,15 +11,14 @@ type PageProps = {
 };
 
 export function generateStaticParams() {
-  return getGameIds().map((id) => ({id}));
+  return getGameIds().map(id => ({id}));
 }
 
 export async function generateMetadata({params}: PageProps) {
   const {id} = await params;
   const game = getGame(id);
-  return {
-    title: game ? `${game.title} · Kaisa Kids` : 'Kaisa Kids',
-  };
+  if (!game) return {};
+  return gamePageMetadata(game);
 }
 
 export default async function GamePage({params}: PageProps) {
@@ -26,19 +27,21 @@ export default async function GamePage({params}: PageProps) {
   if (!game) notFound();
 
   const Game = game.Component;
-
   const isCarRun = id === 'car-run';
 
   return (
-    <main className={`game-page${isCarRun ? ' game-page--car-run' : ''}`}>
-      <header className="game-page__header">
-        <Link href="/" className="game-page__back">
-          🏠 홈으로
-        </Link>
-      </header>
-      <section className="game-page__stage">
-        <Game />
-      </section>
-    </main>
+    <>
+      <JsonLd data={gameJsonLd(game)} />
+      <main className={`game-page${isCarRun ? ' game-page--car-run' : ''}`}>
+        <header className="game-page__header">
+          <Link href="/" className="game-page__back">
+            🏠 홈으로
+          </Link>
+        </header>
+        <section className="game-page__stage">
+          <Game />
+        </section>
+      </main>
+    </>
   );
 }

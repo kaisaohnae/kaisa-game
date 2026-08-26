@@ -1,0 +1,15 @@
+export const SITE_NAME = 'Kaisa Kids';
+
+export const SITE_DESCRIPTION = 'A touch playground for phones and tablets — learning games for kids.';
+
+export function getSiteUrl(): string {
+  const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'http://localhost:8689';
+  return raw.replace(/\/+$/, '');
+}
+
+export function absoluteUrl(path = '/'): string {
+  const base = getSiteUrl();
+  if (!path || path === '/') return `${base}/`;
+  const normalized = path.startsWith('/') ? path : `/${path}`;
+  return `${base}${normalized.endsWith('/') ? normalized : `${normalized}/`}`;
+}

@@ -4,6 +4,7 @@ import '@/app/globals.css';
 import GoogleAnalytics from '@/components/google-analytics';
 import GoogleAdsense from '@/components/google-adsense';
 import {LocaleProvider} from '@/i18n/locale-context';
+import {getSiteUrl, SITE_DESCRIPTION, SITE_NAME} from '@/config/site';
 
 const fredoka = Fredoka({
   subsets: ['latin'],
@@ -18,13 +19,31 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: 'Kaisa Kids',
-  description: 'A touch playground for phones and tablets',
+  metadataBase: new URL(getSiteUrl()),
+  title: {
+    default: SITE_NAME,
+    template: `%s · ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
   appleWebApp: {
     capable: true,
-    title: 'Kaisa Kids',
+    title: SITE_NAME,
     statusBarStyle: 'default',
   },
+  openGraph: {
+    type: 'website',
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary',
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+  },
+  robots: {index: true, follow: true},
 };
 
 export const viewport: Viewport = {
