@@ -53,8 +53,8 @@ type GameState = {
   invulnUntil: number;
 };
 
-const START_SPEED = 105;
-const MAX_SPEED = 320;
+const START_SPEED = 110;
+const MAX_SPEED = 345;
 const CAR_DISPLAY_H = 81;
 const ROAD_RATIO = 0.8;
 const LANE_COUNT = 4;
@@ -145,13 +145,12 @@ function spawnGapMs(speed: number) {
   return Math.max(480, 1040 - speed * 1.12);
 }
 
-/** 거리 따라 조금씩 가속 — 초반도 체감되고, 상한까지 부드럽게 */
+/** 거리 따라 가속 — 초반부터 체감, 상한까지 조금 더 빠르게 */
 function speedFromDistance(distance: number) {
   const meters = distance / 10;
-  // 초반 선형 가속 + 후반 수렴
-  const early = Math.min(1, meters / 420);
-  const late = 1 - Math.exp(-meters / 900);
-  const t = early * 0.45 + late * 0.55;
+  const early = Math.min(1, meters / 340);
+  const late = 1 - Math.exp(-meters / 760);
+  const t = early * 0.52 + late * 0.48;
   return START_SPEED + (MAX_SPEED - START_SPEED) * t;
 }
 
