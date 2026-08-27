@@ -9,25 +9,15 @@ import {
   type LoadedVehicle,
 } from './vehicleAssets';
 import {
-  drawObstacleSprite,
   loadObstacleImages,
   type ObstacleSpriteKind,
 } from './obstacleAssets';
-import {CAR_RUN_VEHICLES, DEFAULT_VEHICLE_ID, isPickerVehicleId} from './vehicles';
+import {CAR_RUN_VEHICLES, DEFAULT_VEHICLE_ID, isPickerVehicleId, pickObstacleVehicleId} from './vehicles';
 import './car-run.css';
 
 type Phase = 'ready' | 'playing' | 'over';
 
-type ObstacleKind =
-  | 'cone'
-  | 'rock'
-  | 'crate'
-  | 'barrel'
-  | 'tire'
-  | 'barrier'
-  | 'puddle'
-  | 'sign'
-  | 'heart';
+type ObstacleKind = 'heart' | 'vehicle';
 
 type Obstacle = {
   id: number;
@@ -36,34 +26,15 @@ type Obstacle = {
   w: number;
   h: number;
   kind: ObstacleKind;
+  /** kind === 'vehicle' 일 때 */
+  vehicleId?: string;
   /** 도로 기준 속도 배율 — 장애물마다 다르게 */
   speedMul: number;
   /** 가로 이동 속도 (px/s). 0이면 직진만 */
   vx: number;
 };
 
-const OBSTACLE_KINDS: Exclude<ObstacleKind, 'heart'>[] = [
-  'cone',
-  'rock',
-  'crate',
-  'barrel',
-  'tire',
-  'barrier',
-  'puddle',
-  'sign',
-];
-
-const OBSTACLE_SIZE: Record<ObstacleKind, {w: number; h: number}> = {
-  cone: {w: 34, h: 38},
-  rock: {w: 40, h: 36},
-  crate: {w: 44, h: 40},
-  barrel: {w: 36, h: 42},
-  tire: {w: 42, h: 34},
-  barrier: {w: 56, h: 28},
-  puddle: {w: 52, h: 24},
-  sign: {w: 38, h: 44},
-  heart: {w: 36, h: 34},
-};
+const HEART_SIZE = {w: 40, h: 38};
 
 type GameState = {
   carX: number;
@@ -101,52 +72,87 @@ function clamp(n: number, min: number, max: number) {
 
 function obstacleSpeedMul(kind: ObstacleKind) {
   if (kind === 'heart') return 0.72 + Math.random() * 0.16;
-  if (kind === 'cone' || kind === 'sign') return 0.68 + Math.random() * 0.2;
-  if (kind === 'rock' || kind === 'puddle') return 0.86 + Math.random() * 0.22;
-  if (kind === 'tire' || kind === 'barrier') return 0.94 + Math.random() * 0.28;
-  return 1.02 + Math.random() * 0.32;
+  return 0.9 + Math.random() * 0.28;
+}
+
+/** 장애물 차량 = 플레이어와 같은 표시 높이(비율은 해당 스프라이트) */
+function sizeForObstacleVehicle(
+  vehicleId: string,
+  vehicles: Map<string, LoadedVehicle> | undefined,
+  playerVehicle: LoadedVehicle | undefined,
+): {w: number; h: number} {
+  const loaded = vehicles?.get(vehicleId) ?? playerVehicle;
+  if (loaded) {
+    const {width, height} = vehicleDisplaySize(loaded, CAR_DISPLAY_H);
+    return {w: width, h: height};
+  }
+  if (playerVehicle) {
+    const {width, height} = vehicleDisplaySize(playerVehicle, CAR_DISPLAY_H);
+    return {w: width, h: height};
+  }
+  return {w: Math.round(CAR_DISPLAY_H * 0.55), h: CAR_DISPLAY_H};
 }
 
 function spawnObstacle(
   roadLeft: number,
   roadWidth: number,
   nextId: number,
-  kind?: ObstacleKind,
+  opts?: {
+    kind?: ObstacleKind;
+    selectedVehicleId?: string;
+    vehicles?: Map<string, LoadedVehicle>;
+  },
 ): Obstacle {
-  const picked =
-    kind ?? OBSTACLE_KINDS[Math.floor(Math.random() * OBSTACLE_KINDS.length)]!;
-  const {w, h} = OBSTACLE_SIZE[picked];
+  const selectedVehicleId = opts?.selectedVehicleId ?? DEFAULT_VEHICLE_ID;
+  const vehicles = opts?.vehicles;
+  const playerVehicle = vehicles?.get(selectedVehicleId);
+
+  let kind: ObstacleKind = opts?.kind ?? 'vehicle';
+  let vehicleId: string | undefined;
+  let w: number;
+  let h: number;
+
+  if (kind === 'heart') {
+    ({w, h} = HEART_SIZE);
+  } else {
+    kind = 'vehicle';
+    vehicleId = pickObstacleVehicleId(selectedVehicleId, vehicles?.keys());
+    ({w, h} = sizeForObstacleVehicle(vehicleId, vehicles, playerVehicle));
+  }
+
   const laneW = roadWidth / LANE_COUNT;
-  // 차선 중앙 근처로 배치하되 살짝 흔들기 — 일렬 직진만 오는 느낌 완화
   const lane = Math.floor(Math.random() * LANE_COUNT);
   const laneCenter = roadLeft + laneW * (lane + 0.5);
-  const jitter = (Math.random() - 0.5) * laneW * 0.35;
+  const jitter = (Math.random() - 0.5) * laneW * 0.28;
   const minX = roadLeft + w * 0.55;
   const maxX = roadLeft + roadWidth - w * 0.55;
-  const moving =
-    picked !== 'heart' && Math.random() < MOVING_OBSTACLE_CHANCE;
+  const moving = kind !== 'heart' && Math.random() < MOVING_OBSTACLE_CHANCE;
   return {
     id: nextId,
     x: clamp(laneCenter + jitter, minX, maxX),
     y: -h - 8,
     w,
     h,
-    kind: picked,
-    speedMul: obstacleSpeedMul(picked),
+    kind,
+    vehicleId,
+    speedMul: obstacleSpeedMul(kind),
     vx: moving ? (Math.random() < 0.5 ? -1 : 1) * (55 + Math.random() * 85) : 0,
   };
 }
 
 function spawnGapMs(speed: number) {
-  // 장애물 사이 간격 살짝 넓힘
-  return Math.max(560, 1180 - speed * 1.05);
+  // 장애물 밀도 살짝 올림
+  return Math.max(480, 1040 - speed * 1.12);
 }
 
-/** 거리 기반 속도 — 초반은 천천히, 점점 가속감 */
+/** 거리 따라 조금씩 가속 — 초반도 체감되고, 상한까지 부드럽게 */
 function speedFromDistance(distance: number) {
-  const t = distance / 14_000;
-  const eased = 1 - Math.exp(-t * 2.4);
-  return START_SPEED + (MAX_SPEED - START_SPEED) * eased;
+  const meters = distance / 10;
+  // 초반 선형 가속 + 후반 수렴
+  const early = Math.min(1, meters / 420);
+  const late = 1 - Math.exp(-meters / 900);
+  const t = early * 0.45 + late * 0.55;
+  return START_SPEED + (MAX_SPEED - START_SPEED) * t;
 }
 
 function rectsOverlap(
@@ -275,100 +281,35 @@ function drawObstacle(
   ctx: CanvasRenderingContext2D,
   o: Obstacle,
   sprites: Partial<Record<ObstacleSpriteKind, HTMLImageElement>>,
+  vehicles: Map<string, LoadedVehicle>,
 ) {
   const left = o.x - o.w / 2;
   const top = o.y;
 
-  if (o.kind !== 'heart') {
-    const img = sprites[o.kind as ObstacleSpriteKind];
+  if (o.kind === 'vehicle' && o.vehicleId) {
+    const v = vehicles.get(o.vehicleId);
+    const img = v?.images[0];
     if (img && img.complete && img.naturalWidth > 0) {
-      drawObstacleSprite(ctx, img, o.x, o.y, o.w, o.h);
+      // 장애물 = 6시(위에서 내려옴), 플레이어와 동일 display 크기
+      drawVehicleSprite(ctx, img, o.x, o.y + o.h / 2, o.w, o.h, {faceUp: false});
       return;
     }
+    ctx.fillStyle = '#546e7a';
+    roundRect(ctx, left, top, o.w, o.h, 8);
+    ctx.fill();
+    return;
   }
 
-  if (o.kind === 'cone') {
-    ctx.fillStyle = '#ff9800';
-    ctx.beginPath();
-    ctx.moveTo(o.x, top);
-    ctx.lineTo(left, top + o.h);
-    ctx.lineTo(left + o.w, top + o.h);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(left + 8, top + o.h - 14, o.w - 16, 5);
-    ctx.fillRect(left + 11, top + o.h - 24, o.w - 22, 4);
-  } else if (o.kind === 'rock') {
-    ctx.fillStyle = '#90a4ae';
-    ctx.beginPath();
-    ctx.ellipse(o.x, top + o.h / 2, o.w / 2, o.h / 2, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#cfd8dc';
-    ctx.beginPath();
-    ctx.ellipse(o.x - 6, top + o.h / 2 - 4, 8, 5, -0.4, 0, Math.PI * 2);
-    ctx.fill();
-  } else if (o.kind === 'crate') {
-    ctx.fillStyle = '#8d6e63';
-    roundRect(ctx, left, top + 6, o.w, o.h - 6, 8);
-    ctx.fill();
-    ctx.fillStyle = '#ffcc80';
-    roundRect(ctx, left + 6, top, o.w - 12, 10, 4);
-    ctx.fill();
-    ctx.fillStyle = '#fff8e1';
-    ctx.fillRect(left + 10, top + 16, o.w - 20, 4);
-    ctx.fillRect(left + 10, top + 24, o.w - 20, 4);
-  } else if (o.kind === 'barrel') {
-    ctx.fillStyle = '#ef5350';
-    roundRect(ctx, left, top + 4, o.w, o.h - 4, 10);
-    ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(left + 4, top + o.h * 0.35, o.w - 8, 6);
-    ctx.fillRect(left + 4, top + o.h * 0.58, o.w - 8, 6);
-    ctx.fillStyle = '#c62828';
-    roundRect(ctx, left + 6, top, o.w - 12, 10, 4);
-    ctx.fill();
-  } else if (o.kind === 'tire') {
-    ctx.fillStyle = '#37474f';
-    ctx.beginPath();
-    ctx.ellipse(o.x, top + o.h / 2, o.w / 2, o.h / 2, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#90a4ae';
-    ctx.beginPath();
-    ctx.ellipse(o.x, top + o.h / 2, o.w * 0.28, o.h * 0.28, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#263238';
-    ctx.beginPath();
-    ctx.ellipse(o.x, top + o.h / 2, o.w * 0.12, o.h * 0.12, 0, 0, Math.PI * 2);
-    ctx.fill();
-  } else if (o.kind === 'barrier') {
-    ctx.fillStyle = '#ffeb3b';
-    roundRect(ctx, left, top + 4, o.w, o.h - 8, 6);
-    ctx.fill();
-    ctx.fillStyle = '#212121';
-    for (let i = 0; i < 3; i++) {
-      const bx = left + 6 + i * ((o.w - 12) / 3);
-      ctx.beginPath();
-      ctx.moveTo(bx, top + 6);
-      ctx.lineTo(bx + 10, top + 6);
-      ctx.lineTo(bx + 18, top + o.h - 6);
-      ctx.lineTo(bx + 8, top + o.h - 6);
-      ctx.closePath();
-      ctx.fill();
-    }
-    ctx.fillStyle = '#ff7043';
-    ctx.fillRect(left + 4, top + o.h - 6, 8, 6);
-    ctx.fillRect(left + o.w - 12, top + o.h - 6, 8, 6);
-  } else if (o.kind === 'puddle') {
-    ctx.fillStyle = 'rgba(33, 150, 243, 0.55)';
-    ctx.beginPath();
-    ctx.ellipse(o.x, top + o.h / 2, o.w / 2, o.h / 2, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = 'rgba(227, 242, 253, 0.7)';
-    ctx.beginPath();
-    ctx.ellipse(o.x - 8, top + o.h / 2 - 2, 10, 5, -0.3, 0, Math.PI * 2);
-    ctx.fill();
-  } else if (o.kind === 'heart') {
+  if (o.kind === 'heart') {
+    const img = sprites.heart;
     const bob = Math.sin(performance.now() / 220 + o.id) * 2.5;
+    if (img && img.complete && img.naturalWidth > 0) {
+      ctx.save();
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(img, left, top + bob, o.w, o.h);
+      ctx.restore();
+      return;
+    }
     const cy = top + o.h / 2 + bob;
     const s = o.w * 0.42;
     ctx.fillStyle = '#e53935';
@@ -381,22 +322,6 @@ function drawObstacle(
     ctx.beginPath();
     ctx.ellipse(o.x - s * 0.28, cy - s * 0.22, s * 0.22, s * 0.16, -0.5, 0, Math.PI * 2);
     ctx.fill();
-  } else {
-    // caution sign
-    ctx.fillStyle = '#78909c';
-    ctx.fillRect(o.x - 3, top + 18, 6, o.h - 18);
-    ctx.fillStyle = '#ffeb3b';
-    ctx.beginPath();
-    ctx.moveTo(o.x, top);
-    ctx.lineTo(left + o.w, top + 22);
-    ctx.lineTo(left, top + 22);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = '#212121';
-    ctx.font = 'bold 14px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('!', o.x, top + 14);
   }
 }
 
@@ -672,16 +597,22 @@ export default function CarRunGame() {
           .filter((o) => o.y < h + 60);
 
         if (now - game.lastSpawn >= spawnGapMs(game.speed)) {
+          const spawnOpts = {
+            selectedVehicleId: selectedVehicleRef.current,
+            vehicles: vehiclesRef.current,
+          };
           if (Math.random() < HEART_SPAWN_CHANCE) {
-            game.obstacles.push(spawnObstacle(roadLeft, roadWidth, game.nextId, 'heart'));
+            game.obstacles.push(
+              spawnObstacle(roadLeft, roadWidth, game.nextId, {...spawnOpts, kind: 'heart'}),
+            );
           } else {
-            game.obstacles.push(spawnObstacle(roadLeft, roadWidth, game.nextId));
+            game.obstacles.push(spawnObstacle(roadLeft, roadWidth, game.nextId, spawnOpts));
           }
           game.nextId += 1;
 
-          if (Math.random() < 0.22) {
-            const extra = spawnObstacle(roadLeft, roadWidth, game.nextId);
-            extra.y -= 95 + Math.random() * 130;
+          if (Math.random() < 0.34) {
+            const extra = spawnObstacle(roadLeft, roadWidth, game.nextId, spawnOpts);
+            extra.y -= 80 + Math.random() * 120;
             game.obstacles.push(extra);
             game.nextId += 1;
           }
@@ -743,7 +674,9 @@ export default function CarRunGame() {
 
       drawRoad(ctx, w, h, roadLeft, roadWidth, game.scroll);
 
-      for (const o of game.obstacles) drawObstacle(ctx, o, obstaclesRef.current);
+      for (const o of game.obstacles) {
+        drawObstacle(ctx, o, obstaclesRef.current, vehiclesRef.current);
+      }
 
       if (vehicle) {
         const img = vehicle.images[0];
@@ -860,14 +793,15 @@ export default function CarRunGame() {
           <div className="car-run__hud" aria-live="polite">
             <div className="car-run__hud-score">{score}m</div>
             <div className="car-run__hearts" aria-label={`하트 ${lives}개`}>
-              {Array.from({length: MAX_LIVES}, (_, i) => (
-                <span
+              {Array.from({length: lives}, (_, i) => (
+                <img
                   key={i}
-                  className={`car-run__heart${i < lives ? '' : ' car-run__heart--empty'}`}
+                  className="car-run__heart"
+                  src="/car-run/obstacles/heart.png"
+                  alt=""
                   aria-hidden
-                >
-                  ♥
-                </span>
+                  draggable={false}
+                />
               ))}
             </div>
           </div>

@@ -32,8 +32,16 @@ export async function loadVehicle(def: VehicleDef): Promise<LoadedVehicle> {
 }
 
 export async function loadAllVehicles(defs: VehicleDef[]) {
-  const entries = await Promise.all(defs.map(async (def) => [def.id, await loadVehicle(def)] as const));
-  return new Map(entries);
+  const entries = await Promise.all(
+    defs.map(async (def) => {
+      try {
+        return [def.id, await loadVehicle(def)] as const;
+      } catch {
+        return null;
+      }
+    }),
+  );
+  return new Map(entries.filter((e): e is readonly [string, LoadedVehicle] => e != null));
 }
 
 export function vehicleDisplaySize(vehicle: LoadedVehicle, displayHeight: number) {
@@ -44,7 +52,11 @@ export function vehicleDisplaySize(vehicle: LoadedVehicle, displayHeight: number
   };
 }
 
-/** 플레이어 차량: 스프라이트(6시) → 화면 12시. 장애물 차량: rotate=false 로 6시 유지 */
+/**
+ * PNG 기본 방향 = 6시(코 아래).
+ * - faceUp true (플레이어): 180° → 화면 12시
+ * - faceUp false (장애물): 그대로 6시(위에서 내려옴)
+ */
 export function drawVehicleSprite(
   ctx: CanvasRenderingContext2D,
   img: HTMLImageElement,
@@ -58,6 +70,7 @@ export function drawVehicleSprite(
   const alpha = opts?.alpha ?? 1;
   ctx.save();
   ctx.globalAlpha = alpha;
+  ctx.imageSmoothingEnabled = false;
   ctx.translate(cx, cy);
   if (faceUp) ctx.rotate(Math.PI);
   ctx.drawImage(img, -w / 2, -h / 2, w, h);

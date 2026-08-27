@@ -758,6 +758,27 @@
       "message": "installed",
       "updatedAt": "2026-08-27T06:50:54.613Z",
       "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\objects\\barrel.png"
+    },
+    {
+      "id": "car-excavator",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:10:50.507Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\excavator.png"
+    },
+    {
+      "id": "car-tank",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:11:21.731Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\tank.png"
+    },
+    {
+      "id": "car-obs-heart",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:11:45.840Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\obstacles\\heart.png"
     }
   ]
 }

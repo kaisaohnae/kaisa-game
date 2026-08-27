@@ -123,6 +123,7 @@ const spawn = spawnSettings;
 const ROLL_COST = bal.player.rollCost;
 const MAX_ROLLS_EQUIV = bal.player.staminaRegenRolls;
 const GROUND_TTL = drops.groundTtlSec;
+const OWNED_TTL = (drops as {alreadyOwnedTtlSec?: number}).alreadyOwnedTtlSec ?? 1;
 const PICKUP_R = drops.pickupRadius;
 
 type Job = JobId;
@@ -1063,13 +1064,15 @@ export default function TodieGame() {
     const spawnGroundDrop = (x: number, y: number, item: Item, scatter = 42) => {
       const ang = Math.random() * Math.PI * 2;
       const dist = rand(18, scatter);
+      const owned = ownsSameUniqueGear(inventory, equippedRef.current, item);
+      const ttl = owned ? OWNED_TTL : GROUND_TTL;
       groundDrops.push({
         uid: nextDropUid++,
         x: x + Math.cos(ang) * dist,
         y: y + Math.sin(ang) * dist,
         item,
-        life: GROUND_TTL,
-        maxLife: GROUND_TTL,
+        life: ttl,
+        maxLife: ttl,
       });
     };
 
@@ -1273,6 +1276,9 @@ export default function TodieGame() {
             showToast(alreadyOwnedToast());
             wrongJobToastCd = drops.wrongJobToastCooldown;
           }
+          // 이미 소지 → 짧게 남기고 사라짐
+          d.life = Math.min(d.life, OWNED_TTL);
+          d.maxLife = Math.min(d.maxLife, OWNED_TTL);
           keep.push(d);
           continue;
         }

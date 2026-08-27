@@ -1,15 +1,7 @@
 const BASE = '/car-run/obstacles';
 
-export const OBSTACLE_SPRITE_KINDS = [
-  'cone',
-  'rock',
-  'crate',
-  'barrel',
-  'tire',
-  'barrier',
-  'puddle',
-  'sign',
-] as const;
+/** 게임에서 쓰는 정적 픽업만 (소형 프롭 장애물 제거) */
+export const OBSTACLE_SPRITE_KINDS = ['heart'] as const;
 
 export type ObstacleSpriteKind = (typeof OBSTACLE_SPRITE_KINDS)[number];
 
@@ -36,18 +28,4 @@ export async function loadObstacleImages(): Promise<
     }),
   );
   return out;
-}
-
-export function drawObstacleSprite(
-  ctx: CanvasRenderingContext2D,
-  img: HTMLImageElement,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-) {
-  ctx.save();
-  ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(img, x - w / 2, y, w, h);
-  ctx.restore();
 }

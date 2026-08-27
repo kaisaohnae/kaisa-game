@@ -45,7 +45,10 @@ const STYLE_SUFFIX =
   ', top-down pixel art, CraftPix RPG style, 16-bit retro game asset, limited color palette, crisp pixels, transparent background';
 
 const CAR_STYLE =
-  ', top-down overhead view looking straight down, car nose pointing DOWN toward bottom of image (6 o clock), headlights at bottom, rear at top, Unlucky Studio style topdown vehicle sprite, retro arcade racing game, crisp pixels, transparent background';
+  ', top-down overhead view looking straight down, vehicle nose pointing DOWN toward bottom of image (6 o clock), headlights at BOTTOM, rear bumper at TOP, Unlucky Studio style topdown vehicle sprite, retro arcade racing game, crisp pixels, transparent background';
+
+const HEART_STYLE =
+  ', cute pixel heart pickup icon for racing game HUD, bright red heart with soft shine, centered, transparent background, no text';
 
 const TIER_VISUAL = {
   basic: 'simple worn starter gear',
@@ -133,7 +136,7 @@ export const MANIFEST = [
   // ── Todie: 장비 (items.json) ──
   ...buildTodieGearManifest(),
 
-  // ── Car Run: 차량 (top-down, 스프라이트는 6시 / 게임에서 플레이어만 12시로 회전) ──
+  // ── Car Run: 차량 (에셋 6시 / 플레이어는 게임에서 12시로 회전, 장애물은 6시 유지) ──
   ...carStatic('viper', '바이퍼', 'sleek black sports car top-down, roof windshield headlights at bottom'),
   ...carStatic('truck', '트럭', 'large delivery truck top-down, cab at bottom cargo box at top'),
   ...carStatic('audi', '아우디', 'silver luxury sedan top-down, headlights at bottom'),
@@ -143,16 +146,11 @@ export const MANIFEST = [
   ...carStatic('mini-van', '미니밴', 'white mini van top-down, headlights at bottom'),
   ...carStatic('police', '경찰차', 'police car top-down, roof light bar, headlights at bottom'),
   ...carStatic('ambulance', '구급차', 'white ambulance van top-down, red cross on roof, headlights at bottom'),
+  ...carStatic('excavator', '포크레인', 'yellow construction excavator digger top-down, cabin and boom arm, headlights at bottom'),
+  ...carStatic('tank', '탱크', 'military green tank top-down, turret and tracks, cannon facing bottom (6 o clock)'),
 
-  // ── Car Run: 장애물 (top-down) ──
-  ...carObstacle('cone', '교통콘', 'orange traffic cone top-down on asphalt, circular base visible'),
-  ...carObstacle('rock', '바위', 'gray boulder rock obstacle on road top-down'),
-  ...carObstacle('crate', '상자', 'wooden shipping crate obstacle top-down, lid visible'),
-  ...carObstacle('barrel', '통', 'red oil barrel obstacle top-down, circular lid visible'),
-  ...carObstacle('tire', '타이어', 'black rubber tire lying flat on road top-down, donut shape'),
-  ...carObstacle('barrier', '차단기', 'yellow black road barrier strip top-down across lane'),
-  ...carObstacle('puddle', '웅덩이', 'road water puddle hazard top-down, irregular blue oval'),
-  ...carObstacle('sign', '도로표지', 'road warning sign obstacle top-down, square sign face'),
+  // ── Car Run: 하트 픽업 (소형 프롭 장애물은 게임에서 미사용) ──
+  ...carHeart(),
 ];
 
 function todieCharacterSync() {
@@ -345,18 +343,17 @@ function carStatic(id, label, desc) {
   ];
 }
 
-/** @param {string} id @param {string} label @param {string} desc */
-function carObstacle(id, label, desc) {
+function carHeart() {
   return [
     {
-      id: `car-obs-${id}`,
+      id: 'car-obs-heart',
       game: 'car-run',
       category: 'obstacle',
-      label: `장애물: ${label}`,
+      label: '픽업: 하트',
       type: 'pixflux',
-      description: `${desc}${CAR_STYLE}`,
-      imageSize: {width: 64, height: 64},
-      fileInstall: {path: `public/car-run/obstacles/${id}.png`},
+      description: `racing game life pickup heart${HEART_STYLE}`,
+      imageSize: {width: 48, height: 48},
+      fileInstall: {path: 'public/car-run/obstacles/heart.png'},
     },
   ];
 }
