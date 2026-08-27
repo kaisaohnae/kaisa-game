@@ -3,8 +3,8 @@ import dropsJson from '../settings/drops.json';
 import displayJson from '../settings/display.json';
 import {jobLabel} from './settings';
 import type {JobId} from './types';
-import type {GearSlot, Item} from './equip';
-import {EQUIP_SLOTS} from './equip';
+import type {Equipment, GearSlot, Item} from './equip';
+import {EQUIP_SLOTS, ownsSameUniqueGear} from './equip';
 
 export const itemSettings = itemsJson;
 export const dropSettings = dropsJson;
@@ -244,16 +244,72 @@ export type LootItemDraft = {
   tier: GearTier | null;
 };
 
-export function rollLootDrop(): LootItemDraft {
+/** 드랍 필터: 내 직업만, 이미 장착·유일 보유 장비는 제외 */
+export type LootDropContext = {
+  job: JobId;
+  bag: Item[];
+  equipped: Equipment;
+};
+
+function draftMatchesEquipped(draft: LootItemDraft, equipped: Equipment): boolean {
+  if (draft.kind !== 'gear' || !draft.gearId || !draft.job) return false;
+  for (const s of EQUIP_SLOTS) {
+    const wearing = equipped[s.id];
+    if (!wearing || wearing.kind !== 'gear') continue;
+    if (
+      wearing.gearId === draft.gearId &&
+      wearing.job === draft.job &&
+      wearing.tier === draft.tier
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function isUsefulGearDrop(draft: LootItemDraft, ctx: LootDropContext): boolean {
+  if (draft.kind !== 'gear') return true;
+  if (draft.job != null && draft.job !== ctx.job) return false;
+  if (draftMatchesEquipped(draft, ctx.equipped)) return false;
+  const probe: Item = {
+    id: 'loot-probe',
+    kind: 'gear',
+    name: draft.name,
+    qty: 1,
+    color: draft.color,
+    job: draft.job,
+    gearId: draft.gearId,
+    gearSlot: draft.gearSlot,
+    tier: draft.tier,
+  };
+  if (ownsSameUniqueGear(ctx.bag, ctx.equipped, probe)) return false;
+  return true;
+}
+
+export function rollLootDrop(ctx?: LootDropContext): LootItemDraft {
   const {rolls, consumableWeights, slotWeights, jobWeights} = dropsJson;
   const {consumables, gear} = itemsJson;
+  const maxTries = 14;
 
-  if (Math.random() < rolls.gearChance) {
-    const job = pickWeighted(
-      (Object.entries(jobWeights ?? {warrior: 50, mage: 50}) as [JobId, number][]).map(
-        ([k, weight]) => ({k, weight}),
-      ),
-    ).k;
+  for (let attempt = 0; attempt < maxTries; attempt += 1) {
+    let draft: LootItemDraft;
+    if (Math.random() < rolls.gearChance) {
+      draft = rollGear();
+    } else {
+      draft = rollConsumable();
+    }
+    if (!ctx || isUsefulGearDrop(draft, ctx)) return draft;
+  }
+  return rollConsumable();
+
+  function rollGear(): LootItemDraft {
+    const job = ctx?.job
+      ? ctx.job
+      : pickWeighted(
+          (Object.entries(jobWeights ?? {warrior: 50, mage: 50}) as [JobId, number][]).map(
+            ([k, weight]) => ({k, weight}),
+          ),
+        ).k;
     const tier = pickWeighted(tierWeightsFromSettings()).k;
     const slot = pickWeighted(
       (Object.entries(slotWeights) as [GearSlot, number][]).map(([k, weight]) => ({
@@ -269,11 +325,26 @@ export function rollLootDrop(): LootItemDraft {
     const fallback = gear[job][tier].filter(
       (g) => (g as {droppable?: boolean}).droppable !== false,
     );
-    const list = pool.length ? pool : fallback;
+    let list = pool.length ? pool : fallback;
+    if (ctx) {
+      list = list.filter((g) => {
+        const probe: LootItemDraft = {
+          kind: 'gear',
+          name: g.name,
+          qty: 1,
+          color: g.color,
+          job,
+          gearId: g.id,
+          gearSlot: g.slot as GearSlot,
+          tier,
+        };
+        return isUsefulGearDrop(probe, ctx);
+      });
+    }
     if (!list.length) {
       return rollConsumable();
     }
-    const g = list[Math.floor(Math.random() * list.length)];
+    const g = list[Math.floor(Math.random() * list.length)]!;
     return {
       kind: 'gear',
       name: formatGearName(job, g.name),
@@ -285,7 +356,6 @@ export function rollLootDrop(): LootItemDraft {
       tier,
     };
   }
-  return rollConsumable();
 
   function rollConsumable(): LootItemDraft {
     const picked = pickWeighted(

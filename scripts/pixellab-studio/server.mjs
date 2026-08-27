@@ -113,6 +113,42 @@ const server = http.createServer(async (req, res) => {
       return json(res, {error: 'apiKey required'}, 400);
     }
 
+    if (url.pathname === '/api/todie-map' && req.method === 'GET') {
+      const mapPath = path.join(ROOT, 'public', 'todie', 'map', 'world.json');
+      if (!fs.existsSync(mapPath)) {
+        return json(res, {error: 'world.json missing'}, 404);
+      }
+      const map = JSON.parse(fs.readFileSync(mapPath, 'utf8'));
+      return json(res, map);
+    }
+
+    if (url.pathname === '/api/todie-map' && req.method === 'POST') {
+      const body = await readJson(req);
+      if (!body || body.version !== 1 || !Array.isArray(body.cells) || !Array.isArray(body.palette)) {
+        return json(res, {error: 'invalid map payload'}, 400);
+      }
+      const cols = Number(body.cols) || 100;
+      const rows = Number(body.rows) || 100;
+      if (body.cells.length !== cols * rows) {
+        return json(res, {error: `cells length must be ${cols * rows}`}, 400);
+      }
+      const dir = path.join(ROOT, 'public', 'todie', 'map');
+      fs.mkdirSync(dir, {recursive: true});
+      const mapPath = path.join(dir, 'world.json');
+      const payload = {
+        version: 1,
+        name: typeof body.name === 'string' ? body.name : 'todie-world',
+        worldSize: Number(body.worldSize) || 10000,
+        tileSize: Number(body.tileSize) || 100,
+        cols,
+        rows,
+        palette: body.palette,
+        cells: body.cells,
+      };
+      fs.writeFileSync(mapPath, JSON.stringify(payload));
+      return json(res, {ok: true, path: 'public/todie/map/world.json', cells: payload.cells.length});
+    }
+
     return json(res, {error: 'not found'}, 404);
   } catch (err) {
     return json(res, {error: err instanceof Error ? err.message : String(err)}, 500);
@@ -133,6 +169,7 @@ server.on('error', (err) => {
 server.listen(PORT, '127.0.0.1', () => {
   console.log(`PixelLab Studio → http://127.0.0.1:${PORT}`);
   console.log(`Open UI       → http://localhost:8887/studio/`);
+  console.log(`Map editor    → http://localhost:8887/studio/map/`);
   if (!API_KEY) {
     console.log('PIXELLAB_API_KEY missing — paste key in /studio/ settings');
   }

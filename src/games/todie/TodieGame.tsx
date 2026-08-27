@@ -22,6 +22,8 @@ import {
   ownsSameUniqueGear,
   alreadyOwnedToast,
   pickSpawnKind,
+  getTileId,
+  tileDef,
   preloadAllTodieAssets,
   pickupOrAutoEquip,
   rollLootDrop,
@@ -51,7 +53,7 @@ import {InventoryDock} from './ui/InventoryDock';
 import {createTodieBgm, readBgmMuted, type TodieBgm} from './audio/proceduralBgm';
 
 const WORLD = spawnSettings.worldSize ?? 10_000;
-const TILE = 72;
+const TILE = 100;
 const PLAYER_R = 18;
 const HOTBAR = 5;
 const BAG_SIZE = 80;
@@ -843,6 +845,8 @@ export default function TodieGame() {
     const consumableImages: Record<string, HTMLImageElement> =
       assetsRef.current?.consumables ?? {};
     const mobImages: Record<string, HTMLImageElement> = assetsRef.current?.mobs ?? {};
+    const tileImages = assetsRef.current?.tiles ?? {};
+    const worldMap = assetsRef.current?.map ?? null;
 
 
     let mobs: Mob[] = [];
@@ -1185,7 +1189,13 @@ export default function TodieGame() {
               : 1;
       let lastName = '';
       for (let i = 0; i < dropN; i += 1) {
-        const loot = draftToItem(rollLootDrop());
+        const loot = draftToItem(
+          rollLootDrop({
+            job: player.job,
+            bag: inventory,
+            equipped: equippedRef.current,
+          }),
+        );
         lastName = loot.name;
         spawnGroundDrop(m.x, m.y, loot);
       }
@@ -1943,30 +1953,25 @@ export default function TodieGame() {
       const ty0 = Math.floor(top / TILE) - 1;
       const tx1 = Math.ceil((left + viewW) / TILE) + 1;
       const ty1 = Math.ceil((top + viewH) / TILE) + 1;
+      ctx.imageSmoothingEnabled = false;
+
       for (let ty = ty0; ty <= ty1; ty += 1) {
         for (let tx = tx0; tx <= tx1; tx += 1) {
           if (tx < 0 || ty < 0 || tx * TILE >= WORLD || ty * TILE >= WORLD) {
             continue;
           }
-          const s = tileSeed(tx, ty);
-          const check = (tx + ty) % 2 === 0;
-          const waste = biomeWasteland(tx, ty);
-
-          // soft grass (low contrast)
-          const gr = (check ? 114 : 122) + (s - 0.5) * 4;
-          const gg = (check ? 152 : 160) + (s - 0.5) * 4;
-          const gb = (check ? 100 : 106) + (s - 0.5) * 3;
-          // soft wasteland dirt (also low contrast)
-          const wr = (check ? 148 : 156) + (s - 0.5) * 4;
-          const wg = (check ? 122 : 128) + (s - 0.5) * 3;
-          const wb = (check ? 96 : 102) + (s - 0.5) * 3;
-
-          const t = smoothstep(waste);
-          const r = Math.round(gr + (wr - gr) * t);
-          const g = Math.round(gg + (wg - gg) * t);
-          const b = Math.round(gb + (wb - gb) * t);
-          ctx.fillStyle = `rgb(${r},${g},${b})`;
-          ctx.fillRect(tx * TILE, ty * TILE, TILE + 1, TILE + 1);
+          const id = worldMap
+            ? getTileId(worldMap, tx, ty)
+            : biomeWasteland(tx, ty) >= 0.45
+              ? 'wasteland_a'
+              : 'grass_a';
+          const prepared = tileImages[id];
+          if (prepared) {
+            ctx.drawImage(prepared, tx * TILE, ty * TILE, TILE, TILE);
+            continue;
+          }
+          ctx.fillStyle = tileDef(id).fill;
+          ctx.fillRect(tx * TILE, ty * TILE, TILE, TILE);
         }
       }
 
@@ -2342,13 +2347,12 @@ export default function TodieGame() {
         for (let u = 0; u < miniBox.w; u += step) {
           const tx = Math.floor(((u + 0.5) / miniBox.w) * (WORLD / TILE));
           const ty = Math.floor(((v + 0.5) / miniBox.h) * (WORLD / TILE));
-          const waste = biomeWasteland(tx, ty);
-          if (waste < 0.42) continue;
-          const t = smoothstep((waste - 0.42) / 0.45);
-          const r = Math.round(46 + 72 * t);
-          const g = Math.round(74 - 28 * t);
-          const b = Math.round(42 - 8 * t);
-          mctx.fillStyle = `rgb(${r},${g},${b})`;
+          const id = worldMap
+            ? getTileId(worldMap, tx, ty)
+            : biomeWasteland(tx, ty) >= 0.45
+              ? 'wasteland_a'
+              : 'grass_a';
+          mctx.fillStyle = tileDef(id).fill;
           mctx.fillRect(u, v, step, step);
         }
       }

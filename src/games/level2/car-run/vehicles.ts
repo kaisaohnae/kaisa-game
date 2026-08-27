@@ -8,17 +8,13 @@ export type VehicleDef = {
   hidden?: boolean;
   /** static 차량 단일 이미지 */
   src?: string;
-  /** animated 차량 프레임 (폴더 순서) */
+  /** animated 차량 프레임 (폴더 순서) — 현재 미사용 */
   frames?: string[];
 };
 
 const BASE = '/car-run/vehicles';
 
-function frames(dir: string, count: number) {
-  return Array.from({length: count}, (_, i) => `${BASE}/${dir}/${i + 1}.png`);
-}
-
-/** Unlucky Studio Topdown Vehicle Sprites Pack */
+/** Unlucky Studio Topdown Vehicle Sprites Pack (스프라이트 기본 방향: 6시) */
 export const CAR_RUN_VEHICLES: VehicleDef[] = [
   {id: 'audi', label: '아우디', kind: 'static', hidden: true, src: `${BASE}/Audi.png`},
   {id: 'viper', label: '바이퍼', kind: 'static', src: `${BASE}/Black_viper.png`},
@@ -27,18 +23,8 @@ export const CAR_RUN_VEHICLES: VehicleDef[] = [
   {id: 'mini-truck', label: '미니트럭', kind: 'static', hidden: true, src: `${BASE}/Mini_truck.png`},
   {id: 'mini-van', label: '미니밴', kind: 'static', hidden: true, src: `${BASE}/Mini_van.png`},
   {id: 'truck', label: '트럭', kind: 'static', src: `${BASE}/truck.png`},
-  {
-    id: 'police',
-    label: '경찰차',
-    kind: 'animated',
-    frames: frames('Police_animation', 3),
-  },
-  {
-    id: 'ambulance',
-    label: '구급차',
-    kind: 'animated',
-    frames: frames('ambulance_animation', 3),
-  },
+  {id: 'police', label: '경찰차', kind: 'static', src: `${BASE}/Police.png`},
+  {id: 'ambulance', label: '구급차', kind: 'static', src: `${BASE}/ambulance.png`},
 ];
 
 export const CAR_RUN_PICKER_VEHICLES = CAR_RUN_VEHICLES.filter((v) => !v.hidden);

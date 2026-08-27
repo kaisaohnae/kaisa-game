@@ -44,7 +44,22 @@ export function vehicleDisplaySize(vehicle: LoadedVehicle, displayHeight: number
   };
 }
 
-export function vehicleFrameIndex(vehicle: LoadedVehicle, now: number, frameMs = 140) {
-  if (vehicle.kind !== 'animated' || vehicle.images.length <= 1) return 0;
-  return Math.floor(now / frameMs) % vehicle.images.length;
+/** 플레이어 차량: 스프라이트(6시) → 화면 12시. 장애물 차량: rotate=false 로 6시 유지 */
+export function drawVehicleSprite(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  cx: number,
+  cy: number,
+  w: number,
+  h: number,
+  opts?: {faceUp?: boolean; alpha?: number},
+) {
+  const faceUp = opts?.faceUp ?? true;
+  const alpha = opts?.alpha ?? 1;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.translate(cx, cy);
+  if (faceUp) ctx.rotate(Math.PI);
+  ctx.drawImage(img, -w / 2, -h / 2, w, h);
+  ctx.restore();
 }

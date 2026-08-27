@@ -634,48 +634,6 @@
       "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\Mini_van.png"
     },
     {
-      "id": "car-police-f1",
-      "status": "completed",
-      "message": "installed",
-      "updatedAt": "2026-08-27T05:52:54.425Z",
-      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\Police_animation\\1.png"
-    },
-    {
-      "id": "car-police-f2",
-      "status": "completed",
-      "message": "installed",
-      "updatedAt": "2026-08-27T05:53:09.034Z",
-      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\Police_animation\\2.png"
-    },
-    {
-      "id": "car-police-f3",
-      "status": "completed",
-      "message": "installed",
-      "updatedAt": "2026-08-27T05:53:35.424Z",
-      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\Police_animation\\3.png"
-    },
-    {
-      "id": "car-ambulance-f1",
-      "status": "completed",
-      "message": "installed",
-      "updatedAt": "2026-08-27T05:53:57.435Z",
-      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\ambulance_animation\\1.png"
-    },
-    {
-      "id": "car-ambulance-f2",
-      "status": "completed",
-      "message": "installed",
-      "updatedAt": "2026-08-27T05:54:17.812Z",
-      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\ambulance_animation\\2.png"
-    },
-    {
-      "id": "car-ambulance-f3",
-      "status": "completed",
-      "message": "installed",
-      "updatedAt": "2026-08-27T05:54:37.319Z",
-      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\ambulance_animation\\3.png"
-    },
-    {
       "id": "car-obs-cone",
       "status": "completed",
       "message": "installed",
@@ -730,6 +688,20 @@
       "message": "installed",
       "updatedAt": "2026-08-27T05:57:11.550Z",
       "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\obstacles\\sign.png"
+    },
+    {
+      "id": "car-police",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T06:04:24.473Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\Police.png"
+    },
+    {
+      "id": "car-ambulance",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T06:04:40.177Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\ambulance.png"
     }
   ]
 }

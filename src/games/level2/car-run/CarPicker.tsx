@@ -9,8 +9,7 @@ type Props = {
 };
 
 function previewSrc(def: VehicleDef) {
-  if (def.kind === 'animated') return def.frames?.[0] ?? '';
-  return def.src ?? '';
+  return def.src ?? def.frames?.[0] ?? '';
 }
 
 export default function CarPicker({selectedId, onSelect}: Props) {
@@ -30,12 +29,12 @@ export default function CarPicker({selectedId, onSelect}: Props) {
               onClick={() => onSelect(vehicle.id)}
             >
               <span className="car-picker__thumb">
-                <img src={previewSrc(vehicle)} alt="" draggable={false} />
-                {vehicle.kind === 'animated' ? (
-                  <span className="car-picker__badge" aria-hidden="true">
-                    ✨
-                  </span>
-                ) : null}
+                <img
+                  className="car-picker__img"
+                  src={previewSrc(vehicle)}
+                  alt=""
+                  draggable={false}
+                />
               </span>
               <span className="car-picker__name">{vehicle.label}</span>
             </button>

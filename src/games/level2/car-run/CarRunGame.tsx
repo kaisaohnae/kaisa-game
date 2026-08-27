@@ -3,11 +3,16 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import CarPicker from './CarPicker';
 import {
+  drawVehicleSprite,
   loadAllVehicles,
   vehicleDisplaySize,
-  vehicleFrameIndex,
   type LoadedVehicle,
 } from './vehicleAssets';
+import {
+  drawObstacleSprite,
+  loadObstacleImages,
+  type ObstacleSpriteKind,
+} from './obstacleAssets';
 import {CAR_RUN_VEHICLES, DEFAULT_VEHICLE_ID, isPickerVehicleId} from './vehicles';
 import './car-run.css';
 
@@ -33,6 +38,8 @@ type Obstacle = {
   kind: ObstacleKind;
   /** 도로 기준 속도 배율 — 장애물마다 다르게 */
   speedMul: number;
+  /** 가로 이동 속도 (px/s). 0이면 직진만 */
+  vx: number;
 };
 
 const OBSTACLE_KINDS: Exclude<ObstacleKind, 'heart'>[] = [
@@ -78,11 +85,14 @@ type GameState = {
 const START_SPEED = 105;
 const MAX_SPEED = 320;
 const CAR_DISPLAY_H = 81;
-const ROAD_RATIO = 0.74;
+const ROAD_RATIO = 0.8;
+const LANE_COUNT = 4;
 const START_LIVES = 3;
 const MAX_LIVES = 5;
 const HIT_INVULN_MS = 1200;
 const HEART_SPAWN_CHANCE = 0.075;
+/** 장애물이 좌우로 움직이는 낮은 확률 */
+const MOVING_OBSTACLE_CHANCE = 0.16;
 const VEHICLE_STORAGE_KEY = 'kaisa-car-run-vehicle';
 
 function clamp(n: number, min: number, max: number) {
@@ -106,21 +116,30 @@ function spawnObstacle(
   const picked =
     kind ?? OBSTACLE_KINDS[Math.floor(Math.random() * OBSTACLE_KINDS.length)]!;
   const {w, h} = OBSTACLE_SIZE[picked];
-  const minX = roadLeft + w * 0.6;
-  const maxX = roadLeft + roadWidth - w * 0.6;
+  const laneW = roadWidth / LANE_COUNT;
+  // 차선 중앙 근처로 배치하되 살짝 흔들기 — 일렬 직진만 오는 느낌 완화
+  const lane = Math.floor(Math.random() * LANE_COUNT);
+  const laneCenter = roadLeft + laneW * (lane + 0.5);
+  const jitter = (Math.random() - 0.5) * laneW * 0.35;
+  const minX = roadLeft + w * 0.55;
+  const maxX = roadLeft + roadWidth - w * 0.55;
+  const moving =
+    picked !== 'heart' && Math.random() < MOVING_OBSTACLE_CHANCE;
   return {
     id: nextId,
-    x: minX + Math.random() * (maxX - minX),
+    x: clamp(laneCenter + jitter, minX, maxX),
     y: -h - 8,
     w,
     h,
     kind: picked,
     speedMul: obstacleSpeedMul(picked),
+    vx: moving ? (Math.random() < 0.5 ? -1 : 1) * (55 + Math.random() * 85) : 0,
   };
 }
 
 function spawnGapMs(speed: number) {
-  return Math.max(400, 920 - speed * 1.2);
+  // 장애물 사이 간격 살짝 넓힘
+  return Math.max(560, 1180 - speed * 1.05);
 }
 
 /** 거리 기반 속도 — 초반은 천천히, 점점 가속감 */
@@ -154,43 +173,119 @@ function rectsOverlap(
   );
 }
 
+function drawTopDownTree(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
+  // 위에서 본 나무 — 수관 원 + 가운데 줄기
+  ctx.fillStyle = '#558b2f';
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#7cb342';
+  ctx.beginPath();
+  ctx.arc(x - r * 0.18, y - r * 0.2, r * 0.62, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#33691e';
+  ctx.beginPath();
+  ctx.arc(x + r * 0.22, y + r * 0.15, r * 0.45, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#5d4037';
+  ctx.beginPath();
+  ctx.arc(x, y, r * 0.18, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawRoadsideTrees(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  roadLeft: number,
+  roadWidth: number,
+  scroll: number,
+) {
+  const period = 118;
+  const offset = scroll % period;
+  const leftCx = roadLeft * 0.48;
+  const rightCx = roadLeft + roadWidth + (w - roadLeft - roadWidth) * 0.52;
+
+  for (let row = -2; row < Math.ceil(h / period) + 2; row += 1) {
+    const y = row * period + offset;
+    // 띄엄띄엄 — 홀수 행만 / 좌우 어긋나게
+    if (row % 2 === 0) {
+      drawTopDownTree(ctx, leftCx + ((row * 17) % 11) - 5, y, 14 + (Math.abs(row) % 3) * 2);
+    } else {
+      drawTopDownTree(ctx, rightCx + ((row * 13) % 9) - 4, y + 18, 13 + (Math.abs(row) % 4));
+    }
+    if (row % 3 === 0) {
+      drawTopDownTree(ctx, leftCx * 0.55, y + 42, 11);
+    }
+    if (row % 3 === 1) {
+      drawTopDownTree(ctx, rightCx + (w - rightCx) * 0.35, y + 55, 12);
+    }
+  }
+}
+
 function drawRoad(
   ctx: CanvasRenderingContext2D,
   w: number,
   h: number,
   roadLeft: number,
   roadWidth: number,
+  scroll: number,
 ) {
-  const sky = ctx.createLinearGradient(0, 0, 0, h);
-  sky.addColorStop(0, '#b3e5fc');
-  sky.addColorStop(1, '#e1f5fe');
-  ctx.fillStyle = sky;
+  // 전체 잔디 (하늘색 없음)
+  ctx.fillStyle = '#7cb342';
   ctx.fillRect(0, 0, w, h);
 
-  ctx.fillStyle = '#aed581';
-  ctx.fillRect(0, 0, roadLeft, h);
-  ctx.fillRect(roadLeft + roadWidth, 0, w - roadLeft - roadWidth, h);
+  ctx.fillStyle = 'rgba(104, 159, 56, 0.28)';
+  for (let y = 0; y < h; y += 16) {
+    const oy = (y + scroll * 0.35) % 16;
+    ctx.fillRect(0, y - oy, roadLeft - 2, 6);
+    ctx.fillRect(roadLeft + roadWidth + 2, y - oy, w - roadLeft - roadWidth, 6);
+  }
 
-  ctx.fillStyle = '#ffe082';
-  ctx.fillRect(roadLeft - 5, 0, 5, h);
-  ctx.fillRect(roadLeft + roadWidth, 0, 5, h);
+  drawRoadsideTrees(ctx, w, h, roadLeft, roadWidth, scroll);
 
-  ctx.fillStyle = '#bdbdbd';
+  ctx.fillStyle = '#ffd54f';
+  ctx.fillRect(roadLeft - 6, 0, 6, h);
+  ctx.fillRect(roadLeft + roadWidth, 0, 6, h);
+
+  const asphalt = ctx.createLinearGradient(roadLeft, 0, roadLeft + roadWidth, 0);
+  asphalt.addColorStop(0, '#616161');
+  asphalt.addColorStop(0.5, '#757575');
+  asphalt.addColorStop(1, '#616161');
+  ctx.fillStyle = asphalt;
   ctx.fillRect(roadLeft, 0, roadWidth, h);
+
+  // 4차선 → 점선 3개
+  const dashH = 26;
+  const gap = 20;
+  const period = dashH + gap;
+  const offset = scroll % period;
+  const laneW = roadWidth / LANE_COUNT;
+  ctx.fillStyle = '#fffde7';
+  for (let lane = 1; lane < LANE_COUNT; lane += 1) {
+    const lx = roadLeft + laneW * lane;
+    const thick = lane === LANE_COUNT / 2 ? 5 : 3;
+    for (let y = -period; y < h + period; y += period) {
+      ctx.fillRect(lx - thick / 2, y + offset, thick, dashH);
+    }
+  }
 }
 
-function drawCloud(ctx: CanvasRenderingContext2D, x: number, y: number, s: number) {
-  ctx.fillStyle = 'rgba(255,255,255,0.85)';
-  ctx.beginPath();
-  ctx.arc(x, y, 16 * s, 0, Math.PI * 2);
-  ctx.arc(x + 18 * s, y - 4 * s, 14 * s, 0, Math.PI * 2);
-  ctx.arc(x + 36 * s, y, 15 * s, 0, Math.PI * 2);
-  ctx.fill();
-}
-
-function drawObstacle(ctx: CanvasRenderingContext2D, o: Obstacle) {
+function drawObstacle(
+  ctx: CanvasRenderingContext2D,
+  o: Obstacle,
+  sprites: Partial<Record<ObstacleSpriteKind, HTMLImageElement>>,
+) {
   const left = o.x - o.w / 2;
   const top = o.y;
+
+  if (o.kind !== 'heart') {
+    const img = sprites[o.kind as ObstacleSpriteKind];
+    if (img && img.complete && img.naturalWidth > 0) {
+      drawObstacleSprite(ctx, img, o.x, o.y, o.w, o.h);
+      return;
+    }
+  }
 
   if (o.kind === 'cone') {
     ctx.fillStyle = '#ff9800';
@@ -354,6 +449,7 @@ export default function CarRunGame() {
   const phaseRef = useRef<Phase>('ready');
   const bestRef = useRef(0);
   const vehiclesRef = useRef<Map<string, LoadedVehicle>>(new Map());
+  const obstaclesRef = useRef<Partial<Record<ObstacleSpriteKind, HTMLImageElement>>>({});
   const selectedVehicleRef = useRef(DEFAULT_VEHICLE_ID);
   const dragRef = useRef({active: false, pointerId: -1});
   const keysRef = useRef({left: false, right: false});
@@ -440,9 +536,10 @@ export default function CarRunGame() {
       selectedVehicleRef.current = DEFAULT_VEHICLE_ID;
     }
 
-    loadAllVehicles(CAR_RUN_VEHICLES)
-      .then((map) => {
+    Promise.all([loadAllVehicles(CAR_RUN_VEHICLES), loadObstacleImages()])
+      .then(([map, obstacles]) => {
         vehiclesRef.current = map;
+        obstaclesRef.current = obstacles;
         setAssetsReady(true);
       })
       .catch(() => setAssetsReady(true));
@@ -553,7 +650,25 @@ export default function CarRunGame() {
         game.carX = clampCarX(game.carX + game.steerVel * dt, w, carW);
 
         game.obstacles = game.obstacles
-          .map((o) => ({...o, y: o.y + game.speed * o.speedMul * dt}))
+          .map((o) => {
+            let x = o.x + o.vx * dt;
+            let vx = o.vx;
+            const minX = roadLeft + o.w * 0.55;
+            const maxX = roadLeft + roadWidth - o.w * 0.55;
+            if (x < minX) {
+              x = minX;
+              vx = Math.abs(vx);
+            } else if (x > maxX) {
+              x = maxX;
+              vx = -Math.abs(vx);
+            }
+            return {
+              ...o,
+              x,
+              vx,
+              y: o.y + game.speed * o.speedMul * dt,
+            };
+          })
           .filter((o) => o.y < h + 60);
 
         if (now - game.lastSpawn >= spawnGapMs(game.speed)) {
@@ -564,9 +679,9 @@ export default function CarRunGame() {
           }
           game.nextId += 1;
 
-          if (Math.random() < 0.28) {
+          if (Math.random() < 0.22) {
             const extra = spawnObstacle(roadLeft, roadWidth, game.nextId);
-            extra.y -= 65 + Math.random() * 95;
+            extra.y -= 95 + Math.random() * 130;
             game.obstacles.push(extra);
             game.nextId += 1;
           }
@@ -626,22 +741,23 @@ export default function CarRunGame() {
         }
       }
 
-      drawRoad(ctx, w, h, roadLeft, roadWidth);
-      drawCloud(ctx, w * 0.18, 50 + ((game.scroll * 0.08) % (h + 80)) - 40, 1);
-      drawCloud(ctx, w * 0.78, 90 + ((game.scroll * 0.06) % (h + 100)) - 60, 0.85);
-      drawCloud(ctx, w * 0.62, 30 + ((game.scroll * 0.05) % (h + 120)) - 80, 0.7);
+      drawRoad(ctx, w, h, roadLeft, roadWidth, game.scroll);
 
-      for (const o of game.obstacles) drawObstacle(ctx, o);
+      for (const o of game.obstacles) drawObstacle(ctx, o, obstaclesRef.current);
 
       if (vehicle) {
-        const frame = vehicleFrameIndex(vehicle, now);
-        const img = vehicle.images[frame] ?? vehicle.images[0];
+        const img = vehicle.images[0];
         if (img) {
           const blinking = now < game.invulnUntil && Math.floor(now / 90) % 2 === 0;
-          ctx.save();
-          if (blinking) ctx.globalAlpha = 0.35;
-          ctx.drawImage(img, game.carX - carW / 2, carY - carH, carW, carH);
-          ctx.restore();
+          drawVehicleSprite(
+            ctx,
+            img,
+            game.carX,
+            carY - carH / 2,
+            carW,
+            carH,
+            {faceUp: true, alpha: blinking ? 0.35 : 1},
+          );
         }
       }
 

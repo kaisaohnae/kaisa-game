@@ -45,7 +45,7 @@ const STYLE_SUFFIX =
   ', top-down pixel art, CraftPix RPG style, 16-bit retro game asset, limited color palette, crisp pixels, transparent background';
 
 const CAR_STYLE =
-  ', top-down overhead view looking straight down, car nose pointing up, Unlucky Studio style topdown vehicle sprite, retro arcade racing game, crisp pixels, transparent background';
+  ', top-down overhead view looking straight down, car nose pointing DOWN toward bottom of image (6 o clock), headlights at bottom, rear at top, Unlucky Studio style topdown vehicle sprite, retro arcade racing game, crisp pixels, transparent background';
 
 const TIER_VISUAL = {
   basic: 'simple worn starter gear',
@@ -99,20 +99,16 @@ export const MANIFEST = [
   // ── Todie: 장비 (items.json) ──
   ...buildTodieGearManifest(),
 
-  // ── Car Run: 차량 (top-down, 위에서 내려다본 시점) ──
-  ...carStatic('viper', '바이퍼', 'sleek black sports car top-down, roof windshield headlights roof vents visible'),
-  ...carStatic('truck', '트럭', 'large delivery truck top-down, cargo box roof and cab roof visible'),
-  ...carStatic('audi', '아우디', 'silver luxury sedan top-down, roof and windshield visible'),
-  ...carStatic('taxi', '택시', 'yellow taxi cab top-down, roof light and checkered stripe visible'),
-  ...carStatic('car', '심플카', 'compact red hatchback top-down, roof and windshield visible'),
-  ...carStatic('mini-truck', '미니트럭', 'small pickup truck top-down, open bed and cab roof visible'),
-  ...carStatic('mini-van', '미니밴', 'white mini van top-down, long roof visible'),
-  ...carAnimFrame('police', 1, 'police car top-down, roof light bar off, windshield and hood visible'),
-  ...carAnimFrame('police', 2, 'police car top-down, red blue roof lights flashing frame 2'),
-  ...carAnimFrame('police', 3, 'police car top-down, red blue roof lights flashing frame 3'),
-  ...carAnimFrame('ambulance', 1, 'white ambulance van top-down, red cross on roof, lights off'),
-  ...carAnimFrame('ambulance', 2, 'ambulance top-down, red cross roof lights flashing frame 2'),
-  ...carAnimFrame('ambulance', 3, 'ambulance top-down, red cross roof lights flashing frame 3'),
+  // ── Car Run: 차량 (top-down, 스프라이트는 6시 / 게임에서 플레이어만 12시로 회전) ──
+  ...carStatic('viper', '바이퍼', 'sleek black sports car top-down, roof windshield headlights at bottom'),
+  ...carStatic('truck', '트럭', 'large delivery truck top-down, cab at bottom cargo box at top'),
+  ...carStatic('audi', '아우디', 'silver luxury sedan top-down, headlights at bottom'),
+  ...carStatic('taxi', '택시', 'yellow taxi cab top-down, headlights at bottom, roof light'),
+  ...carStatic('car', '심플카', 'compact red hatchback top-down, headlights at bottom'),
+  ...carStatic('mini-truck', '미니트럭', 'small pickup truck top-down, cab at bottom open bed at top'),
+  ...carStatic('mini-van', '미니밴', 'white mini van top-down, headlights at bottom'),
+  ...carStatic('police', '경찰차', 'police car top-down, roof light bar, headlights at bottom'),
+  ...carStatic('ambulance', '구급차', 'white ambulance van top-down, red cross on roof, headlights at bottom'),
 
   // ── Car Run: 장애물 (top-down) ──
   ...carObstacle('cone', '교통콘', 'orange traffic cone top-down on asphalt, circular base visible'),
@@ -280,7 +276,11 @@ function carStatic(id, label, desc) {
             ? 'Car.png'
             : id === 'audi'
               ? 'Audi.png'
-              : `${id}.png`;
+              : id === 'police'
+                ? 'Police.png'
+                : id === 'ambulance'
+                  ? 'ambulance.png'
+                  : `${id}.png`;
   return [
     {
       id: `car-${id}`,
@@ -291,23 +291,6 @@ function carStatic(id, label, desc) {
       description: `${desc}${CAR_STYLE}`,
       imageSize: {width: 64, height: 128},
       fileInstall: {path: `public/car-run/vehicles/${fileName}`},
-    },
-  ];
-}
-
-/** @param {string} id @param {number} frame @param {string} desc */
-function carAnimFrame(id, frame, desc) {
-  const dir = id === 'police' ? 'Police_animation' : 'ambulance_animation';
-  return [
-    {
-      id: `car-${id}-f${frame}`,
-      game: 'car-run',
-      category: 'vehicle',
-      label: `차량: ${id === 'police' ? '경찰차' : '구급차'} ${frame}프레임`,
-      type: 'pixflux',
-      description: `${desc}${CAR_STYLE}`,
-      imageSize: {width: 64, height: 128},
-      fileInstall: {path: `public/car-run/vehicles/${dir}/${frame}.png`},
     },
   ];
 }

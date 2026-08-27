@@ -193,6 +193,8 @@ export default function StudioPage() {
           <h1 className="studio__title">PixelLab Asset Studio</h1>
           <p className="studio__sub">
             로컬 전용 · <code>npm run studio</code> 실행 후 사용 · 공개 포털에 링크 없음
+            {' · '}
+            <a href="/studio/map/">Todie 맵 편집</a>
           </p>
         </div>
         <div className="studio__status">

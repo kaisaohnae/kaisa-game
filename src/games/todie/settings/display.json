@@ -56,5 +56,10 @@
       "bigBoss": 200,
       "finalBoss": 240
     }
+  },
+  "tiles": {
+    "publicBase": "/todie/tiles",
+    "size": 100,
+    "imageSmoothing": false
   }
 }

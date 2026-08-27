@@ -32,6 +32,18 @@ export {
 export {spawnSettings, pickSpawnKind} from './spawn';
 export {loadMobImages, mobSpriteKey, mobDrawSize} from './mobs';
 export type {MobSpriteId} from './mobs';
+export {
+  loadTileImages,
+  loadTodieMap,
+  prepareTileCanvases,
+  pickTileId,
+  TILE_DEFS,
+  getTileId,
+  tileDef,
+  MAP_TILE_SIZE,
+  MAP_WORLD_SIZE,
+} from './tiles';
+export type {TileId, TodieMapJson} from './tiles';
 export type {GearDef, LootItemDraft, GearTier, ItemHelpInfo, GearStats} from './items';
 export {
   EQUIP_SLOTS,

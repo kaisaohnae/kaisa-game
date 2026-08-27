@@ -1,6 +1,13 @@
-import {JOB_ART, loadJobImages, type LoadedImages} from './jobAssets';
 import {loadConsumableImages, loadGearImages} from './items';
 import {loadMobImages} from './mobs';
+import {JOB_ART, loadJobImages, type LoadedImages} from './jobAssets';
+import {
+  loadTileImages,
+  loadTodieMap,
+  prepareTileCanvases,
+  type PreparedTiles,
+  type TodieMapJson,
+} from './tiles';
 import type {JobId} from './types';
 
 export type TodieAssetBundle = {
@@ -8,24 +15,32 @@ export type TodieAssetBundle = {
   gear: Record<string, HTMLImageElement>;
   consumables: Record<string, HTMLImageElement>;
   mobs: Record<string, HTMLImageElement>;
+  tiles: PreparedTiles;
+  map: TodieMapJson;
 };
 
-/** Preload every job action/skill + gear/consumable/mob PNG before gameplay starts. */
+/** Preload every job action/skill + gear/consumable/mob/tile/map before gameplay starts. */
 export async function preloadAllTodieAssets(): Promise<TodieAssetBundle> {
-  const [warrior, mage, gear, consumables, mobs] = await Promise.all([
+  const [warrior, mage, gear, consumables, mobs, tileImgs, map] = await Promise.all([
     loadJobImages('warrior'),
     loadJobImages('mage'),
     loadGearImages(),
     loadConsumableImages(),
     loadMobImages(),
+    loadTileImages(),
+    loadTodieMap(),
   ]);
 
   void JOB_ART;
+
+  const tiles = prepareTileCanvases(tileImgs, map.tileSize);
 
   return {
     jobs: {warrior, mage},
     gear,
     consumables,
     mobs,
+    tiles,
+    map,
   };
 }
