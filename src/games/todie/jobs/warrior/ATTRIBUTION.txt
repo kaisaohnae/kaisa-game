@@ -2,3 +2,11 @@ warrior 8-dir sprites from:
 Desktop/rotations2 (검사)
 south→down, south-east→downRight, east→right, north-east→upRight,
 north→up, north-west→upLeft, west→left, south-west→downLeft
+
+warrior walk 8-dir sprites from:
+PixelLab export C:/Users/kaisa/Desktop/케릭터/16c3fd35-4d06-4fa3-881b-a0ec311917ee-16c3fd35/16c3fd35/rotations
+1 frame(s) per direction (horizontal sheet)
+
+warrior attack 8-dir sprites from:
+PixelLab export C:/Users/kaisa/Desktop/케릭터/fbe9029c-7ec3-4558-8def-84162cdb5528-fbe9029c/fbe9029c/rotations
+1 frame(s) per direction (horizontal sheet)

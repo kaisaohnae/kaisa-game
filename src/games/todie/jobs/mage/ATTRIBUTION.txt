@@ -2,3 +2,11 @@ mage 8-dir sprites from:
 Desktop/rotations1 (법사)
 south→down, south-east→downRight, east→right, north-east→upRight,
 north→up, north-west→upLeft, west→left, south-west→downLeft
+
+mage walk 8-dir sprites from:
+PixelLab export C:/Users/kaisa/Desktop/케릭터/0ad17b16-ffef-4435-a785-3ae6d9235ef6-0ad17b16/0ad17b16/rotations
+1 frame(s) per direction (horizontal sheet)
+
+mage attack 8-dir sprites from:
+PixelLab export C:/Users/kaisa/Desktop/케릭터/bf21e19b-7d24-4ba3-870c-92b4f3cb8398-bf21e19b/bf21e19b/rotations
+1 frame(s) per direction (horizontal sheet)

@@ -82,6 +82,13 @@ function drawMythicBackGlow(
   ctx.restore();
 }
 
+export function walkSheetFrameCount(img: HTMLImageElement): number {
+  const h = img.naturalHeight;
+  const w = img.naturalWidth;
+  if (h <= 0 || w <= h) return 1;
+  return Math.max(1, Math.round(w / h));
+}
+
 export function drawJobCharacter(
   ctx: CanvasRenderingContext2D,
   images: LoadedImages | null,
@@ -94,6 +101,7 @@ export function drawJobCharacter(
   equipped?: Equipment | null,
   _gearImages?: Record<string, HTMLImageElement> | null,
   _attackSwing?: AttackSwing | null,
+  actionFrame = 0,
 ) {
   const size = char.worldSize;
   const dir = facingToCardinal(facing);
@@ -124,7 +132,14 @@ export function drawJobCharacter(
   }
 
   if (img && img.complete && img.naturalWidth > 0) {
-    ctx.drawImage(img, ox, oy, size, size);
+    const frames = action === 'walk' || action === 'attack' ? walkSheetFrameCount(img) : 1;
+    if (frames > 1) {
+      const frameW = img.naturalWidth / frames;
+      const fi = ((actionFrame % frames) + frames) % frames;
+      ctx.drawImage(img, fi * frameW, 0, frameW, img.naturalHeight, ox, oy, size, size);
+    } else {
+      ctx.drawImage(img, ox, oy, size, size);
+    }
   } else {
     ctx.fillStyle = job === 'warrior' ? '#ff8a65' : '#7e57c2';
     ctx.fillRect(-14, -18, 28, 36);

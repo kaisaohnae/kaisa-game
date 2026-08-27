@@ -12,11 +12,16 @@
     "todie:import-warrior": "node src/games/todie/scripts/import-oga-warrior.mjs",
     "todie:import-mage": "node src/games/todie/scripts/import-oga-mage.mjs",
     "todie:install-rotations": "node src/games/todie/scripts/install-desktop-rotations.mjs",
+    "todie:install-mage-walk": "node src/games/todie/scripts/install-mage-walk-rotations.mjs walk mage",
+    "todie:install-warrior-walk": "node src/games/todie/scripts/install-mage-walk-rotations.mjs walk warrior",
+    "todie:install-mage-attack": "node src/games/todie/scripts/install-mage-walk-rotations.mjs attack mage",
+    "todie:install-warrior-attack": "node src/games/todie/scripts/install-mage-walk-rotations.mjs attack warrior",
     "todie:warrior-skills": "node src/games/todie/scripts/gen-warrior-skills.mjs",
     "todie:gear-icons": "node src/games/todie/scripts/gen-gear-icons.mjs",
     "todie:mobs": "node src/games/todie/scripts/gen-mobs.mjs",
     "todie:big-boss": "node src/games/todie/scripts/gen-big-boss.mjs",
-    "car-run:sprites": "node scripts/install-car-sprites.mjs"
+    "car-run:sprites": "node scripts/install-car-sprites.mjs",
+    "studio": "node scripts/pixellab-studio/server.mjs"
   },
   "dependencies": {
     "next": "16.2.9",

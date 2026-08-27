@@ -24,6 +24,14 @@ import warriorRollUp from '../jobs/warrior/actions/roll_up.png';
 import warriorRollUpLeft from '../jobs/warrior/actions/roll_upLeft.png';
 import warriorRollLeft from '../jobs/warrior/actions/roll_left.png';
 import warriorRollDownLeft from '../jobs/warrior/actions/roll_downLeft.png';
+import warriorAttackDown from '../jobs/warrior/actions/attack_down.png';
+import warriorAttackDownRight from '../jobs/warrior/actions/attack_downRight.png';
+import warriorAttackRight from '../jobs/warrior/actions/attack_right.png';
+import warriorAttackUpRight from '../jobs/warrior/actions/attack_upRight.png';
+import warriorAttackUp from '../jobs/warrior/actions/attack_up.png';
+import warriorAttackUpLeft from '../jobs/warrior/actions/attack_upLeft.png';
+import warriorAttackLeft from '../jobs/warrior/actions/attack_left.png';
+import warriorAttackDownLeft from '../jobs/warrior/actions/attack_downLeft.png';
 import warriorSlash from '../jobs/warrior/skills/slash.png';
 import warriorSpin from '../jobs/warrior/skills/spin.png';
 import warriorBash from '../jobs/warrior/skills/bash.png';
@@ -52,6 +60,14 @@ import mageRollUp from '../jobs/mage/actions/roll_up.png';
 import mageRollUpLeft from '../jobs/mage/actions/roll_upLeft.png';
 import mageRollLeft from '../jobs/mage/actions/roll_left.png';
 import mageRollDownLeft from '../jobs/mage/actions/roll_downLeft.png';
+import mageAttackDown from '../jobs/mage/actions/attack_down.png';
+import mageAttackDownRight from '../jobs/mage/actions/attack_downRight.png';
+import mageAttackRight from '../jobs/mage/actions/attack_right.png';
+import mageAttackUpRight from '../jobs/mage/actions/attack_upRight.png';
+import mageAttackUp from '../jobs/mage/actions/attack_up.png';
+import mageAttackUpLeft from '../jobs/mage/actions/attack_upLeft.png';
+import mageAttackLeft from '../jobs/mage/actions/attack_left.png';
+import mageAttackDownLeft from '../jobs/mage/actions/attack_downLeft.png';
 import mageBolt from '../jobs/mage/skills/bolt.png';
 import mageNova from '../jobs/mage/skills/nova.png';
 import mageShield from '../jobs/mage/skills/shield.png';
@@ -73,7 +89,7 @@ export const CARDINAL_DIRS: CardinalDir[] = [
   'downLeft',
 ];
 
-type DirActions = Record<ActionId, Record<CardinalDir, string>>;
+type DirActions = Partial<Record<ActionId, Record<CardinalDir, string>>>;
 
 type JobArt = {
   actions: DirActions;
@@ -126,6 +142,16 @@ export const JOB_ART: Record<JobId, JobArt> = {
         assetUrl(warriorRollLeft),
         assetUrl(warriorRollDownLeft),
       ),
+      attack: eight(
+        assetUrl(warriorAttackDown),
+        assetUrl(warriorAttackDownRight),
+        assetUrl(warriorAttackRight),
+        assetUrl(warriorAttackUpRight),
+        assetUrl(warriorAttackUp),
+        assetUrl(warriorAttackUpLeft),
+        assetUrl(warriorAttackLeft),
+        assetUrl(warriorAttackDownLeft),
+      ),
     },
     skills: {
       slash: assetUrl(warriorSlash),
@@ -165,6 +191,16 @@ export const JOB_ART: Record<JobId, JobArt> = {
         assetUrl(mageRollLeft),
         assetUrl(mageRollDownLeft),
       ),
+      attack: eight(
+        assetUrl(mageAttackDown),
+        assetUrl(mageAttackDownRight),
+        assetUrl(mageAttackRight),
+        assetUrl(mageAttackUpRight),
+        assetUrl(mageAttackUp),
+        assetUrl(mageAttackUpLeft),
+        assetUrl(mageAttackLeft),
+        assetUrl(mageAttackDownLeft),
+      ),
     },
     skills: {
       bolt: assetUrl(mageBolt),
@@ -175,7 +211,7 @@ export const JOB_ART: Record<JobId, JobArt> = {
 };
 
 export type LoadedImages = {
-  actions: Record<ActionId, Record<CardinalDir, HTMLImageElement>>;
+  actions: Partial<Record<ActionId, Record<CardinalDir, HTMLImageElement>>>;
   skills: Record<string, HTMLImageElement>;
 };
 
@@ -212,19 +248,18 @@ export function facingToCardinal(facing: number): CardinalDir {
 
 export async function loadJobImages(job: JobId): Promise<LoadedImages> {
   const art = JOB_ART[job];
-  const actions = {
-    idle: {} as Record<CardinalDir, HTMLImageElement>,
-    walk: {} as Record<CardinalDir, HTMLImageElement>,
-    roll: {} as Record<CardinalDir, HTMLImageElement>,
-  };
+  const actions: Partial<Record<ActionId, Record<CardinalDir, HTMLImageElement>>> = {};
   const skills: Record<string, HTMLImageElement> = {};
 
   const loads: Promise<void>[] = [];
   for (const action of Object.keys(art.actions) as ActionId[]) {
+    actions[action] = {} as Record<CardinalDir, HTMLImageElement>;
     for (const dir of CARDINAL_DIRS) {
+      const src = art.actions[action]?.[dir];
+      if (!src) continue;
       loads.push(
-        loadImage(art.actions[action][dir]).then((img) => {
-          actions[action][dir] = img;
+        loadImage(src).then((img) => {
+          actions[action]![dir] = img;
         }),
       );
     }

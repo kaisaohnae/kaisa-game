@@ -1,5 +1,5 @@
 export type JobId = 'warrior' | 'mage';
-export type ActionId = 'idle' | 'walk' | 'roll';
+export type ActionId = 'idle' | 'walk' | 'roll' | 'attack';
 /** 8-direction facing (desktop rotation packs) */
 export type CardinalDir =
   | 'down'

@@ -32,7 +32,8 @@
   "actions": {
     "idle": { "fps": 1, "loop": true },
     "walk": { "fps": 8, "loop": true },
-    "roll": { "fps": 14, "loop": false }
+    "roll": { "fps": 14, "loop": false },
+    "attack": { "fps": 12, "loop": false }
   },
   "skillFx": {
     "size": 128,

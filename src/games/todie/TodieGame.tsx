@@ -12,6 +12,7 @@ import {
   emptyEquipment,
   ensureHotbarConsumableSlots,
   EQUIP_SLOTS,
+  facingToCardinal,
   gearImageKey,
   JOB_ART,
   jobLabel,
@@ -43,7 +44,7 @@ import {
   type RuntimeSkill,
   type TodieAssetBundle,
 } from './content';
-import {drawJobCharacter, drawSkillSprite} from './render/drawCharacter';
+import {drawJobCharacter, drawSkillSprite, walkSheetFrameCount} from './render/drawCharacter';
 import {drawDashTrail, drawSkillWorldFx} from './render/skillFx';
 
 import {InventoryDock} from './ui/InventoryDock';
@@ -2147,10 +2148,32 @@ export default function TodieGame() {
         Boolean(moveTarget) ||
         chaseTarget;
       let action: ActionId = 'idle';
+      let actionFrame = 0;
+      const dir = facingToCardinal(player.facing);
       if (player.rolling > 0) action = 'roll';
-      else if (moving) {
-        const frame = Math.floor(performance.now() / (1000 / displaySettings.actions.walk.fps));
-        action = frame % 2 === 0 ? 'walk' : 'idle';
+      else if (player.swingT > 0) {
+        const attackImg = jobImages?.actions.attack?.[dir] ?? null;
+        if (attackImg?.complete && attackImg.naturalWidth > 0) {
+          action = 'attack';
+          const frameCount = walkSheetFrameCount(attackImg);
+          if (frameCount > 1 && player.swingMax > 0) {
+            const progress = 1 - player.swingT / player.swingMax;
+            actionFrame = Math.min(frameCount - 1, Math.floor(progress * frameCount));
+          }
+        }
+      } else if (moving) {
+        const tick = Math.floor(performance.now() / (1000 / displaySettings.actions.walk.fps));
+        const walkImg = jobImages?.actions.walk?.[dir] ?? null;
+        const frameCount =
+          walkImg && walkImg.complete && walkImg.naturalWidth > 0
+            ? walkSheetFrameCount(walkImg)
+            : 1;
+        if (frameCount > 1) {
+          action = 'walk';
+          actionFrame = tick;
+        } else {
+          action = tick % 2 === 0 ? 'walk' : 'idle';
+        }
       }
       drawJobCharacter(
         ctx,
@@ -2166,6 +2189,7 @@ export default function TodieGame() {
         player.swingT > 0 && player.swingKind
           ? {t: player.swingT / Math.max(0.001, player.swingMax), kind: player.swingKind}
           : null,
+        actionFrame,
       );
       ctx.globalAlpha = 1;
 
@@ -3041,7 +3065,7 @@ export default function TodieGame() {
               >
                 <img
                   className="todie__gate-job-sprite"
-                  src={JOB_ART[job].actions.idle.down}
+                  src={JOB_ART[job].actions.idle?.down ?? ''}
                   alt=""
                   draggable={false}
                 />

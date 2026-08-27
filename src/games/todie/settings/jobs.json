@@ -4,14 +4,14 @@
       "id": "warrior",
       "label": "검사",
       "folder": "warrior",
-      "actions": ["idle", "walk", "roll"],
+      "actions": ["idle", "walk", "roll", "attack"],
       "skills": ["slash", "spin", "bash"]
     },
     "mage": {
       "id": "mage",
       "label": "법사",
       "folder": "mage",
-      "actions": ["idle", "walk", "roll"],
+      "actions": ["idle", "walk", "roll", "attack"],
       "skills": ["bolt", "nova", "shield"]
     }
   },
