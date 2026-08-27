@@ -16,6 +16,36 @@ export const dictionary: Record<string, LocaleEntry> = {
     "zh": "去玩 →",
     "hi": "खेलें →"
   },
+  "Chess": {
+    "ko": "체스",
+    "zh": "国际象棋",
+    "hi": "शतरंज"
+  },
+  "Classic chess — take turns moving pieces": {
+    "ko": "기물을 번갈아 움직여요",
+    "zh": "轮流移动棋子",
+    "hi": "बारी-बारी से मोहरे चलाएँ"
+  },
+  "Janggi": {
+    "ko": "장기",
+    "zh": "将棋",
+    "hi": "जंगी"
+  },
+  "Korean chess — take turns moving pieces": {
+    "ko": "기물을 번갈아 움직여요",
+    "zh": "轮流移动棋子",
+    "hi": "बारी-बारी से मोहरे चलाएँ"
+  },
+  "Baduk": {
+    "ko": "바둑",
+    "zh": "围棋",
+    "hi": "बैडुक"
+  },
+  "Place stones and capture groups": {
+    "ko": "돌을 놓고 상대 돌을 잡아요",
+    "zh": "落子并吃掉对方棋子",
+    "hi": "पत्थर रखें और समूह पकड़ें"
+  },
   "Car Race": {
     "ko": "자동차 달리기",
     "zh": "汽车奔跑",

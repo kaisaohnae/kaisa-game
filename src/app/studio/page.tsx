@@ -17,9 +17,11 @@ const CATEGORY_LABEL: Record<string, string> = {
 
 type QueueStatus = 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
 
+type StudioGame = 'todie' | 'car-run';
+
 type ManifestRow = {
   id: string;
-  game: 'todie' | 'car-run';
+  game: StudioGame;
   category: string;
   label: string;
   type: string;
@@ -43,7 +45,7 @@ export default function StudioPage() {
   const [secretInput, setSecretInput] = useState(STUDIO_SECRET);
   const [log, setLog] = useState<string[]>([]);
   const [filter, setFilter] = useState<string>('all');
-  const [gameFilter, setGameFilter] = useState<'todie' | 'car-run'>('todie');
+  const [gameFilter, setGameFilter] = useState<StudioGame>('todie');
 
   const pushLog = useCallback((line: string) => {
     setLog((prev) => [`${new Date().toLocaleTimeString()} ${line}`, ...prev].slice(0, 80));
@@ -165,20 +167,20 @@ export default function StudioPage() {
   const clearSelection = () => setSelected(new Set());
 
   const gameCounts = useMemo(() => {
-    const counts = {todie: 0, 'car-run': 0};
+    const counts: Record<StudioGame, number> = {todie: 0, 'car-run': 0};
     for (const row of rows) counts[row.game] += 1;
     return counts;
   }, [rows]);
 
   const gameIncomplete = useMemo(() => {
-    const counts = {todie: 0, 'car-run': 0};
+    const counts: Record<StudioGame, number> = {todie: 0, 'car-run': 0};
     for (const row of rows) {
       if (row.queue.status !== 'completed') counts[row.game] += 1;
     }
     return counts;
   }, [rows]);
 
-  const switchGame = (game: 'todie' | 'car-run') => {
+  const switchGame = (game: StudioGame) => {
     setGameFilter(game);
     setFilter('all');
     setSelected(new Set());

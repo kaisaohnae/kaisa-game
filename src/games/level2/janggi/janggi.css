@@ -1,0 +1,162 @@
+.janggi {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 1.5vh, 14px);
+  width: 100%;
+  max-width: min(100%, 720px);
+  margin: 0 auto;
+  padding: 4px 0 10px;
+  min-height: 0;
+}
+
+.janggi__message {
+  margin: 0;
+  font-family: var(--font-kids-display), var(--font-kids-body), sans-serif;
+  font-size: clamp(16px, 3.8vw, 24px);
+  font-weight: 700;
+  color: #4e342e;
+  text-align: center;
+  line-height: 1.35;
+}
+
+.janggi__meta {
+  display: flex;
+  gap: 18px;
+  font-size: clamp(14px, 3.2vw, 17px);
+  font-weight: 800;
+  color: #8d6e63;
+}
+
+.janggi__meta .is-cho {
+  color: #2e7d32;
+}
+
+.janggi__meta .is-han {
+  color: #c62828;
+}
+
+.janggi__board {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+  width: min(100%, 92vw, 78vh, 560px);
+  aspect-ratio: 9 / 10;
+  flex-shrink: 0;
+  border: 4px solid #fff8e1;
+  border-radius: 12px;
+  background: linear-gradient(160deg, #f0d9b5 0%, #d7b48a 100%);
+  box-shadow: 0 10px 0 #a1887f;
+  overflow: hidden;
+  touch-action: manipulation;
+}
+
+.janggi__cell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-right: 1px solid rgba(93, 64, 55, 0.35);
+  border-bottom: 1px solid rgba(93, 64, 55, 0.35);
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.janggi__cell:nth-child(9n) {
+  border-right: 0;
+}
+
+.janggi__cell:nth-child(n + 82) {
+  border-bottom: 0;
+}
+
+.janggi__cell.is-palace {
+  background: rgba(183, 28, 28, 0.06);
+}
+
+.janggi__cell.is-selected {
+  background: rgba(255, 235, 59, 0.45);
+}
+
+.janggi__cell.is-move::after {
+  content: '';
+  position: absolute;
+  width: 26%;
+  height: 26%;
+  border-radius: 50%;
+  background: rgba(46, 125, 50, 0.55);
+  pointer-events: none;
+}
+
+.janggi__piece {
+  position: relative;
+  z-index: 1;
+  width: 88%;
+  max-width: 58px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: clamp(13px, 2.6vw, 18px);
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.25);
+}
+
+.janggi__piece--cho {
+  background: radial-gradient(circle at 35% 30%, #c8e6c9, #81c784 55%, #43a047);
+  color: #1b5e20;
+  border: 2px solid #2e7d32;
+}
+
+.janggi__piece--han {
+  background: radial-gradient(circle at 35% 30%, #ffcdd2, #e57373 55%, #e53935);
+  color: #b71c1c;
+  border: 2px solid #c62828;
+}
+
+.janggi__piece.is-king {
+  outline: 2px solid #ffd54f;
+  outline-offset: 1px;
+}
+
+.janggi__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.janggi__btn {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 3px solid #fff;
+  border-radius: 999px;
+  background: #ffe0b2;
+  box-shadow: 0 4px 0 #ffcc80;
+  font-weight: 800;
+  color: #e65100;
+  cursor: pointer;
+  touch-action: manipulation;
+  font: inherit;
+  font-size: clamp(14px, 3.2vw, 16px);
+}
+
+.janggi__btn--primary {
+  background: #ffcc80;
+  box-shadow: 0 4px 0 #ffb74d;
+}
+
+.janggi__btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.janggi__btn:not(:disabled):active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #ffcc80;
+}

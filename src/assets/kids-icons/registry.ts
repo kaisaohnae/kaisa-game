@@ -220,6 +220,9 @@ export const FRUIT_ICON_IDS = [
 
 export const GAME_CARD_ICONS: Record<string, KidsIconId> = {
   todie: 'item-sword',
+  baduk: 'shape-circle',
+  janggi: 'shape-diamond',
+  chess: 'shape-square',
   'animal-tap': 'animal-dog',
   'color-touch': 'item-palette',
   'balloon-pop': 'item-balloon',

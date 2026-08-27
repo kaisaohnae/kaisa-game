@@ -779,6 +779,183 @@
       "message": "installed",
       "updatedAt": "2026-08-27T07:11:45.840Z",
       "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\obstacles\\heart.png"
+    },
+    {
+      "id": "janggi-cho-king",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:51:42.926Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\janggi\\pieces\\cho-king.png"
+    },
+    {
+      "id": "janggi-han-king",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:52:00.611Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\janggi\\pieces\\han-king.png"
+    },
+    {
+      "id": "janggi-cho-guard",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:52:17.268Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\janggi\\pieces\\cho-guard.png"
+    },
+    {
+      "id": "janggi-han-guard",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:52:33.868Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\janggi\\pieces\\han-guard.png"
+    },
+    {
+      "id": "janggi-cho-elephant",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:52:50.418Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\janggi\\pieces\\cho-elephant.png"
+    },
+    {
+      "id": "janggi-han-elephant",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:53:07.669Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\janggi\\pieces\\han-elephant.png"
+    },
+    {
+      "id": "janggi-cho-horse",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:53:23.167Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\janggi\\pieces\\cho-horse.png"
+    },
+    {
+      "id": "janggi-han-horse",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:53:40.031Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\janggi\\pieces\\han-horse.png"
+    },
+    {
+      "id": "janggi-cho-chariot",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:53:56.677Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\janggi\\pieces\\cho-chariot.png"
+    },
+    {
+      "id": "janggi-han-chariot",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:54:11.853Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\janggi\\pieces\\han-chariot.png"
+    },
+    {
+      "id": "janggi-cho-cannon",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:54:28.605Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\janggi\\pieces\\cho-cannon.png"
+    },
+    {
+      "id": "janggi-han-cannon",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:55:00.245Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\janggi\\pieces\\han-cannon.png"
+    },
+    {
+      "id": "janggi-cho-soldier",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:55:16.381Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\janggi\\pieces\\cho-soldier.png"
+    },
+    {
+      "id": "janggi-han-soldier",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:55:36.729Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\janggi\\pieces\\han-soldier.png"
+    },
+    {
+      "id": "chess-white-king",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:55:53.107Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\chess\\pieces\\white-king.png"
+    },
+    {
+      "id": "chess-black-king",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:56:09.820Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\chess\\pieces\\black-king.png"
+    },
+    {
+      "id": "chess-white-queen",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:56:34.305Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\chess\\pieces\\white-queen.png"
+    },
+    {
+      "id": "chess-black-queen",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:57:01.912Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\chess\\pieces\\black-queen.png"
+    },
+    {
+      "id": "chess-white-rook",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:57:27.110Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\chess\\pieces\\white-rook.png"
+    },
+    {
+      "id": "chess-black-rook",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:57:46.893Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\chess\\pieces\\black-rook.png"
+    },
+    {
+      "id": "chess-white-bishop",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T07:58:06.625Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\chess\\pieces\\white-bishop.png"
+    },
+    {
+      "id": "chess-black-bishop",
+      "status": "running",
+      "message": "started",
+      "updatedAt": "2026-08-27T07:58:07.841Z"
+    },
+    {
+      "id": "chess-white-knight",
+      "status": "pending",
+      "message": "queued",
+      "updatedAt": "2026-08-27T07:51:33.383Z"
+    },
+    {
+      "id": "chess-black-knight",
+      "status": "pending",
+      "message": "queued",
+      "updatedAt": "2026-08-27T07:51:33.384Z"
+    },
+    {
+      "id": "chess-white-pawn",
+      "status": "pending",
+      "message": "queued",
+      "updatedAt": "2026-08-27T07:51:33.385Z"
+    },
+    {
+      "id": "chess-black-pawn",
+      "status": "pending",
+      "message": "queued",
+      "updatedAt": "2026-08-27T07:51:33.386Z"
     }
   ]
 }

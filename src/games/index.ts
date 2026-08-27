@@ -2,9 +2,12 @@ import type {GameLevel, GameModule} from './types';
 import {AnimalTapGame} from './level1/animal-tap';
 import {BalloonPopGame} from './level1/balloon-pop';
 import {ColorTouchGame} from './level1/color-touch';
+import {BadukGame} from './level2/baduk';
 import {CarRunGame} from './level2/car-run';
+import {ChessGame} from './level2/chess';
 import {CountFruitGame} from './level2/count-fruit';
 import {DragFruitGame} from './level2/drag-fruit';
+import {JanggiGame} from './level2/janggi';
 import {MemoryCardsGame} from './level2/memory-cards';
 import {TapOrderGame} from './level2/tap-order';
 import {MazePadGame} from './level3/maze-pad';
@@ -125,6 +128,27 @@ export const GAMES: GameModule[] = [
     description: 'Tap the matching animal!',
     level: 1,
     Component: AnimalTapGame,
+  },
+  {
+    id: 'chess',
+    title: 'Chess',
+    description: 'Classic chess — take turns moving pieces',
+    level: 4,
+    Component: ChessGame,
+  },
+  {
+    id: 'janggi',
+    title: 'Janggi',
+    description: 'Korean chess — take turns moving pieces',
+    level: 4,
+    Component: JanggiGame,
+  },
+  {
+    id: 'baduk',
+    title: 'Baduk',
+    description: 'Place stones and capture groups',
+    level: 4,
+    Component: BadukGame,
   },
 ];
 
