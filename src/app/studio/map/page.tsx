@@ -2,23 +2,37 @@
 
 import Link from 'next/link';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {STUDIO_SECRET, STUDIO_URL} from '@/lib/pixellab/studio-config';
 import {
+  STUDIO_SECRET,
+  STUDIO_URL,
+  isLocalStudioUrl,
+  studioHeaders,
+} from '@/lib/pixellab/studio-config';
+import {
+  MAP_OBJECT_DEFS,
   TILE_DEFS,
+  eraseMapObject,
   floodFill,
   generateDefaultMap,
   getTileId,
+  mapObjectDef,
+  mapObjectUrl,
+  objectAt,
   paintBrush,
   parseMapJson,
-  setTileId,
+  placeMapObject,
   tileDef,
   tileSpriteUrl,
+  type MapObjectKind,
   type TileId,
   type TodieMapJson,
 } from '@/games/todie/content/tiles';
 import './map-studio.css';
 
-type Tool = 'paint' | 'fill' | 'eyedrop';
+type Tool = 'paint' | 'fill' | 'eyedrop' | 'object' | 'erase-object';
+
+const TILE_REGEN_IDS = TILE_DEFS.map((t) => `tile-${t.id}`);
+const OBJECT_REGEN_IDS = MAP_OBJECT_DEFS.map((o) => `obj-${o.id}`);
 
 export default function TodieMapStudioPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -33,15 +47,20 @@ export default function TodieMapStudioPage() {
     space: boolean;
   }>({mode: null, lastX: 0, lastY: 0, space: false});
   const tileImgsRef = useRef<Partial<Record<TileId, HTMLImageElement>>>({});
+  const objImgsRef = useRef<Partial<Record<MapObjectKind, HTMLImageElement>>>({});
 
   const [brush, setBrush] = useState<TileId>('grass_a');
+  const [objectBrush, setObjectBrush] = useState<MapObjectKind>('tree_oak');
   const [tool, setTool] = useState<Tool>('paint');
   const [brushSize, setBrushSize] = useState(2);
   const [dirty, setDirty] = useState(false);
   const [status, setStatus] = useState('맵 로딩…');
+  const [studioOnline, setStudioOnline] = useState(false);
   const [secret] = useState(STUDIO_SECRET);
   const [cursorTile, setCursorTile] = useState({tx: 0, ty: 0});
   const [, bump] = useState(0);
+
+  const localOnly = isLocalStudioUrl();
 
   const redraw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -84,14 +103,13 @@ export default function TodieMapStudioPage() {
         ctx.fillStyle = tileDef(id).fill;
         ctx.fillRect(x, y, ts + 0.5, ts + 0.5);
         if (img && img.complete) {
-          ctx.globalAlpha = 0.65;
+          ctx.globalAlpha = 0.55;
           ctx.drawImage(img, x, y, ts, ts);
           ctx.globalAlpha = 1;
         }
       }
     }
 
-    // grid when zoomed in
     if (zoom >= 0.45) {
       ctx.strokeStyle = 'rgba(255,255,255,0.08)';
       ctx.lineWidth = 1;
@@ -109,12 +127,27 @@ export default function TodieMapStudioPage() {
       }
     }
 
-    // world border
+    for (const o of map.objects) {
+      if (o.tx < x0 - 1 || o.tx > x1 + 1 || o.ty < y0 - 1 || o.ty > y1 + 1) continue;
+      const def = mapObjectDef(o.kind);
+      const cx = (o.tx + 0.5) * ts;
+      const cy = (o.ty + 0.5) * ts;
+      const sz = def.size * zoom;
+      const img = objImgsRef.current[o.kind];
+      if (img && img.complete) {
+        ctx.drawImage(img, cx - sz / 2, cy - sz / 2, sz, sz);
+      } else {
+        ctx.fillStyle = def.fill;
+        ctx.beginPath();
+        ctx.arc(cx, cy, sz * 0.35, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
     ctx.strokeStyle = 'rgba(255, 224, 130, 0.55)';
     ctx.lineWidth = 2;
     ctx.strokeRect(0, 0, map.cols * ts, map.rows * ts);
 
-    // spawn marker
     const sx = (map.cols / 2) * ts;
     const sy = (map.rows / 2) * ts;
     ctx.fillStyle = '#fff59d';
@@ -129,39 +162,82 @@ export default function TodieMapStudioPage() {
     requestAnimationFrame(() => redraw());
   }, [redraw]);
 
+  const pingStudio = useCallback(async () => {
+    if (!localOnly) {
+      setStudioOnline(false);
+      return false;
+    }
+    try {
+      const res = await fetch(`${STUDIO_URL}/api/health`);
+      const ok = res.ok;
+      setStudioOnline(ok);
+      return ok;
+    } catch {
+      setStudioOnline(false);
+      return false;
+    }
+  }, [localOnly]);
+
   useEffect(() => {
     let alive = true;
     (async () => {
-      const imgs: Partial<Record<TileId, HTMLImageElement>> = {};
-      await Promise.all(
-        TILE_DEFS.map(
+      const tileImgs: Partial<Record<TileId, HTMLImageElement>> = {};
+      const objImgs: Partial<Record<MapObjectKind, HTMLImageElement>> = {};
+      await Promise.all([
+        ...TILE_DEFS.map(
           (t) =>
             new Promise<void>((resolve) => {
               const img = new Image();
               img.onload = () => {
-                imgs[t.id] = img;
+                tileImgs[t.id] = img;
                 resolve();
               };
               img.onerror = () => resolve();
               img.src = tileSpriteUrl(t.id);
             }),
         ),
-      );
+        ...MAP_OBJECT_DEFS.map(
+          (o) =>
+            new Promise<void>((resolve) => {
+              const img = new Image();
+              img.onload = () => {
+                objImgs[o.id] = img;
+                resolve();
+              };
+              img.onerror = () => resolve();
+              img.src = mapObjectUrl(o.id);
+            }),
+        ),
+      ]);
       if (!alive) return;
-      tileImgsRef.current = imgs;
+      tileImgsRef.current = tileImgs;
+      objImgsRef.current = objImgs;
 
+      const online = await pingStudio();
       try {
-        const res = await fetch(`${STUDIO_URL}/api/todie-map`, {
-          headers: {'X-Studio-Secret': secret},
-        });
-        if (res.ok) {
-          mapRef.current = parseMapJson(await res.json());
-          setStatus('서버 맵 로드됨 · public/todie/map/world.json');
+        if (online) {
+          const res = await fetch(`${STUDIO_URL}/api/todie-map`, {
+            headers: {'X-Studio-Secret': secret},
+          });
+          if (res.ok) {
+            mapRef.current = parseMapJson(await res.json());
+            setStatus('서버 맵 로드 · public/todie/map/world.json (8890)');
+          } else if (res.status === 404) {
+            setStatus('스튜디오에 /api/todie-map 없음 — npm run studio 재시작 필요');
+            const pub = await fetch('/todie/map/world.json', {cache: 'no-store'});
+            if (pub.ok) mapRef.current = parseMapJson(await pub.json());
+          } else {
+            const pub = await fetch('/todie/map/world.json', {cache: 'no-store'});
+            if (pub.ok) {
+              mapRef.current = parseMapJson(await pub.json());
+              setStatus(`맵 로드 (스튜디오 ${res.status}) · /todie/map/world.json`);
+            }
+          }
         } else {
           const pub = await fetch('/todie/map/world.json', {cache: 'no-store'});
           if (pub.ok) {
             mapRef.current = parseMapJson(await pub.json());
-            setStatus('맵 로드됨 · /todie/map/world.json');
+            setStatus('맵 로드 · studio 오프라인 · 저장 불가');
           } else {
             mapRef.current = generateDefaultMap();
             setStatus('기본 맵 생성됨');
@@ -169,23 +245,11 @@ export default function TodieMapStudioPage() {
           }
         }
       } catch {
-        try {
-          const pub = await fetch('/todie/map/world.json', {cache: 'no-store'});
-          if (pub.ok) {
-            mapRef.current = parseMapJson(await pub.json());
-            setStatus('맵 로드됨 · /todie/map/world.json');
-          } else {
-            mapRef.current = generateDefaultMap();
-            setStatus('기본 맵 생성됨 (studio 오프라인)');
-            setDirty(true);
-          }
-        } catch {
-          mapRef.current = generateDefaultMap();
-          setStatus('기본 맵 생성됨');
-          setDirty(true);
-        }
+        mapRef.current = generateDefaultMap();
+        setStatus('기본 맵 생성됨');
+        setDirty(true);
       }
-      // center view on spawn
+
       const wrap = wrapRef.current;
       if (wrap) {
         const map = mapRef.current;
@@ -201,7 +265,7 @@ export default function TodieMapStudioPage() {
     return () => {
       alive = false;
     };
-  }, [scheduleRedraw, secret]);
+  }, [scheduleRedraw, secret, pingStudio]);
 
   useEffect(() => {
     const onResize = () => scheduleRedraw();
@@ -215,6 +279,8 @@ export default function TodieMapStudioPage() {
       if (e.type === 'keydown' && e.key === 'b') setTool('paint');
       if (e.type === 'keydown' && e.key === 'f') setTool('fill');
       if (e.type === 'keydown' && e.key === 'i') setTool('eyedrop');
+      if (e.type === 'keydown' && e.key === 'o') setTool('object');
+      if (e.type === 'keydown' && e.key === 'x') setTool('erase-object');
     };
     window.addEventListener('keydown', onKey);
     window.addEventListener('keyup', onKey);
@@ -243,6 +309,18 @@ export default function TodieMapStudioPage() {
     if (tool === 'eyedrop') {
       setBrush(getTileId(map, tx, ty));
       setTool('paint');
+      return;
+    }
+    if (tool === 'object') {
+      placeMapObject(map, tx, ty, objectBrush);
+      setDirty(true);
+      scheduleRedraw();
+      return;
+    }
+    if (tool === 'erase-object') {
+      eraseMapObject(map, tx, ty);
+      setDirty(true);
+      scheduleRedraw();
       return;
     }
     if (tool === 'fill') {
@@ -289,7 +367,11 @@ export default function TodieMapStudioPage() {
       scheduleRedraw();
       return;
     }
-    if (dragRef.current.mode === 'paint' && tool === 'paint' && t) {
+    if (
+      dragRef.current.mode === 'paint' &&
+      (tool === 'paint' || tool === 'object' || tool === 'erase-object') &&
+      t
+    ) {
       applyAt(t.tx, t.ty);
     }
   };
@@ -318,20 +400,56 @@ export default function TodieMapStudioPage() {
   };
 
   const saveToServer = async () => {
+    if (!localOnly) {
+      setStatus('로컬(127.0.0.1) 스튜디오에서만 저장 가능');
+      return;
+    }
     setStatus('저장 중…');
+    const online = await pingStudio();
+    if (!online) {
+      setStatus('studio 오프라인 — npm run studio 후 다시 저장');
+      return;
+    }
     try {
       const res = await fetch(`${STUDIO_URL}/api/todie-map`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Studio-Secret': secret,
-        },
+        headers: studioHeaders({'X-Studio-Secret': secret}),
         body: JSON.stringify(mapRef.current),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 404) {
+        throw new Error('API 없음 — 떠 있는 studio를 재시작하세요 (npm run studio)');
+      }
       if (!res.ok) throw new Error(data.error ?? `save ${res.status}`);
       setDirty(false);
-      setStatus(`저장 완료 · ${data.path} (${data.cells} cells)`);
+      setStatus(
+        `저장 완료 · ${data.path} · cells ${data.cells} · objects ${data.objects ?? 0}`,
+      );
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : String(err));
+    }
+  };
+
+  const queueRegen = async (ids: string[], label: string) => {
+    if (!localOnly) {
+      setStatus('로컬 스튜디오에서만 PixelLab 재생성 가능');
+      return;
+    }
+    const online = await pingStudio();
+    if (!online) {
+      setStatus('studio 오프라인');
+      return;
+    }
+    setStatus(`${label} 큐에 넣는 중…`);
+    try {
+      const res = await fetch(`${STUDIO_URL}/api/queue/run`, {
+        method: 'POST',
+        headers: studioHeaders({'X-Studio-Secret': secret}),
+        body: JSON.stringify({ids}),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? `queue ${res.status}`);
+      setStatus(`${label} 큐 등록 · Asset Studio에서 진행 확인 · 완료 후 새로고침`);
     } catch (err) {
       setStatus(err instanceof Error ? err.message : String(err));
     }
@@ -371,9 +489,12 @@ export default function TodieMapStudioPage() {
 
   const map = mapRef.current;
   const meta = useMemo(
-    () => `${map.cols}×${map.rows} · tile ${map.tileSize} · world ${map.worldSize}`,
+    () =>
+      `${map.cols}×${map.rows} · tile ${map.tileSize} · objs ${map.objects?.length ?? 0}`,
     [map],
   );
+
+  const atObj = objectAt(map, cursorTile.tx, cursorTile.ty);
 
   return (
     <main className="map-studio">
@@ -381,7 +502,11 @@ export default function TodieMapStudioPage() {
         <div>
           <h1 className="map-studio__title">Todie Map Studio</h1>
           <p className="map-studio__sub">
-            {meta} · 휠 줌 · Space/우클릭 팬 · B칠하기 F채우기 I스포이드
+            {meta} · 휠 줌 · Space/우클릭 팬 · B칠 F채우기 O오브젝트 X지우기
+            {' · '}
+            <span className={studioOnline ? 'map-studio__online' : 'map-studio__offline'}>
+              {studioOnline ? '8890 연결됨' : '8890 오프라인'}
+            </span>
           </p>
         </div>
         <div className="map-studio__links">
@@ -396,13 +521,13 @@ export default function TodieMapStudioPage() {
 
       <div className="map-studio__body">
         <aside className="map-studio__side">
-          <h2>팔레트</h2>
+          <h2>타일 팔레트</h2>
           <div className="map-studio__palette">
             {TILE_DEFS.map((t) => (
               <button
                 key={t.id}
                 type="button"
-                className={`map-studio__swatch${brush === t.id ? ' is-active' : ''}`}
+                className={`map-studio__swatch${brush === t.id && (tool === 'paint' || tool === 'fill') ? ' is-active' : ''}`}
                 onClick={() => {
                   setBrush(t.id);
                   setTool('paint');
@@ -416,6 +541,25 @@ export default function TodieMapStudioPage() {
             ))}
           </div>
 
+          <h2>오브젝트</h2>
+          <div className="map-studio__palette">
+            {MAP_OBJECT_DEFS.map((o) => (
+              <button
+                key={o.id}
+                type="button"
+                className={`map-studio__swatch${objectBrush === o.id && tool === 'object' ? ' is-active' : ''}`}
+                onClick={() => {
+                  setObjectBrush(o.id);
+                  setTool('object');
+                }}
+              >
+                <span className="map-studio__swatch-color" style={{background: o.fill}} />
+                <img src={mapObjectUrl(o.id)} alt="" />
+                <span>{o.label}</span>
+              </button>
+            ))}
+          </div>
+
           <h2>도구</h2>
           <div className="map-studio__tools">
             {(
@@ -423,6 +567,8 @@ export default function TodieMapStudioPage() {
                 ['paint', '칠하기'],
                 ['fill', '채우기'],
                 ['eyedrop', '스포이드'],
+                ['object', '오브젝트'],
+                ['erase-object', '오브젝트 지우기'],
               ] as const
             ).map(([id, label]) => (
               <button
@@ -447,9 +593,14 @@ export default function TodieMapStudioPage() {
             />
           </label>
 
-          <h2>파일</h2>
+          <h2>파일 (로컬 8890)</h2>
           <div className="map-studio__files">
-            <button type="button" className="map-studio__btn map-studio__btn--primary" onClick={() => void saveToServer()}>
+            <button
+              type="button"
+              className="map-studio__btn map-studio__btn--primary"
+              onClick={() => void saveToServer()}
+              disabled={!localOnly}
+            >
               서버에 저장 {dirty ? '*' : ''}
             </button>
             <button type="button" className="map-studio__btn" onClick={downloadJson}>
@@ -469,14 +620,43 @@ export default function TodieMapStudioPage() {
             </button>
           </div>
 
+          <h2>PixelLab 재생성</h2>
+          <div className="map-studio__files">
+            <button
+              type="button"
+              className="map-studio__btn"
+              onClick={() => void queueRegen(TILE_REGEN_IDS, '타일 6종')}
+            >
+              타일 다시 생성 (64px seamless)
+            </button>
+            <button
+              type="button"
+              className="map-studio__btn"
+              onClick={() => void queueRegen(OBJECT_REGEN_IDS, '오브젝트 8종')}
+            >
+              오브젝트 다시 생성
+            </button>
+            <button
+              type="button"
+              className="map-studio__btn"
+              onClick={() =>
+                void queueRegen([...TILE_REGEN_IDS, ...OBJECT_REGEN_IDS], '타일+오브젝트')
+              }
+            >
+              전부 다시 생성
+            </button>
+          </div>
+
           <p className="map-studio__hint">
-            저장 위치: <code>public/todie/map/world.json</code>
+            저장: <code>public/todie/map/world.json</code> via{' '}
+            <code>{STUDIO_URL}</code>
             <br />
-            <code>npm run studio</code> 필요 (서버 저장 시)
+            로컬 전용 · <code>npm run studio</code> 필요
           </p>
           <p className="map-studio__status">{status}</p>
           <p className="map-studio__cursor">
             타일 {cursorTile.tx}, {cursorTile.ty} · {getTileId(map, cursorTile.tx, cursorTile.ty)}
+            {atObj ? ` · ${atObj.kind}` : ''}
           </p>
         </aside>
 

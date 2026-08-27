@@ -84,13 +84,47 @@ export const MANIFEST = [
   ...todieMob('bigBoss', 'large demon knight boss top-down, red black armor, horns'),
   ...todieMob('finalBoss', 'final boss void lich king top-down, pale violet robes, dark aura'),
 
-  // ── Todie: 타일 ──
-  ...todieTile('grass_a', '잔디 타일 A', 'seamless top-down grass meadow tile, soft green, tiny flowers, 32x32 game tileset'),
-  ...todieTile('grass_b', '잔디 타일 B', 'seamless top-down grass tile variant, slightly darker green patches, 32x32'),
-  ...todieTile('wasteland_a', '황무지 타일 A', 'seamless top-down dry wasteland dirt tile, cracked brown soil, 32x32'),
-  ...todieTile('wasteland_b', '황무지 타일 B', 'seamless top-down wasteland dirt variant, pebbles and dry weeds, 32x32'),
-  ...todieTile('stone_path', '돌길 타일', 'seamless top-down cobblestone path tile, gray stones, 32x32'),
-  ...todieTile('water_shallow', '얕은 물 타일', 'seamless top-down shallow water tile, light blue ripples, 32x32'),
+  // ── Todie: 타일 (seamless set · 64px) ──
+  ...todieTile(
+    'grass_a',
+    '잔디 타일 A',
+    'seamless tileable top-down grass meadow floor tile, soft green #6f9458 base, tiny soft flowers, NO border, edges must match when repeated, flat RPG tileset',
+  ),
+  ...todieTile(
+    'grass_b',
+    '잔디 타일 B',
+    'seamless tileable top-down grass floor tile variant matching grass_a palette, slightly darker green #62874e patches, NO border, edges match neighbors, flat RPG tileset',
+  ),
+  ...todieTile(
+    'wasteland_a',
+    '황무지 타일 A',
+    'seamless tileable top-down dry dirt wasteland floor tile, brown #9a7b5c cracked soil, NO border, edges match when tiled, flat RPG tileset',
+  ),
+  ...todieTile(
+    'wasteland_b',
+    '황무지 타일 B',
+    'seamless tileable top-down wasteland dirt floor tile variant matching wasteland_a, pebbles dry weeds #8a6d52, NO border, edges match, flat RPG tileset',
+  ),
+  ...todieTile(
+    'stone_path',
+    '돌길 타일',
+    'seamless tileable top-down cobblestone path floor tile, gray stones #8d8f8a, NO border, edges match when repeated, flat RPG tileset',
+  ),
+  ...todieTile(
+    'water_shallow',
+    '얕은 물 타일',
+    'seamless tileable top-down shallow water floor tile, light blue #4f8fb8 soft ripples, NO border, edges match when tiled, flat RPG tileset',
+  ),
+
+  // ── Todie: 맵 오브젝트 ──
+  ...todieObject('tree_oak', '참나무', 'top-down oak tree canopy circle with brown trunk center, soft green leaves, RPG map prop, centered, transparent background'),
+  ...todieObject('tree_pine', '소나무', 'top-down pine tree canopy, dark green pointed foliage circle, brown trunk center, RPG map prop, centered, transparent background'),
+  ...todieObject('bush', '덤불', 'top-down small round green bush shrub, RPG map decoration, centered, transparent background'),
+  ...todieObject('rock', '바위', 'top-down gray rock boulder stone, RPG map prop, centered, transparent background'),
+  ...todieObject('stump', '그루터기', 'top-down cut tree stump rings wood, RPG map prop, centered, transparent background'),
+  ...todieObject('flowers', '꽃밭', 'top-down small wildflower patch pink yellow white blooms on grass, RPG decoration, centered, transparent background'),
+  ...todieObject('crate', '상자', 'top-down wooden crate box, RPG map prop, centered, transparent background'),
+  ...todieObject('barrel', '통', 'top-down wooden barrel top view, RPG map prop, centered, transparent background'),
 
   // ── Todie: 소모품 ──
   ...todieConsumable('potion', '체력포션', 'red health potion bottle icon, heart label, glass shine, 48x48 inventory icon'),
@@ -188,8 +222,24 @@ function todieTile(id, label, desc) {
       label,
       type: 'pixflux',
       description: `${desc}${STYLE_SUFFIX}`,
-      imageSize: {width: 32, height: 32},
+      imageSize: {width: 64, height: 64},
       fileInstall: {path: `public/todie/tiles/${id}.png`},
+    },
+  ];
+}
+
+/** @param {string} id @param {string} label @param {string} desc */
+function todieObject(id, label, desc) {
+  return [
+    {
+      id: `obj-${id}`,
+      game: 'todie',
+      category: 'object',
+      label: `맵오브젝트: ${label}`,
+      type: 'pixflux',
+      description: `${desc}${STYLE_SUFFIX}`,
+      imageSize: {width: 64, height: 64},
+      fileInstall: {path: `public/todie/objects/${id}.png`},
     },
   ];
 }

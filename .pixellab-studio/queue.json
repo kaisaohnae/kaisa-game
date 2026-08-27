@@ -154,42 +154,42 @@
       "id": "tile-grass_a",
       "status": "completed",
       "message": "installed",
-      "updatedAt": "2026-08-27T05:14:23.189Z",
+      "updatedAt": "2026-08-27T06:47:21.850Z",
       "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\tiles\\grass_a.png"
     },
     {
       "id": "tile-grass_b",
       "status": "completed",
       "message": "installed",
-      "updatedAt": "2026-08-27T05:14:36.243Z",
+      "updatedAt": "2026-08-27T06:47:36.632Z",
       "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\tiles\\grass_b.png"
     },
     {
       "id": "tile-wasteland_a",
       "status": "completed",
       "message": "installed",
-      "updatedAt": "2026-08-27T05:14:52.314Z",
+      "updatedAt": "2026-08-27T06:47:50.977Z",
       "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\tiles\\wasteland_a.png"
     },
     {
       "id": "tile-wasteland_b",
       "status": "completed",
       "message": "installed",
-      "updatedAt": "2026-08-27T05:15:10.584Z",
+      "updatedAt": "2026-08-27T06:48:56.443Z",
       "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\tiles\\wasteland_b.png"
     },
     {
       "id": "tile-stone_path",
       "status": "completed",
       "message": "installed",
-      "updatedAt": "2026-08-27T05:15:33.482Z",
+      "updatedAt": "2026-08-27T06:49:10.643Z",
       "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\tiles\\stone_path.png"
     },
     {
       "id": "tile-water_shallow",
       "status": "completed",
       "message": "installed",
-      "updatedAt": "2026-08-27T05:15:52.615Z",
+      "updatedAt": "2026-08-27T06:49:30.335Z",
       "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\tiles\\water_shallow.png"
     },
     {
@@ -702,6 +702,62 @@
       "message": "installed",
       "updatedAt": "2026-08-27T06:04:40.177Z",
       "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\ambulance.png"
+    },
+    {
+      "id": "obj-tree_oak",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T06:43:14.478Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\objects\\tree_oak.png"
+    },
+    {
+      "id": "obj-tree_pine",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T06:46:25.499Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\objects\\tree_pine.png"
+    },
+    {
+      "id": "obj-bush",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T06:46:45.520Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\objects\\bush.png"
+    },
+    {
+      "id": "obj-rock",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T06:47:04.330Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\objects\\rock.png"
+    },
+    {
+      "id": "obj-stump",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T06:49:55.078Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\objects\\stump.png"
+    },
+    {
+      "id": "obj-flowers",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T06:50:18.530Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\objects\\flowers.png"
+    },
+    {
+      "id": "obj-crate",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T06:50:35.384Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\objects\\crate.png"
+    },
+    {
+      "id": "obj-barrel",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T06:50:54.613Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\objects\\barrel.png"
     }
   ]
 }

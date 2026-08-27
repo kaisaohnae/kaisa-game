@@ -24,6 +24,7 @@ import {
   pickSpawnKind,
   getTileId,
   tileDef,
+  mapObjectDef,
   preloadAllTodieAssets,
   pickupOrAutoEquip,
   rollLootDrop,
@@ -846,6 +847,7 @@ export default function TodieGame() {
       assetsRef.current?.consumables ?? {};
     const mobImages: Record<string, HTMLImageElement> = assetsRef.current?.mobs ?? {};
     const tileImages = assetsRef.current?.tiles ?? {};
+    const objectImages = assetsRef.current?.objects ?? {};
     const worldMap = assetsRef.current?.map ?? null;
 
 
@@ -1975,6 +1977,32 @@ export default function TodieGame() {
         }
       }
 
+      if (worldMap?.objects?.length) {
+        for (const o of worldMap.objects) {
+          const ox = (o.tx + 0.5) * TILE;
+          const oy = (o.ty + 0.5) * TILE;
+          if (
+            ox < left - 80 ||
+            ox > left + viewW + 80 ||
+            oy < top - 80 ||
+            oy > top + viewH + 80
+          ) {
+            continue;
+          }
+          const def = mapObjectDef(o.kind);
+          const img = objectImages[o.kind];
+          const sz = def.size;
+          if (img && img.complete && img.naturalWidth > 0) {
+            ctx.drawImage(img, ox - sz / 2, oy - sz / 2, sz, sz);
+          } else {
+            ctx.fillStyle = def.fill;
+            ctx.beginPath();
+            ctx.arc(ox, oy, sz * 0.28, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+
       // world border
       ctx.strokeStyle = 'rgba(180, 220, 140, 0.2)';
       ctx.lineWidth = 8;
@@ -2817,6 +2845,28 @@ export default function TodieGame() {
 
         player.x = Math.max(PLAYER_R, Math.min(WORLD - PLAYER_R, player.x + player.vx * dt));
         player.y = Math.max(PLAYER_R, Math.min(WORLD - PLAYER_R, player.y + player.vy * dt));
+
+        // map prop collision (trees / rocks / crates …)
+        if (worldMap?.objects?.length) {
+          for (const o of worldMap.objects) {
+            const def = mapObjectDef(o.kind);
+            if (!def.blocking) continue;
+            const ox = (o.tx + 0.5) * TILE;
+            const oy = (o.ty + 0.5) * TILE;
+            const rad = def.size * 0.28;
+            const dx = player.x - ox;
+            const dy = player.y - oy;
+            const dist = Math.hypot(dx, dy) || 1;
+            const minD = PLAYER_R + rad;
+            if (dist < minD) {
+              const push = (minD - dist) / dist;
+              player.x += dx * push;
+              player.y += dy * push;
+              player.x = Math.max(PLAYER_R, Math.min(WORLD - PLAYER_R, player.x));
+              player.y = Math.max(PLAYER_R, Math.min(WORLD - PLAYER_R, player.y));
+            }
+          }
+        }
 
         if (camFollow) {
           camX += (player.x - camX) * Math.min(1, 10 * dt);

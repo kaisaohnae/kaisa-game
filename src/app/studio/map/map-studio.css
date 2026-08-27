@@ -177,6 +177,14 @@
   color: #c5e1a5;
 }
 
+.map-studio__online {
+  color: #81c784;
+}
+
+.map-studio__offline {
+  color: #ef9a9a;
+}
+
 .map-studio__canvas-wrap {
   position: relative;
   min-height: 60vh;

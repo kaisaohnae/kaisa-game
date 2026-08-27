@@ -34,6 +34,7 @@ export {loadMobImages, mobSpriteKey, mobDrawSize} from './mobs';
 export type {MobSpriteId} from './mobs';
 export {
   loadTileImages,
+  loadMapObjectImages,
   loadTodieMap,
   prepareTileCanvases,
   pickTileId,
@@ -42,8 +43,10 @@ export {
   tileDef,
   MAP_TILE_SIZE,
   MAP_WORLD_SIZE,
+  MAP_OBJECT_DEFS,
+  mapObjectDef,
 } from './tiles';
-export type {TileId, TodieMapJson} from './tiles';
+export type {TileId, TodieMapJson, MapObjectKind, MapObjectPlacement} from './tiles';
 export type {GearDef, LootItemDraft, GearTier, ItemHelpInfo, GearStats} from './items';
 export {
   EQUIP_SLOTS,

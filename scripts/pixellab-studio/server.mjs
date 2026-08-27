@@ -19,7 +19,8 @@ const ROOT = path.join(__dirname, '..', '..');
 loadEnvLocal();
 
 const PORT = Number(process.env.STUDIO_PORT ?? 8890);
-const SECRET = process.env.STUDIO_SECRET ?? 'dev-secret';
+const SECRET =
+  process.env.STUDIO_SECRET ?? process.env.NEXT_PUBLIC_STUDIO_SECRET ?? 'dev-secret';
 const API_KEY = process.env.PIXELLAB_API_KEY ?? '';
 
 /** @type {PixelLabClient | null} */
@@ -135,6 +136,7 @@ const server = http.createServer(async (req, res) => {
       const dir = path.join(ROOT, 'public', 'todie', 'map');
       fs.mkdirSync(dir, {recursive: true});
       const mapPath = path.join(dir, 'world.json');
+      const objects = Array.isArray(body.objects) ? body.objects : [];
       const payload = {
         version: 1,
         name: typeof body.name === 'string' ? body.name : 'todie-world',
@@ -144,9 +146,17 @@ const server = http.createServer(async (req, res) => {
         rows,
         palette: body.palette,
         cells: body.cells,
+        objects,
+        nextObjectId: Number(body.nextObjectId) || objects.length + 1,
       };
       fs.writeFileSync(mapPath, JSON.stringify(payload));
-      return json(res, {ok: true, path: 'public/todie/map/world.json', cells: payload.cells.length});
+      return json(res, {
+        ok: true,
+        localOnly: true,
+        path: 'public/todie/map/world.json',
+        cells: payload.cells.length,
+        objects: objects.length,
+      });
     }
 
     return json(res, {error: 'not found'}, 404);

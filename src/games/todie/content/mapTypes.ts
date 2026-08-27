@@ -1,5 +1,13 @@
 /** Todie world map — 10000×10000, tile grid saved as JSON */
 
+import {
+  parseMapObjects,
+  type MapObjectPlacement,
+} from './mapObjects';
+
+export type {MapObjectKind, MapObjectPlacement} from './mapObjects';
+export {MAP_OBJECT_DEFS, MAP_OBJECT_IDS, mapObjectDef, mapObjectUrl} from './mapObjects';
+
 export type TileId =
   | 'grass_a'
   | 'grass_b'
@@ -46,6 +54,10 @@ export type TodieMapJson = {
   palette: TileId[];
   /** Row-major palette indices, length = cols * rows */
   cells: number[];
+  /** Optional props (trees, rocks, …) */
+  objects: MapObjectPlacement[];
+  /** Next object id */
+  nextObjectId: number;
 };
 
 export function tileDef(id: TileId): TileDef {
@@ -63,6 +75,8 @@ export function emptyMap(fill: TileId = 'grass_a'): TodieMapJson {
     rows: MAP_ROWS,
     palette: [...TILE_IDS],
     cells: Array.from({length: MAP_COLS * MAP_ROWS}, () => idx),
+    objects: [],
+    nextObjectId: 1,
   };
 }
 
@@ -112,7 +126,39 @@ export function generateDefaultMap(): TodieMapJson {
       map.cells[ty * cols + tx] = TILE_INDEX[id];
     }
   }
+  // sparse starter props away from spawn
+  const spawnTx = Math.floor(cols / 2);
+  const spawnTy = Math.floor(rows / 2);
+  const kinds = ['tree_oak', 'tree_pine', 'bush', 'rock', 'flowers'] as const;
+  for (let i = 0; i < 180; i += 1) {
+    const tx = Math.floor(hash01(i, 3, 9) * cols);
+    const ty = Math.floor(hash01(i, 7, 13) * rows);
+    if (Math.hypot(tx - spawnTx, ty - spawnTy) < 10) continue;
+    if (hash01(tx, ty, 71) < 0.55) continue;
+    const kind = kinds[Math.floor(hash01(tx, ty, 99) * kinds.length)]!;
+    map.objects.push({id: map.nextObjectId++, kind, tx, ty});
+  }
   return map;
+}
+
+export function placeMapObject(
+  map: TodieMapJson,
+  tx: number,
+  ty: number,
+  kind: MapObjectPlacement['kind'],
+) {
+  if (tx < 0 || ty < 0 || tx >= map.cols || ty >= map.rows) return;
+  // one prop per cell
+  map.objects = map.objects.filter((o) => !(o.tx === tx && o.ty === ty));
+  map.objects.push({id: map.nextObjectId++, kind, tx, ty});
+}
+
+export function eraseMapObject(map: TodieMapJson, tx: number, ty: number) {
+  map.objects = map.objects.filter((o) => !(o.tx === tx && o.ty === ty));
+}
+
+export function objectAt(map: TodieMapJson, tx: number, ty: number) {
+  return map.objects.find((o) => o.tx === tx && o.ty === ty) ?? null;
 }
 
 export function cellIndex(map: TodieMapJson, tx: number, ty: number) {
@@ -181,6 +227,12 @@ export function parseMapJson(data: unknown): TodieMapJson {
   const need = cols * rows;
   const cells = raw.cells.slice(0, need);
   while (cells.length < need) cells.push(0);
+  const objects = parseMapObjects((raw as {objects?: unknown}).objects);
+  const nextObjectId = Math.max(
+    Number((raw as {nextObjectId?: number}).nextObjectId) || 1,
+    ...objects.map((o) => o.id + 1),
+    1,
+  );
   return {
     version: 1,
     name: typeof raw.name === 'string' ? raw.name : 'todie-world',
@@ -190,5 +242,7 @@ export function parseMapJson(data: unknown): TodieMapJson {
     rows,
     palette: raw.palette.filter((p): p is TileId => TILE_IDS.includes(p as TileId)),
     cells,
+    objects,
+    nextObjectId,
   };
 }

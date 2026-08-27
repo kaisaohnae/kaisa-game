@@ -1,3 +1,4 @@
+import {MAP_OBJECT_IDS} from './mapObjects';
 import {displaySettings} from './settings';
 import {
   MAP_URL,
@@ -9,7 +10,6 @@ import {
   type TodieMapJson,
 } from './mapTypes';
 
-export type {TileId, TodieMapJson} from './mapTypes';
 export {
   TILE_DEFS,
   TILE_IDS,
@@ -18,6 +18,8 @@ export {
   MAP_COLS,
   MAP_ROWS,
   MAP_URL,
+  MAP_OBJECT_DEFS,
+  MAP_OBJECT_IDS,
   generateDefaultMap,
   getTileId,
   setTileId,
@@ -26,7 +28,14 @@ export {
   parseMapJson,
   emptyMap,
   tileDef,
+  mapObjectDef,
+  mapObjectUrl,
+  placeMapObject,
+  eraseMapObject,
+  objectAt,
 } from './mapTypes';
+
+export type {TileId, TodieMapJson, MapObjectKind, MapObjectPlacement} from './mapTypes';
 
 export function tilePublicBase(): string {
   return (
@@ -36,6 +45,14 @@ export function tilePublicBase(): string {
 
 export function tileSpriteUrl(id: TileId): string {
   return `${tilePublicBase()}/${id}.png`;
+}
+
+export function objectPublicBase(): string {
+  return '/todie/objects';
+}
+
+export function objectSpriteUrl(id: string): string {
+  return `${objectPublicBase()}/${id}.png`;
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -102,12 +119,28 @@ export function prepareTileCanvases(
     const img = images[def.id];
     if (img && img.complete && img.naturalWidth > 0) {
       const punched = punchDarkToAlpha(img, tileSize);
-      g.globalAlpha = def.id === 'stone_path' || def.id === 'water_shallow' ? 0.92 : 0.55;
+      // Higher fill + softer overlay = neighboring tiles share base hue (fewer seams)
+      g.globalAlpha =
+        def.id === 'stone_path' || def.id === 'water_shallow' ? 0.78 : 0.42;
       g.drawImage(punched, 0, 0);
       g.globalAlpha = 1;
     }
     out[def.id] = c;
   }
+  return out;
+}
+
+export async function loadMapObjectImages(): Promise<Partial<Record<string, HTMLImageElement>>> {
+  const out: Partial<Record<string, HTMLImageElement>> = {};
+  await Promise.all(
+    MAP_OBJECT_IDS.map(async (id) => {
+      try {
+        out[id] = await loadImage(objectSpriteUrl(id));
+      } catch {
+        /* fallback fill */
+      }
+    }),
+  );
   return out;
 }
 
