@@ -13,7 +13,16 @@ import './car-run.css';
 
 type Phase = 'ready' | 'playing' | 'over';
 
-type ObstacleKind = 'cone' | 'rock' | 'crate' | 'barrel' | 'tire' | 'barrier' | 'puddle' | 'sign';
+type ObstacleKind =
+  | 'cone'
+  | 'rock'
+  | 'crate'
+  | 'barrel'
+  | 'tire'
+  | 'barrier'
+  | 'puddle'
+  | 'sign'
+  | 'heart';
 
 type Obstacle = {
   id: number;
@@ -26,7 +35,7 @@ type Obstacle = {
   speedMul: number;
 };
 
-const OBSTACLE_KINDS: ObstacleKind[] = [
+const OBSTACLE_KINDS: Exclude<ObstacleKind, 'heart'>[] = [
   'cone',
   'rock',
   'crate',
@@ -46,35 +55,57 @@ const OBSTACLE_SIZE: Record<ObstacleKind, {w: number; h: number}> = {
   barrier: {w: 56, h: 28},
   puddle: {w: 52, h: 24},
   sign: {w: 38, h: 44},
+  heart: {w: 36, h: 34},
 };
 
 type GameState = {
   carX: number;
-  targetX: number;
+  /** 가로 조향 속도 (px/s) */
+  steerVel: number;
+  /** 포인터가 가리키는 목표 X (없으면 null) */
+  pointerX: number | null;
   obstacles: Obstacle[];
   distance: number;
   speed: number;
   lastSpawn: number;
   nextId: number;
   scroll: number;
+  lives: number;
+  /** 충돌 직후 무적 종료 시각 (ms) */
+  invulnUntil: number;
 };
 
-const START_SPEED = 130;
-const MAX_SPEED = 300;
+const START_SPEED = 105;
+const MAX_SPEED = 320;
 const CAR_DISPLAY_H = 81;
 const ROAD_RATIO = 0.74;
+const START_LIVES = 3;
+const MAX_LIVES = 5;
+const HIT_INVULN_MS = 1200;
+const HEART_SPAWN_CHANCE = 0.075;
 const VEHICLE_STORAGE_KEY = 'kaisa-car-run-vehicle';
 
+function clamp(n: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, n));
+}
+
 function obstacleSpeedMul(kind: ObstacleKind) {
+  if (kind === 'heart') return 0.72 + Math.random() * 0.16;
   if (kind === 'cone' || kind === 'sign') return 0.68 + Math.random() * 0.2;
   if (kind === 'rock' || kind === 'puddle') return 0.86 + Math.random() * 0.22;
   if (kind === 'tire' || kind === 'barrier') return 0.94 + Math.random() * 0.28;
   return 1.02 + Math.random() * 0.32;
 }
 
-function spawnObstacle(roadLeft: number, roadWidth: number, nextId: number): Obstacle {
-  const kind = OBSTACLE_KINDS[Math.floor(Math.random() * OBSTACLE_KINDS.length)]!;
-  const {w, h} = OBSTACLE_SIZE[kind];
+function spawnObstacle(
+  roadLeft: number,
+  roadWidth: number,
+  nextId: number,
+  kind?: ObstacleKind,
+): Obstacle {
+  const picked =
+    kind ?? OBSTACLE_KINDS[Math.floor(Math.random() * OBSTACLE_KINDS.length)]!;
+  const {w, h} = OBSTACLE_SIZE[picked];
   const minX = roadLeft + w * 0.6;
   const maxX = roadLeft + roadWidth - w * 0.6;
   return {
@@ -83,13 +114,20 @@ function spawnObstacle(roadLeft: number, roadWidth: number, nextId: number): Obs
     y: -h - 8,
     w,
     h,
-    kind,
-    speedMul: obstacleSpeedMul(kind),
+    kind: picked,
+    speedMul: obstacleSpeedMul(picked),
   };
 }
 
 function spawnGapMs(speed: number) {
-  return Math.max(380, 880 - speed * 1.35);
+  return Math.max(400, 920 - speed * 1.2);
+}
+
+/** 거리 기반 속도 — 초반은 천천히, 점점 가속감 */
+function speedFromDistance(distance: number) {
+  const t = distance / 14_000;
+  const eased = 1 - Math.exp(-t * 2.4);
+  return START_SPEED + (MAX_SPEED - START_SPEED) * eased;
 }
 
 function rectsOverlap(
@@ -234,6 +272,20 @@ function drawObstacle(ctx: CanvasRenderingContext2D, o: Obstacle) {
     ctx.beginPath();
     ctx.ellipse(o.x - 8, top + o.h / 2 - 2, 10, 5, -0.3, 0, Math.PI * 2);
     ctx.fill();
+  } else if (o.kind === 'heart') {
+    const bob = Math.sin(performance.now() / 220 + o.id) * 2.5;
+    const cy = top + o.h / 2 + bob;
+    const s = o.w * 0.42;
+    ctx.fillStyle = '#e53935';
+    ctx.beginPath();
+    ctx.moveTo(o.x, cy + s * 0.7);
+    ctx.bezierCurveTo(o.x + s * 1.2, cy + s * 0.1, o.x + s * 1.1, cy - s * 0.75, o.x, cy - s * 0.2);
+    ctx.bezierCurveTo(o.x - s * 1.1, cy - s * 0.75, o.x - s * 1.2, cy + s * 0.1, o.x, cy + s * 0.7);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.beginPath();
+    ctx.ellipse(o.x - s * 0.28, cy - s * 0.22, s * 0.22, s * 0.16, -0.5, 0, Math.PI * 2);
+    ctx.fill();
   } else {
     // caution sign
     ctx.fillStyle = '#78909c';
@@ -277,13 +329,16 @@ function roundRect(
 function createInitialState(canvasW: number): GameState {
   return {
     carX: canvasW / 2,
-    targetX: canvasW / 2,
+    steerVel: 0,
+    pointerX: null,
     obstacles: [],
     distance: 0,
     speed: START_SPEED,
     lastSpawn: 0,
     nextId: 1,
     scroll: 0,
+    lives: START_LIVES,
+    invulnUntil: 0,
   };
 }
 
@@ -306,6 +361,7 @@ export default function CarRunGame() {
   const [phase, setPhase] = useState<Phase>('ready');
   const [score, setScore] = useState(0);
   const [best, setBest] = useState(0);
+  const [lives, setLives] = useState(START_LIVES);
   const [assetsReady, setAssetsReady] = useState(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState(DEFAULT_VEHICLE_ID);
 
@@ -337,7 +393,9 @@ export default function CarRunGame() {
       gameRef.current = createInitialState(rect.width);
     }
     gameRef.current.carX = clampCarX(gameRef.current.carX, rect.width, carW);
-    gameRef.current.targetX = clampCarX(gameRef.current.targetX, rect.width, carW);
+    if (gameRef.current.pointerX != null) {
+      gameRef.current.pointerX = clampCarX(gameRef.current.pointerX, rect.width, carW);
+    }
   }, [clampCarX]);
 
   const resetGame = useCallback(() => {
@@ -347,11 +405,11 @@ export default function CarRunGame() {
     const {width: carW} = carSize(vehicle);
     const state = createInitialState(w);
     state.carX = clampCarX(w / 2, w, carW);
-    state.targetX = state.carX;
     gameRef.current = state;
     keysRef.current.left = false;
     keysRef.current.right = false;
     setScore(0);
+    setLives(START_LIVES);
     phaseRef.current = 'playing';
     setPhase('playing');
   }, [clampCarX]);
@@ -363,11 +421,11 @@ export default function CarRunGame() {
     const {width: carW} = carSize(vehicle);
     const state = createInitialState(w);
     state.carX = clampCarX(w / 2, w, carW);
-    state.targetX = state.carX;
     gameRef.current = state;
     keysRef.current.left = false;
     keysRef.current.right = false;
     setScore(0);
+    setLives(START_LIVES);
     phaseRef.current = 'ready';
     setPhase('ready');
   }, [clampCarX]);
@@ -466,32 +524,47 @@ export default function CarRunGame() {
       const {width: carW, height: carH} = carSize(vehicle);
 
       if (phaseRef.current === 'playing') {
-        game.speed = Math.min(MAX_SPEED, START_SPEED + game.distance * 0.045);
+        game.speed = speedFromDistance(game.distance);
         game.distance += game.speed * dt;
         game.scroll += game.speed * dt;
 
-        const steerDir =
-          keysRef.current.left && !keysRef.current.right
-            ? -1
-            : keysRef.current.right && !keysRef.current.left
-              ? 1
-              : 0;
-        if (steerDir !== 0) {
-          const step = roadWidth * 1.1 * dt;
-          game.targetX = clampCarX(game.targetX + steerDir * step, w, carW);
+        let steerInput = 0;
+        if (keysRef.current.left && !keysRef.current.right) steerInput = -1;
+        else if (keysRef.current.right && !keysRef.current.left) steerInput = 1;
+        else if (game.pointerX != null) {
+          const dx = game.pointerX - game.carX;
+          if (Math.abs(dx) > 10) steerInput = Math.sign(dx);
         }
 
-        game.carX += (game.targetX - game.carX) * Math.min(1, dt * (dragRef.current.active ? 20 : 14));
+        const speedRatio = game.speed / START_SPEED;
+        const maxSteerSpeed = 95 + game.speed * 0.72;
+        const steerAccel = 1600 + 900 * Math.min(1.6, speedRatio);
+        if (steerInput !== 0) {
+          game.steerVel += steerInput * steerAccel * dt;
+          // 목표 반대 방향이면 더 빨리 꺾기
+          if (Math.sign(game.steerVel) !== 0 && Math.sign(game.steerVel) !== steerInput) {
+            game.steerVel += steerInput * steerAccel * 0.85 * dt;
+          }
+        } else {
+          game.steerVel *= Math.exp(-7.5 * dt);
+          if (Math.abs(game.steerVel) < 4) game.steerVel = 0;
+        }
+        game.steerVel = clamp(game.steerVel, -maxSteerSpeed, maxSteerSpeed);
+        game.carX = clampCarX(game.carX + game.steerVel * dt, w, carW);
 
         game.obstacles = game.obstacles
           .map((o) => ({...o, y: o.y + game.speed * o.speedMul * dt}))
           .filter((o) => o.y < h + 60);
 
         if (now - game.lastSpawn >= spawnGapMs(game.speed)) {
-          game.obstacles.push(spawnObstacle(roadLeft, roadWidth, game.nextId));
+          if (Math.random() < HEART_SPAWN_CHANCE) {
+            game.obstacles.push(spawnObstacle(roadLeft, roadWidth, game.nextId, 'heart'));
+          } else {
+            game.obstacles.push(spawnObstacle(roadLeft, roadWidth, game.nextId));
+          }
           game.nextId += 1;
 
-          if (Math.random() < 0.32) {
+          if (Math.random() < 0.28) {
             const extra = spawnObstacle(roadLeft, roadWidth, game.nextId);
             extra.y -= 65 + Math.random() * 95;
             game.obstacles.push(extra);
@@ -503,19 +576,47 @@ export default function CarRunGame() {
 
         const carLeft = game.carX - carW / 2;
         const carTop = carY - carH;
-        const hit = game.obstacles.some((o) =>
-          rectsOverlap(carLeft, carTop, carW, carH, o.x - o.w / 2, o.y, o.w, o.h),
-        );
 
-        if (hit) {
-          keysRef.current.left = false;
-          keysRef.current.right = false;
-          phaseRef.current = 'over';
-          setPhase('over');
-          const meters = Math.floor(game.distance / 10);
-          if (meters > bestRef.current) {
-            bestRef.current = meters;
-            setBest(meters);
+        const heartHit = game.obstacles.find(
+          (o) =>
+            o.kind === 'heart' &&
+            rectsOverlap(carLeft, carTop, carW, carH, o.x - o.w / 2, o.y, o.w, o.h),
+        );
+        if (heartHit) {
+          game.obstacles = game.obstacles.filter((o) => o.id !== heartHit.id);
+          if (game.lives < MAX_LIVES) {
+            game.lives += 1;
+            setLives(game.lives);
+          }
+        }
+
+        const invuln = now < game.invulnUntil;
+        if (!invuln) {
+          const hitObs = game.obstacles.find(
+            (o) =>
+              o.kind !== 'heart' &&
+              rectsOverlap(carLeft, carTop, carW, carH, o.x - o.w / 2, o.y, o.w, o.h),
+          );
+
+          if (hitObs) {
+            game.obstacles = game.obstacles.filter((o) => o.id !== hitObs.id);
+            game.lives = Math.max(0, game.lives - 1);
+            game.invulnUntil = now + HIT_INVULN_MS;
+            game.steerVel *= 0.35;
+            setLives(game.lives);
+
+            if (game.lives <= 0) {
+              keysRef.current.left = false;
+              keysRef.current.right = false;
+              game.pointerX = null;
+              phaseRef.current = 'over';
+              setPhase('over');
+              const meters = Math.floor(game.distance / 10);
+              if (meters > bestRef.current) {
+                bestRef.current = meters;
+                setBest(meters);
+              }
+            }
           }
         }
 
@@ -536,7 +637,11 @@ export default function CarRunGame() {
         const frame = vehicleFrameIndex(vehicle, now);
         const img = vehicle.images[frame] ?? vehicle.images[0];
         if (img) {
+          const blinking = now < game.invulnUntil && Math.floor(now / 90) % 2 === 0;
+          ctx.save();
+          if (blinking) ctx.globalAlpha = 0.35;
           ctx.drawImage(img, game.carX - carW / 2, carY - carH, carW, carH);
+          ctx.restore();
         }
       }
 
@@ -545,9 +650,9 @@ export default function CarRunGame() {
 
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, []);
+  }, [clampCarX]);
 
-  const setCarFromPointer = useCallback(
+  const setPointerX = useCallback(
     (clientX: number, fieldWidth: number) => {
       const game = gameRef.current;
       if (!game) return;
@@ -559,7 +664,7 @@ export default function CarRunGame() {
       const localX = clientX - rect.left;
       const vehicle = vehiclesRef.current.get(selectedVehicleRef.current);
       const {width: carW} = carSize(vehicle);
-      game.targetX = clampCarX(localX, fieldWidth, carW);
+      game.pointerX = clampCarX(localX, fieldWidth, carW);
     },
     [clampCarX],
   );
@@ -572,14 +677,14 @@ export default function CarRunGame() {
     if (phaseRef.current !== 'playing') return;
     e.currentTarget.setPointerCapture(e.pointerId);
     dragRef.current = {active: true, pointerId: e.pointerId};
-    setCarFromPointer(e.clientX, e.currentTarget.getBoundingClientRect().width);
+    setPointerX(e.clientX, e.currentTarget.getBoundingClientRect().width);
   };
 
   const onFieldPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!dragRef.current.active || dragRef.current.pointerId !== e.pointerId) return;
     if (phaseRef.current !== 'playing') return;
 
-    setCarFromPointer(e.clientX, e.currentTarget.getBoundingClientRect().width);
+    setPointerX(e.clientX, e.currentTarget.getBoundingClientRect().width);
   };
 
   const onFieldPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -590,14 +695,15 @@ export default function CarRunGame() {
       e.currentTarget.releasePointerCapture(e.pointerId);
     }
 
-    if (phaseRef.current === 'playing') {
-      setCarFromPointer(e.clientX, e.currentTarget.getBoundingClientRect().width);
-    }
+    const game = gameRef.current;
+    if (game) game.pointerX = null;
   };
 
   const onFieldPointerCancel = (e: React.PointerEvent<HTMLDivElement>) => {
     if (dragRef.current.pointerId !== e.pointerId) return;
     dragRef.current.active = false;
+    const game = gameRef.current;
+    if (game) game.pointerX = null;
   };
 
   const onSelectVehicle = (id: string) => {
@@ -612,7 +718,9 @@ export default function CarRunGame() {
       const canvasW = wrap.getBoundingClientRect().width;
       const {width: carW} = carSize(vehiclesRef.current.get(id));
       game.carX = clampCarX(game.carX, canvasW, carW);
-      game.targetX = clampCarX(game.targetX, canvasW, carW);
+      if (game.pointerX != null) {
+        game.pointerX = clampCarX(game.pointerX, canvasW, carW);
+      }
     }
   };
 
@@ -632,12 +740,29 @@ export default function CarRunGame() {
       >
         <canvas ref={canvasRef} className="car-run__canvas" />
 
+        {phase === 'playing' ? (
+          <div className="car-run__hud" aria-live="polite">
+            <div className="car-run__hud-score">{score}m</div>
+            <div className="car-run__hearts" aria-label={`하트 ${lives}개`}>
+              {Array.from({length: MAX_LIVES}, (_, i) => (
+                <span
+                  key={i}
+                  className={`car-run__heart${i < lives ? '' : ' car-run__heart--empty'}`}
+                  aria-hidden
+                >
+                  ♥
+                </span>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
         {showSetup ? (
           <div className="car-run__setup" role="dialog" aria-labelledby="car-run-setup-title">
             {phase === 'over' ? (
               <>
                 <p id="car-run-setup-title" className="car-run__setup-title car-run__setup-title--over">
-                  앗! 부딪혔어요
+                  하트가 다 떨어졌어요
                 </p>
                 <p className="car-run__setup-score">{score}m 달렸어요</p>
                 {best > 0 ? <p className="car-run__setup-best">최고 {best}m</p> : null}

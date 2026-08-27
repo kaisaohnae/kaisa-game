@@ -97,15 +97,6 @@ const server = http.createServer(async (req, res) => {
       return json(res, {ok: true, queue: runner.snapshot()});
     }
 
-    if (url.pathname === '/api/queue/run-defaults' && req.method === 'POST') {
-      assertRunner();
-      const defaults = manifestForApi()
-        .filter((i) => i.selectedByDefault)
-        .map((i) => i.id);
-      runner.enqueue(defaults);
-      return json(res, {ok: true, ids: defaults, queue: runner.snapshot()});
-    }
-
     if (url.pathname === '/api/queue' && req.method === 'GET') {
       assertRunner();
       return json(res, {queue: runner.snapshot(), running: runner.running});

@@ -64,6 +64,52 @@
   pointer-events: none;
 }
 
+.car-run__hud {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  right: 14px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.car-run__hud-score {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 3px solid #fff;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 4px 0 rgba(33, 150, 243, 0.35);
+  font-size: clamp(15px, 3.8vw, 20px);
+  font-weight: 800;
+  color: #1565c0;
+}
+
+.car-run__hearts {
+  display: flex;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 3px solid #fff;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 4px 0 rgba(229, 57, 53, 0.28);
+}
+
+.car-run__heart {
+  font-size: clamp(20px, 5vw, 26px);
+  line-height: 1;
+  color: #e53935;
+  text-shadow: 0 2px 0 rgba(183, 28, 28, 0.25);
+}
+
+.car-run__heart--empty {
+  color: #cfd8dc;
+  text-shadow: none;
+}
+
 .car-run__field--idle {
   box-shadow: 0 10px 0 #ce93d8;
 }

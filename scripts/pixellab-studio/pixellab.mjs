@@ -129,17 +129,34 @@ function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-/** @param {object} job */
-export function extractPixfluxImage(job) {
-  const images = job.last_response?.images ?? job.last_response?.image;
+/** @param {unknown} value */
+function imageSourceFromValue(value) {
+  if (!value) return null;
+  if (typeof value === 'string') return value;
+  if (typeof value !== 'object') return null;
+  const img = /** @type {{ url?: string, base64?: string, type?: string, format?: string }} */ (value);
+  if (img.url) return img.url;
+  if (img.base64) {
+    const format = img.format ?? 'png';
+    return `data:image/${format};base64,${img.base64}`;
+  }
+  return null;
+}
+
+/** Sync create-image-pixflux response or completed background job */
+export function extractPixfluxImage(data) {
+  const direct = imageSourceFromValue(data?.image);
+  if (direct) return direct;
+
+  const images = data?.last_response?.images ?? data?.last_response?.image;
   if (!images) return null;
   const first = Array.isArray(images) ? images[0] : images;
-  if (!first) return null;
-  if (typeof first === 'string') return first;
-  if (first.url) return first.url;
-  if (first.base64) return `data:image/png;base64,${first.base64}`;
-  if (first.type === 'base64' && first.base64) return `data:image/png;base64,${first.base64}`;
-  return null;
+  return imageSourceFromValue(first);
+}
+
+/** @param {object} created */
+export function extractPixfluxJobId(created) {
+  return created.background_job_id ?? created.job_id ?? created.id ?? null;
 }
 
 /** @param {string} src */

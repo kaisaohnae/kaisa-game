@@ -50,7 +50,7 @@ import {drawDashTrail, drawSkillWorldFx} from './render/skillFx';
 import {InventoryDock} from './ui/InventoryDock';
 import {createTodieBgm, readBgmMuted, type TodieBgm} from './audio/proceduralBgm';
 
-const WORLD = spawnSettings.worldSize ?? 30_000;
+const WORLD = spawnSettings.worldSize ?? 10_000;
 const TILE = 72;
 const PLAYER_R = 18;
 const HOTBAR = 5;

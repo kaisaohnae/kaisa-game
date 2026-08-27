@@ -1,9 +1,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {MANIFEST} from './manifest.mjs';
+import {MANIFEST, PRECOMPLETED_IDS} from './manifest.mjs';
 import {installCharacterRotations, installRawPng} from './install.mjs';
-import {extractPixfluxImage, loadImageSource, PixelLabClient} from './pixellab.mjs';
+import {
+  extractPixfluxImage,
+  extractPixfluxJobId,
+  loadImageSource,
+  PixelLabClient,
+} from './pixellab.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const STATE_DIR = path.join(__dirname, '..', '..', '.pixellab-studio');
@@ -33,16 +38,31 @@ export class StudioRunner {
 
   loadState() {
     fs.mkdirSync(STATE_DIR, {recursive: true});
-    if (!fs.existsSync(STATE_FILE)) return;
-    try {
-      const saved = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
-      for (const e of saved.entries ?? []) {
-        if (e.status === 'running') e.status = 'pending';
-        this.queue.set(e.id, e);
+    if (fs.existsSync(STATE_FILE)) {
+      try {
+        const saved = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+        for (const e of saved.entries ?? []) {
+          if (e.status === 'running') e.status = 'pending';
+          this.queue.set(e.id, e);
+        }
+      } catch {
+        /* ignore corrupt state */
       }
-    } catch {
-      /* ignore corrupt state */
     }
+
+    let seeded = false;
+    for (const id of PRECOMPLETED_IDS) {
+      const cur = this.queue.get(id);
+      if (cur?.status === 'completed') continue;
+      this.queue.set(id, {
+        id,
+        status: 'completed',
+        message: 'already synced',
+        updatedAt: new Date().toISOString(),
+      });
+      seeded = true;
+    }
+    if (seeded) this.saveState();
   }
 
   saveState() {
@@ -64,12 +84,20 @@ export class StudioRunner {
   }
 
   snapshot() {
-    return MANIFEST.map((item) => {
+    const rows = MANIFEST.map((item) => {
       const q = this.queue.get(item.id);
+      const fallbackStatus = PRECOMPLETED_IDS.has(item.id) ? 'completed' : 'pending';
+      const fallbackMessage = PRECOMPLETED_IDS.has(item.id) ? 'already synced' : undefined;
       return {
         ...item,
-        queue: q ?? {id: item.id, status: 'pending'},
+        queue: q ?? {id: item.id, status: fallbackStatus, message: fallbackMessage},
       };
+    });
+
+    return rows.sort((a, b) => {
+      const aDone = a.queue.status === 'completed' ? 1 : 0;
+      const bDone = b.queue.status === 'completed' ? 1 : 0;
+      return aDone - bDone;
     });
   }
 
@@ -137,13 +165,22 @@ export class StudioRunner {
         description: item.description,
         image_size: item.imageSize,
       });
-      const jobId = created.background_job_id ?? created.job_id;
-      if (!jobId) throw new Error('no background_job_id from pixflux');
-      this.patch(item.id, {message: `job ${jobId}`});
-      const done = await this.client.waitBackgroundJob(jobId, {
-        onTick: (j) => this.patch(item.id, {message: `pixflux ${j.status}`}),
-      });
-      const src = extractPixfluxImage(done);
+
+      let src = extractPixfluxImage(created);
+      if (!src) {
+        const jobId = extractPixfluxJobId(created);
+        if (!jobId) {
+          throw new Error('pixflux returned no image or background job id');
+        }
+        this.patch(item.id, {message: `job ${jobId}`});
+        const done = await this.client.waitBackgroundJob(jobId, {
+          onTick: (j) => this.patch(item.id, {message: `pixflux ${j.status}`}),
+        });
+        src = extractPixfluxImage(done);
+      } else {
+        this.patch(item.id, {message: 'pixflux ready'});
+      }
+
       if (!src) throw new Error('pixflux returned no image');
       const buf = await loadImageSource(src);
       return installRawPng(item.fileInstall.path, buf);

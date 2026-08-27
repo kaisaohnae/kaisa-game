@@ -1,0 +1,735 @@
+{
+  "entries": [
+    {
+      "id": "mob-slime",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:01:27.164Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\mobs\\slime.png"
+    },
+    {
+      "id": "mob-slime_elite",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:02:25.384Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\mobs\\slime_elite.png"
+    },
+    {
+      "id": "mob-bat",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:02:43.967Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\mobs\\bat.png"
+    },
+    {
+      "id": "mob-bat_elite",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:03:02.849Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\mobs\\bat_elite.png"
+    },
+    {
+      "id": "mob-block",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:03:21.125Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\mobs\\block.png"
+    },
+    {
+      "id": "mob-block_elite",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:03:39.914Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\mobs\\block_elite.png"
+    },
+    {
+      "id": "mob-wolf",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:04:00.203Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\mobs\\wolf.png"
+    },
+    {
+      "id": "mob-wolf_elite",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:04:13.660Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\mobs\\wolf_elite.png"
+    },
+    {
+      "id": "mob-spider",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:04:27.394Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\mobs\\spider.png"
+    },
+    {
+      "id": "mob-spider_elite",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:04:45.901Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\mobs\\spider_elite.png"
+    },
+    {
+      "id": "mob-boss",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:05:07.794Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\mobs\\boss.png"
+    },
+    {
+      "id": "mob-bigBoss",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:05:26.558Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\mobs\\bigBoss.png"
+    },
+    {
+      "id": "mob-finalBoss",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:05:57.147Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\mobs\\finalBoss.png"
+    },
+    {
+      "id": "tile-grass-a",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:06:38.584Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\tiles\\grass_a.png"
+    },
+    {
+      "id": "tile-grass-b",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:06:49.750Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\tiles\\grass_b.png"
+    },
+    {
+      "id": "tile-wasteland-a",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:07:02.732Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\tiles\\wasteland_a.png"
+    },
+    {
+      "id": "item-potion",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:07:17.379Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\items\\potion.png"
+    },
+    {
+      "id": "item-mana",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:07:35.950Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\items\\mana.png"
+    },
+    {
+      "id": "mage-walk-sync",
+      "status": "completed",
+      "message": "already synced",
+      "updatedAt": "2026-08-27T05:07:49.486Z"
+    },
+    {
+      "id": "warrior-walk-sync",
+      "status": "completed",
+      "message": "already synced",
+      "updatedAt": "2026-08-27T05:07:49.486Z"
+    },
+    {
+      "id": "mage-attack-sync",
+      "status": "completed",
+      "message": "already synced",
+      "updatedAt": "2026-08-27T05:07:49.486Z"
+    },
+    {
+      "id": "warrior-attack-sync",
+      "status": "completed",
+      "message": "already synced",
+      "updatedAt": "2026-08-27T05:07:49.486Z"
+    },
+    {
+      "id": "tile-grass_a",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:14:23.189Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\tiles\\grass_a.png"
+    },
+    {
+      "id": "tile-grass_b",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:14:36.243Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\tiles\\grass_b.png"
+    },
+    {
+      "id": "tile-wasteland_a",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:14:52.314Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\tiles\\wasteland_a.png"
+    },
+    {
+      "id": "tile-wasteland_b",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:15:10.584Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\tiles\\wasteland_b.png"
+    },
+    {
+      "id": "tile-stone_path",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:15:33.482Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\tiles\\stone_path.png"
+    },
+    {
+      "id": "tile-water_shallow",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:15:52.615Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\tiles\\water_shallow.png"
+    },
+    {
+      "id": "gear-warrior-basic-cloth_wrap",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:16:12.387Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\basic\\cloth_wrap.png"
+    },
+    {
+      "id": "gear-warrior-basic-ragged_vest",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:16:35.258Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\basic\\ragged_vest.png"
+    },
+    {
+      "id": "gear-warrior-basic-wrap_gloves",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:17:05.299Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\basic\\wrap_gloves.png"
+    },
+    {
+      "id": "gear-warrior-basic-straw_shoes",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:17:34.485Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\basic\\straw_shoes.png"
+    },
+    {
+      "id": "gear-warrior-ascend-iron_sword",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:17:52.573Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\ascend\\iron_sword.png"
+    },
+    {
+      "id": "gear-warrior-ascend-knight_helm",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:18:15.250Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\ascend\\knight_helm.png"
+    },
+    {
+      "id": "gear-warrior-ascend-blue_plate",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:18:32.186Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\ascend\\blue_plate.png"
+    },
+    {
+      "id": "gear-warrior-ascend-iron_gauntlets",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:18:53.309Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\ascend\\iron_gauntlets.png"
+    },
+    {
+      "id": "gear-warrior-ascend-march_boots",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:19:12.537Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\ascend\\march_boots.png"
+    },
+    {
+      "id": "gear-warrior-unique-courage_pendant",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:19:44.224Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\unique\\courage_pendant.png"
+    },
+    {
+      "id": "gear-warrior-unique-battle_ear",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:20:03.269Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\unique\\battle_ear.png"
+    },
+    {
+      "id": "gear-warrior-unique-power_ring",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:20:24.066Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\unique\\power_ring.png"
+    },
+    {
+      "id": "gear-warrior-hero-wasteland_blade",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:20:39.384Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\hero\\wasteland_blade.png"
+    },
+    {
+      "id": "gear-warrior-hero-war_crown",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:20:54.842Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\hero\\war_crown.png"
+    },
+    {
+      "id": "gear-warrior-hero-hero_plate",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:21:09.072Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\hero\\hero_plate.png"
+    },
+    {
+      "id": "gear-warrior-hero-hero_gauntlets",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:21:27.796Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\hero\\hero_gauntlets.png"
+    },
+    {
+      "id": "gear-warrior-hero-hero_greaves",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:21:50.404Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\hero\\hero_greaves.png"
+    },
+    {
+      "id": "gear-warrior-hero-hero_pendant",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:22:11.365Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\hero\\hero_pendant.png"
+    },
+    {
+      "id": "gear-warrior-hero-hero_ear",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:22:32.210Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\hero\\hero_ear.png"
+    },
+    {
+      "id": "gear-warrior-hero-hero_ring",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:22:51.353Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\hero\\hero_ring.png"
+    },
+    {
+      "id": "gear-warrior-mythic-void_blade",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:23:14.612Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\mythic\\void_blade.png"
+    },
+    {
+      "id": "gear-warrior-mythic-myth_helm",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:23:37.270Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\mythic\\myth_helm.png"
+    },
+    {
+      "id": "gear-warrior-mythic-myth_plate",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:23:56.212Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\mythic\\myth_plate.png"
+    },
+    {
+      "id": "gear-warrior-mythic-myth_gauntlets",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:24:17.742Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\mythic\\myth_gauntlets.png"
+    },
+    {
+      "id": "gear-warrior-mythic-myth_greaves",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:24:36.200Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\mythic\\myth_greaves.png"
+    },
+    {
+      "id": "gear-warrior-mythic-myth_pendant",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:24:54.727Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\mythic\\myth_pendant.png"
+    },
+    {
+      "id": "gear-warrior-mythic-myth_ear",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:25:13.341Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\mythic\\myth_ear.png"
+    },
+    {
+      "id": "gear-warrior-mythic-myth_ring",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:25:41.183Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\warrior\\mythic\\myth_ring.png"
+    },
+    {
+      "id": "gear-mage-basic-apprentice_cap",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:26:03.615Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\basic\\apprentice_cap.png"
+    },
+    {
+      "id": "gear-mage-basic-plain_robe",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:26:24.851Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\basic\\plain_robe.png"
+    },
+    {
+      "id": "gear-mage-basic-soft_gloves",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:26:44.469Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\basic\\soft_gloves.png"
+    },
+    {
+      "id": "gear-mage-basic-cloth_shoes",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:27:08.137Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\basic\\cloth_shoes.png"
+    },
+    {
+      "id": "gear-mage-ascend-crystal_staff",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:27:21.919Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\ascend\\crystal_staff.png"
+    },
+    {
+      "id": "gear-mage-ascend-wizard_hat",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:27:53.774Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\ascend\\wizard_hat.png"
+    },
+    {
+      "id": "gear-mage-ascend-arcane_robe",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:28:20.982Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\ascend\\arcane_robe.png"
+    },
+    {
+      "id": "gear-mage-ascend-silk_gloves",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:28:42.794Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\ascend\\silk_gloves.png"
+    },
+    {
+      "id": "gear-mage-ascend-mana_boots",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:28:56.571Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\ascend\\mana_boots.png"
+    },
+    {
+      "id": "gear-mage-unique-wisdom_pendant",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:29:10.939Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\unique\\wisdom_pendant.png"
+    },
+    {
+      "id": "gear-mage-unique-mana_ear",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:29:30.974Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\unique\\mana_ear.png"
+    },
+    {
+      "id": "gear-mage-unique-mind_ring",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:29:49.280Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\unique\\mind_ring.png"
+    },
+    {
+      "id": "gear-mage-hero-wasteland_staff",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:30:10.912Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\hero\\wasteland_staff.png"
+    },
+    {
+      "id": "gear-mage-hero-arcane_circlet",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:30:35.211Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\hero\\arcane_circlet.png"
+    },
+    {
+      "id": "gear-mage-hero-hero_robe",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:30:54.882Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\hero\\hero_robe.png"
+    },
+    {
+      "id": "gear-mage-hero-hero_gloves",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:31:16.037Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\hero\\hero_gloves.png"
+    },
+    {
+      "id": "gear-mage-hero-hero_slippers",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:31:36.580Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\hero\\hero_slippers.png"
+    },
+    {
+      "id": "gear-mage-hero-hero_pendant",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:31:51.935Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\hero\\hero_pendant.png"
+    },
+    {
+      "id": "gear-mage-hero-hero_ear",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:32:06.344Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\hero\\hero_ear.png"
+    },
+    {
+      "id": "gear-mage-hero-hero_ring",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:32:44.193Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\hero\\hero_ring.png"
+    },
+    {
+      "id": "gear-mage-mythic-void_staff",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:33:05.229Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\mythic\\void_staff.png"
+    },
+    {
+      "id": "gear-mage-mythic-myth_circlet",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:33:24.422Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\mythic\\myth_circlet.png"
+    },
+    {
+      "id": "gear-mage-mythic-myth_robe",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:33:44.609Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\mythic\\myth_robe.png"
+    },
+    {
+      "id": "gear-mage-mythic-myth_gloves",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:34:08.956Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\mythic\\myth_gloves.png"
+    },
+    {
+      "id": "gear-mage-mythic-myth_slippers",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:34:29.999Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\mythic\\myth_slippers.png"
+    },
+    {
+      "id": "gear-mage-mythic-myth_pendant",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:35:32.815Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\mythic\\myth_pendant.png"
+    },
+    {
+      "id": "gear-mage-mythic-myth_ear",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:35:47.244Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\mythic\\myth_ear.png"
+    },
+    {
+      "id": "gear-mage-mythic-myth_ring",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:36:01.401Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\todie\\gear\\mage\\mythic\\myth_ring.png"
+    },
+    {
+      "id": "car-viper",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:50:30.383Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\Black_viper.png"
+    },
+    {
+      "id": "car-truck",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:50:49.386Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\truck.png"
+    },
+    {
+      "id": "car-audi",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:51:13.521Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\Audi.png"
+    },
+    {
+      "id": "car-taxi",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:51:36.649Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\taxi.png"
+    },
+    {
+      "id": "car-car",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:52:00.024Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\Car.png"
+    },
+    {
+      "id": "car-mini-truck",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:52:22.538Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\Mini_truck.png"
+    },
+    {
+      "id": "car-mini-van",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:52:38.624Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\Mini_van.png"
+    },
+    {
+      "id": "car-police-f1",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:52:54.425Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\Police_animation\\1.png"
+    },
+    {
+      "id": "car-police-f2",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:53:09.034Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\Police_animation\\2.png"
+    },
+    {
+      "id": "car-police-f3",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:53:35.424Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\Police_animation\\3.png"
+    },
+    {
+      "id": "car-ambulance-f1",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:53:57.435Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\ambulance_animation\\1.png"
+    },
+    {
+      "id": "car-ambulance-f2",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:54:17.812Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\ambulance_animation\\2.png"
+    },
+    {
+      "id": "car-ambulance-f3",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:54:37.319Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\vehicles\\ambulance_animation\\3.png"
+    },
+    {
+      "id": "car-obs-cone",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:54:55.961Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\obstacles\\cone.png"
+    },
+    {
+      "id": "car-obs-rock",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:55:15.391Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\obstacles\\rock.png"
+    },
+    {
+      "id": "car-obs-crate",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:55:36.093Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\obstacles\\crate.png"
+    },
+    {
+      "id": "car-obs-barrel",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:55:55.686Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\obstacles\\barrel.png"
+    },
+    {
+      "id": "car-obs-tire",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:56:16.156Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\obstacles\\tire.png"
+    },
+    {
+      "id": "car-obs-barrier",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:56:35.379Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\obstacles\\barrier.png"
+    },
+    {
+      "id": "car-obs-puddle",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:56:52.497Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\obstacles\\puddle.png"
+    },
+    {
+      "id": "car-obs-sign",
+      "status": "completed",
+      "message": "installed",
+      "updatedAt": "2026-08-27T05:57:11.550Z",
+      "outputPath": "C:\\workspace-kaisa\\kaisa-game\\public\\car-run\\obstacles\\sign.png"
+    }
+  ]
+}

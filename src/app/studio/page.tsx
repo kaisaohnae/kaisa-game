@@ -4,14 +4,25 @@ import {useCallback, useEffect, useMemo, useState} from 'react';
 import {STUDIO_SECRET, STUDIO_URL} from '@/lib/pixellab/studio-config';
 import './studio.css';
 
+const CATEGORY_LABEL: Record<string, string> = {
+  all: '전체',
+  character: '캐릭터',
+  mob: '몬스터',
+  tile: '타일',
+  item: '소모품',
+  gear: '장비',
+  vehicle: '차량',
+  obstacle: '장애물',
+};
+
 type QueueStatus = 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
 
 type ManifestRow = {
   id: string;
+  game: 'todie' | 'car-run';
   category: string;
   label: string;
   type: string;
-  selectedByDefault?: boolean;
   costsGenerations?: boolean;
   queue: {id: string; status: QueueStatus; message?: string; outputPath?: string};
 };
@@ -32,6 +43,7 @@ export default function StudioPage() {
   const [secretInput, setSecretInput] = useState(STUDIO_SECRET);
   const [log, setLog] = useState<string[]>([]);
   const [filter, setFilter] = useState<string>('all');
+  const [gameFilter, setGameFilter] = useState<'todie' | 'car-run'>('todie');
 
   const pushLog = useCallback((line: string) => {
     setLog((prev) => [`${new Date().toLocaleTimeString()} ${line}`, ...prev].slice(0, 80));
@@ -57,15 +69,6 @@ export default function StudioPage() {
       const data = await man.json();
       setRows(data.queue ?? []);
       setRunning(Boolean(data.running));
-      setSelected((prev) => {
-        if (prev.size > 0) return prev;
-        const defaults = new Set<string>(
-          (data.queue as ManifestRow[])
-            .filter((r) => r.selectedByDefault)
-            .map((r) => r.id),
-        );
-        return defaults;
-      });
 
       if (h.hasApiKey) {
         const bal = await fetch(`${STUDIO_URL}/api/balance`, {headers});
@@ -116,18 +119,6 @@ export default function StudioPage() {
     void refresh();
   };
 
-  const runDefaults = async () => {
-    pushLog('run defaults (sync characters)…');
-    const res = await fetch(`${STUDIO_URL}/api/queue/run-defaults`, {
-      method: 'POST',
-      headers,
-    });
-    const data = await res.json();
-    if (!res.ok) pushLog(data.error ?? 'run failed');
-    else pushLog(`queued ${data.ids?.length ?? 0}`);
-    void refresh();
-  };
-
   const saveApiKey = async () => {
     if (!apiKeyInput.trim()) return;
     const res = await fetch(`${STUDIO_URL}/api/config`, {
@@ -144,7 +135,55 @@ export default function StudioPage() {
     }
   };
 
-  const filtered = rows.filter((r) => filter === 'all' || r.category === filter);
+  const gameRows = useMemo(
+    () => rows.filter((r) => r.game === gameFilter),
+    [rows, gameFilter],
+  );
+
+  const categoryOptions = useMemo(() => {
+    const cats = new Set(gameRows.map((r) => r.category));
+    return ['all', ...Array.from(cats).sort()];
+  }, [gameRows]);
+
+  const filtered = gameRows
+    .filter((r) => filter === 'all' || r.category === filter)
+    .sort((a, b) => {
+      const aDone = a.queue.status === 'completed' ? 1 : 0;
+      const bDone = b.queue.status === 'completed' ? 1 : 0;
+      return aDone - bDone;
+    });
+
+  const incompleteInView = useMemo(
+    () => filtered.filter((r) => r.queue.status !== 'completed'),
+    [filtered],
+  );
+
+  const selectIncomplete = () => {
+    setSelected(new Set(incompleteInView.map((r) => r.id)));
+  };
+
+  const clearSelection = () => setSelected(new Set());
+
+  const gameCounts = useMemo(() => {
+    const counts = {todie: 0, 'car-run': 0};
+    for (const row of rows) counts[row.game] += 1;
+    return counts;
+  }, [rows]);
+
+  const gameIncomplete = useMemo(() => {
+    const counts = {todie: 0, 'car-run': 0};
+    for (const row of rows) {
+      if (row.queue.status !== 'completed') counts[row.game] += 1;
+    }
+    return counts;
+  }, [rows]);
+
+  const switchGame = (game: 'todie' | 'car-run') => {
+    setGameFilter(game);
+    setFilter('all');
+    setSelected(new Set());
+  };
+
   const genLeft = balance?.subscription?.generations;
 
   return (
@@ -202,46 +241,103 @@ export default function StudioPage() {
         </p>
       </section>
 
-      <section className="studio__toolbar">
-        <button type="button" className="studio__btn studio__btn--primary" onClick={() => void runDefaults()}>
-          기본 4종 동기화 (캐릭터, 무료)
-        </button>
-        <button type="button" className="studio__btn" onClick={() => void runSelected()}>
-          선택 실행 ({selected.size})
-        </button>
-        <button type="button" className="studio__btn" onClick={() => void refresh()}>
-          새로고침
-        </button>
-        <select value={filter} onChange={(e) => setFilter(e.target.value)} className="studio__select">
-          <option value="all">전체</option>
-          <option value="character">캐릭터</option>
-          <option value="mob">몬스터</option>
-          <option value="tile">타일</option>
-          <option value="item">아이템</option>
-        </select>
-      </section>
+      <section className="studio__workspace">
+        <div className="studio__tab-bar" role="tablist" aria-label="게임 선택">
+          <button
+            type="button"
+            role="tab"
+            id="studio-tab-todie"
+            aria-selected={gameFilter === 'todie'}
+            aria-controls="studio-panel-assets"
+            className={`studio__tab${gameFilter === 'todie' ? ' studio__tab--active' : ''}`}
+            onClick={() => switchGame('todie')}
+          >
+            <span className="studio__tab-label">Todie</span>
+            <span className="studio__tab-meta">
+              <span className="studio__tab-count">{gameCounts.todie}</span>
+              {gameIncomplete.todie > 0 && (
+                <span className="studio__tab-badge">{gameIncomplete.todie} 남음</span>
+              )}
+            </span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            id="studio-tab-car-run"
+            aria-selected={gameFilter === 'car-run'}
+            aria-controls="studio-panel-assets"
+            className={`studio__tab${gameFilter === 'car-run' ? ' studio__tab--active' : ''}`}
+            onClick={() => switchGame('car-run')}
+          >
+            <span className="studio__tab-label">자동차</span>
+            <span className="studio__tab-meta">
+              <span className="studio__tab-count">{gameCounts['car-run']}</span>
+              {gameIncomplete['car-run'] > 0 && (
+                <span className="studio__tab-badge">{gameIncomplete['car-run']} 남음</span>
+              )}
+            </span>
+          </button>
+        </div>
 
-      <section className="studio__panel">
-        <h2>에셋 목록</h2>
-        <ul className="studio__list">
-          {filtered.map((row) => (
-            <li key={row.id} className={`studio__row studio__row--${row.queue.status}`}>
-              <label className="studio__check">
-                <input
-                  type="checkbox"
-                  checked={selected.has(row.id)}
-                  onChange={() => toggle(row.id)}
-                />
-                <span className="studio__row-title">{row.label}</span>
-              </label>
-              <span className="studio__tag">{row.category}</span>
-              <span className="studio__tag">{row.type}</span>
-              {row.costsGenerations && <span className="studio__tag studio__tag--cost">gen</span>}
-              <span className="studio__state">{row.queue.status}</span>
-              {row.queue.message && <span className="studio__msg">{row.queue.message}</span>}
-            </li>
-          ))}
-        </ul>
+        <div
+          id="studio-panel-assets"
+          role="tabpanel"
+          aria-labelledby={gameFilter === 'todie' ? 'studio-tab-todie' : 'studio-tab-car-run'}
+          className="studio__tab-panel"
+        >
+          <div className="studio__toolbar">
+            <button type="button" className="studio__btn studio__btn--primary" onClick={() => void runSelected()}>
+              선택 실행 ({selected.size})
+            </button>
+            <button
+              type="button"
+              className="studio__btn"
+              onClick={selectIncomplete}
+              disabled={incompleteInView.length === 0}
+            >
+              미완료 전체선택 ({incompleteInView.length})
+            </button>
+            <button type="button" className="studio__btn" onClick={clearSelection} disabled={selected.size === 0}>
+              선택 해제
+            </button>
+            <button type="button" className="studio__btn" onClick={() => void refresh()}>
+              새로고침
+            </button>
+            <select value={filter} onChange={(e) => setFilter(e.target.value)} className="studio__select">
+              {categoryOptions.map((cat) => (
+                <option key={cat} value={cat}>
+                  {CATEGORY_LABEL[cat] ?? cat}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="studio__tab-panel-head">
+            <h2>에셋 목록</h2>
+            <span className="studio__tab-panel-sub">{filtered.length}개</span>
+            {running && <span className="studio__running">실행 중…</span>}
+          </div>
+
+          <ul className="studio__list">
+            {filtered.map((row) => (
+              <li key={row.id} className={`studio__row studio__row--${row.queue.status}`}>
+                <label className="studio__check">
+                  <input
+                    type="checkbox"
+                    checked={selected.has(row.id)}
+                    onChange={() => toggle(row.id)}
+                  />
+                  <span className="studio__row-title">{row.label}</span>
+                </label>
+                <span className="studio__tag">{CATEGORY_LABEL[row.category] ?? row.category}</span>
+                <span className="studio__tag">{row.type}</span>
+                {row.costsGenerations && <span className="studio__tag studio__tag--cost">gen</span>}
+                <span className="studio__state">{row.queue.status}</span>
+                {row.queue.message && <span className="studio__msg">{row.queue.message}</span>}
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
 
       <section className="studio__panel">
