@@ -1,0 +1,9 @@
+1:"$Sreact.fragment"
+2:I[73556,["/_next/static/chunks/0nvyn15_0dn4x.js","/_next/static/chunks/14mrh2-p_w84d.js","/_next/static/chunks/21qbh0sgujjj2.js","/_next/static/chunks/0sqlz99rnv0cn.js","/_next/static/chunks/3he0ldx9_b1_3.js","/_next/static/chunks/2h4hr4tugq3mx.js"],"default"]
+3:I[97367,["/_next/static/chunks/0nvyn15_0dn4x.js","/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
+4:"$Sreact.suspense"
+:HL["/_next/static/chunks/0-i6a52y652xc.css","style"]
+:HL["/_next/static/chunks/3dwdrrdzjqgib.css","style"]
+:HL["/_next/static/chunks/1u9yqaugba49y.css","style"]
+0:{"rsc":["$","$1","c",{"children":[[["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"WebSite\",\"name\":\"Kaisa\",\"description\":\"Games from Kaisa — play on phones and tablets.\",\"url\":\"https://game.kaisa.co.kr/\"}"}}],["$","$L2",null,{}]],[["$","link","0",{"rel":"stylesheet","href":"/_next/static/chunks/0-i6a52y652xc.css","precedence":"next"}],["$","link","1",{"rel":"stylesheet","href":"/_next/static/chunks/3dwdrrdzjqgib.css","precedence":"next"}],["$","link","2",{"rel":"stylesheet","href":"/_next/static/chunks/1u9yqaugba49y.css","precedence":"next"}],["$","script","script-0",{"src":"/_next/static/chunks/0sqlz99rnv0cn.js","async":true}],["$","script","script-1",{"src":"/_next/static/chunks/3he0ldx9_b1_3.js","async":true}],["$","script","script-2",{"src":"/_next/static/chunks/2h4hr4tugq3mx.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"VG1fOy4hq7-Hi3hL8tBoG"}
+5:null
