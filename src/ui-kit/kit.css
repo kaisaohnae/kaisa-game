@@ -1,0 +1,1456 @@
+.kaisa-kit,
+.kaisa-overlay,
+.kaisa-loading {
+  --kaisa-accent: #1a1a18;
+  --kaisa-ink: #1a1a18;
+  --kaisa-muted: #6b6964;
+  --kaisa-line: #e5e5e0;
+  --kaisa-soft: #f7f7f5;
+  --kaisa-danger: #b42318;
+  --kaisa-radius: 8px;
+  --kaisa-cal-accent: #ff4d00;
+  --kaisa-cal-accent-soft: rgba(255, 77, 0, 0.12);
+}
+
+.kaisa-kit input,
+.kaisa-kit select,
+.kaisa-kit textarea,
+.kaisa-kit button {
+  font-family: inherit;
+}
+
+.kaisa-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  min-width: 0;
+}
+
+.kaisa-field__control {
+  position: relative;
+  --kaisa-control-h: 42px;
+}
+
+.kaisa-field__control:has(.kaisa-input--sm),
+.kaisa-field__control:has(.kaisa-select--sm),
+.kaisa-field__control:has(.kaisa-datepicker--sm),
+.kaisa-field__control:has(.kaisa-colorpicker--sm) {
+  --kaisa-control-h: 36px;
+}
+
+.kaisa-field__control:has(.kaisa-input--lg),
+.kaisa-field__control:has(.kaisa-select--lg),
+.kaisa-field__control:has(.kaisa-datepicker--lg),
+.kaisa-field__control:has(.kaisa-colorpicker--lg) {
+  --kaisa-control-h: 48px;
+}
+
+.kaisa-field__control:has(.kaisa-textarea) {
+  --kaisa-control-h: 40px;
+}
+
+.kaisa-field__label {
+  position: absolute;
+  left: 12px;
+  top: 0;
+  z-index: 1;
+  padding: 0 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #aaaaaa;
+  pointer-events: none;
+  transform: translateY(calc(var(--kaisa-control-h) / 2 - 50%));
+  transform-origin: left center;
+  transition:
+    transform 0.2s ease,
+    font-size 0.2s ease,
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.kaisa-field__label--required::after {
+  content: '*';
+  margin-left: 2px;
+  color: var(--kaisa-danger);
+}
+
+.kaisa-field:focus-within .kaisa-field__label,
+.kaisa-field:has(.kaisa-input:not(:placeholder-shown)) .kaisa-field__label,
+.kaisa-field:has(.kaisa-textarea:not(:placeholder-shown)) .kaisa-field__label,
+.kaisa-field:has(.kaisa-select) .kaisa-field__label,
+.kaisa-field:has(.kaisa-datepicker__input:not(:placeholder-shown)) .kaisa-field__label,
+.kaisa-field:has(.kaisa-colorpicker__input:not(:placeholder-shown)) .kaisa-field__label {
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: #333333;
+  background: #fff;
+}
+
+.kaisa-field--invalid .kaisa-field__label,
+.kaisa-field--invalid:focus-within .kaisa-field__label {
+  color: var(--kaisa-danger);
+}
+
+.kaisa-field--disabled .kaisa-field__label,
+.kaisa-field--disabled:focus-within .kaisa-field__label,
+.kaisa-field--disabled:has(.kaisa-select) .kaisa-field__label {
+  color: #a8a6a0;
+  background: var(--kaisa-soft);
+}
+
+.kaisa-field:has(.kaisa-field__label) .kaisa-input::placeholder,
+.kaisa-field:has(.kaisa-field__label) .kaisa-textarea::placeholder,
+.kaisa-field:has(.kaisa-field__label) .kaisa-datepicker__input::placeholder,
+.kaisa-field:has(.kaisa-field__label) .kaisa-colorpicker__input::placeholder {
+  color: transparent;
+}
+
+.kaisa-field__hint,
+.kaisa-field__error {
+  margin: 8px 2px 0;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.kaisa-field__hint {
+  color: var(--kaisa-muted);
+}
+
+.kaisa-field__error {
+  color: var(--kaisa-danger);
+}
+
+.kaisa-input,
+.kaisa-input[type='text'],
+.kaisa-input[type='email'],
+.kaisa-input[type='password'],
+.kaisa-input[type='number'],
+.kaisa-input[type='search'],
+.kaisa-input[type='tel'],
+.kaisa-input[type='url'],
+.kaisa-datepicker__input,
+.kaisa-datepicker__input[type='text'],
+.kaisa-colorpicker__input,
+.kaisa-colorpicker__input[type='text'],
+.kaisa-colorpicker__hex,
+.kaisa-colorpicker__hex[type='text'],
+.kaisa-select,
+.kaisa-textarea {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  height: auto;
+  margin: 0;
+  vertical-align: baseline;
+  line-height: normal;
+  font-weight: inherit;
+  text-shadow: none;
+  border: 1px solid var(--kaisa-line);
+  border-radius: var(--kaisa-radius);
+  background: #fff;
+  color: var(--kaisa-ink);
+  outline: none;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    background-color 0.16s ease;
+}
+
+.kaisa-input.kaisa-input--sm,
+.kaisa-select.kaisa-select--sm,
+.kaisa-datepicker--sm .kaisa-datepicker__input,
+.kaisa-colorpicker--sm .kaisa-colorpicker__input {
+  height: 36px;
+  min-height: 36px;
+  padding: 0 12px;
+  font-size: 13px;
+  line-height: 34px;
+}
+
+.kaisa-input.kaisa-input--md,
+.kaisa-select.kaisa-select--md,
+.kaisa-datepicker--md .kaisa-datepicker__input,
+.kaisa-colorpicker--md .kaisa-colorpicker__input {
+  height: 42px;
+  min-height: 42px;
+  padding: 0 14px;
+  font-size: 14px;
+  line-height: 40px;
+}
+
+.kaisa-input.kaisa-input--lg,
+.kaisa-select.kaisa-select--lg,
+.kaisa-datepicker--lg .kaisa-datepicker__input,
+.kaisa-colorpicker--lg .kaisa-colorpicker__input {
+  height: 48px;
+  min-height: 48px;
+  padding: 0 16px;
+  font-size: 15px;
+  line-height: 46px;
+}
+
+.kaisa-input:hover,
+.kaisa-select:hover,
+.kaisa-textarea:hover,
+.kaisa-datepicker__input:hover,
+.kaisa-colorpicker__input:hover {
+  border-color: #cfcfc8;
+}
+
+.kaisa-input:focus,
+.kaisa-select:focus,
+.kaisa-textarea:focus,
+.kaisa-datepicker__input:focus,
+.kaisa-colorpicker__input:focus {
+  border-color: var(--kaisa-ink);
+  box-shadow: 0 0 0 3px rgba(26, 26, 24, 0.08);
+}
+
+.kaisa-input--invalid,
+.kaisa-select--invalid,
+.kaisa-textarea--invalid,
+.kaisa-datepicker--invalid .kaisa-datepicker__input,
+.kaisa-colorpicker--invalid .kaisa-colorpicker__input {
+  border-color: var(--kaisa-danger);
+}
+
+.kaisa-field--invalid:focus-within .kaisa-input,
+.kaisa-field--invalid:focus-within .kaisa-select,
+.kaisa-field--invalid:focus-within .kaisa-textarea,
+.kaisa-field--invalid:focus-within .kaisa-datepicker__input,
+.kaisa-field--invalid:focus-within .kaisa-colorpicker__input {
+  box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.12);
+}
+
+.kaisa-input.kaisa-is-disabled,
+.kaisa-select.kaisa-is-disabled,
+.kaisa-textarea.kaisa-is-disabled,
+.kaisa-input:disabled,
+.kaisa-select:disabled,
+.kaisa-textarea:disabled {
+  color: #a8a6a0;
+  background: var(--kaisa-soft);
+  cursor: not-allowed;
+}
+
+.kaisa-input.kaisa-is-readonly,
+.kaisa-textarea.kaisa-is-readonly,
+.kaisa-input:read-only,
+.kaisa-textarea:read-only {
+  background: var(--kaisa-soft);
+  color: #3f3f3a;
+}
+
+.kaisa-textarea {
+  min-height: 120px;
+  padding: 12px;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.kaisa-field:has(.kaisa-field__label) .kaisa-textarea {
+  padding-top: 18px;
+}
+
+.kaisa-select-wrap {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.kaisa-select-wrap::after {
+  content: '';
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid var(--kaisa-muted);
+  border-bottom: 1.5px solid var(--kaisa-muted);
+  transform: translateY(-50%) rotate(45deg);
+  pointer-events: none;
+  transition: transform 0.16s ease;
+}
+
+.kaisa-select-wrap:focus-within::after {
+  transform: translateY(-50%) rotate(225deg);
+}
+
+.kaisa-select,
+.kaisa-select.kaisa-select--sm,
+.kaisa-select.kaisa-select--md,
+.kaisa-select.kaisa-select--lg {
+  appearance: none;
+  padding-right: 36px;
+}
+
+.kaisa-radio-group {
+  display: grid;
+  gap: 2px;
+}
+
+.kaisa-radio-group--row {
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  gap: 4px;
+}
+
+.kaisa-radio-group--invalid .kaisa-radio__mark {
+  border-color: var(--kaisa-danger);
+}
+
+.kaisa-radio,
+.kaisa-check,
+.kaisa-toggle {
+  display: block;
+  cursor: pointer;
+}
+
+.kaisa-radio,
+.kaisa-check,
+.kaisa-toggle {
+  position: relative;
+}
+
+.kaisa-toggle > .kaisa-toggle__input[type='checkbox'],
+.kaisa-toggle > .kaisa-toggle__input[type='checkbox']:checked,
+.kaisa-check > .kaisa-check__input[type='checkbox'],
+.kaisa-check > .kaisa-check__input[type='checkbox']:checked,
+.kaisa-radio > .kaisa-radio__input[type='radio'],
+.kaisa-radio > .kaisa-radio__input[type='radio']:checked {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 0;
+  height: 0;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  opacity: 0;
+  appearance: none;
+  background: transparent;
+  line-height: 0;
+  pointer-events: none;
+}
+
+.kaisa-toggle > .kaisa-toggle__input[type='checkbox']:checked::before,
+.kaisa-toggle > .kaisa-toggle__input[type='checkbox']:checked::after,
+.kaisa-check > .kaisa-check__input[type='checkbox']:checked::before,
+.kaisa-check > .kaisa-check__input[type='checkbox']:checked::after {
+  content: none;
+  display: none;
+}
+
+.kaisa-radio__card,
+.kaisa-check__chip {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  transition: background-color 0.16s ease;
+}
+
+.kaisa-radio__card:hover,
+.kaisa-check__chip:hover {
+  background: var(--kaisa-soft);
+}
+
+.kaisa-radio__input:checked + .kaisa-radio__card:hover,
+.kaisa-check__input:checked + .kaisa-check__chip:hover {
+  background: rgba(255, 77, 0, 0.08);
+}
+
+.kaisa-radio__mark,
+.kaisa-check__mark {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  border: 2px solid #d4d0c8;
+  border-radius: 50%;
+  background: #fff;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease;
+}
+
+.kaisa-check__mark {
+  border-radius: 8px;
+}
+
+.kaisa-radio__input:checked + .kaisa-radio__card .kaisa-radio__mark,
+.kaisa-check__input:checked + .kaisa-check__chip .kaisa-check__mark {
+  background: #ff4d00;
+  border-color: #ff4d00;
+}
+
+.kaisa-radio__input:checked + .kaisa-radio__card .kaisa-radio__mark {
+  box-shadow: inset 0 0 0 5px #fff;
+}
+
+.kaisa-check__input:checked + .kaisa-check__chip .kaisa-check__mark {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' d='M3.5 8.5 6.5 11.5 12.5 4.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 12px;
+}
+
+.kaisa-radio__input:focus-visible + .kaisa-radio__card .kaisa-radio__mark,
+.kaisa-check__input:focus-visible + .kaisa-check__chip .kaisa-check__mark {
+  outline: 3px solid rgba(255, 77, 0, 0.2);
+  outline-offset: 2px;
+}
+
+.kaisa-toggle__input:focus-visible + .kaisa-toggle__track {
+  box-shadow: 0 0 0 3px rgba(26, 26, 24, 0.08);
+}
+
+.kaisa-radio__label,
+.kaisa-check__label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--kaisa-ink);
+}
+
+.kaisa-toggle__label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--kaisa-ink);
+}
+
+.kaisa-radio__desc,
+.kaisa-check__desc,
+.kaisa-toggle__desc {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--kaisa-muted);
+}
+
+.kaisa-radio.is-disabled,
+.kaisa-check.is-disabled,
+.kaisa-toggle.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.kaisa-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kaisa-toggle__track {
+  position: relative;
+  z-index: 1;
+  width: 44px;
+  height: 26px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e5e5e0;
+  transition: background-color 0.18s ease;
+}
+
+.kaisa-toggle__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(26, 26, 24, 0.18);
+  transition: left 0.18s ease;
+}
+
+.kaisa-toggle__input:checked + .kaisa-toggle__track {
+  background: var(--kaisa-ink);
+}
+
+.kaisa-toggle__input:checked + .kaisa-toggle__track .kaisa-toggle__thumb {
+  left: 21px;
+}
+
+.kaisa-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: var(--kaisa-radius);
+  background: #fff;
+  color: var(--kaisa-ink);
+  font-weight: 600;
+  text-shadow: none;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease;
+}
+
+.kaisa-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.kaisa-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.kaisa-btn--primary {
+  background: #1a1a18;
+  color: #fff;
+}
+
+.kaisa-btn--primary:hover:not(:disabled) {
+  background: #2e2e2a;
+}
+
+.kaisa-btn--secondary {
+  border-color: var(--kaisa-line, #e5e5e0);
+  background: #fff;
+  color: #1a1a18;
+}
+
+.kaisa-btn--secondary:hover:not(:disabled) {
+  border-color: var(--kaisa-ink);
+  background: var(--kaisa-soft);
+}
+
+.kaisa-btn--ghost {
+  background: transparent;
+  color: #1a1a18;
+}
+
+.kaisa-btn--ghost:hover:not(:disabled) {
+  background: var(--kaisa-soft);
+}
+
+.kaisa-btn--danger {
+  background: #b42318;
+  color: #fff;
+}
+
+.kaisa-btn--danger:hover:not(:disabled) {
+  background: #8f1c14;
+}
+
+.kaisa-btn--sm {
+  min-height: 32px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.kaisa-btn--lg {
+  min-height: 48px;
+  padding: 0 20px;
+  font-size: 16px;
+}
+
+.kaisa-btn--block {
+  width: 100%;
+}
+
+.kaisa-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.kaisa-btn__spinner {
+  width: 16px;
+  height: 16px;
+}
+
+.kaisa-spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: #1a1a18;
+}
+
+.kaisa-spinner--sm {
+  width: 18px;
+  height: 18px;
+}
+
+.kaisa-spinner--md {
+  width: 28px;
+  height: 28px;
+}
+
+.kaisa-spinner--lg {
+  width: 40px;
+  height: 40px;
+}
+
+.kaisa-spinner--ring,
+.kaisa-spinner--dash,
+.kaisa-spinner--orbit {
+  position: relative;
+  border-radius: 50%;
+}
+
+.kaisa-spinner--ring {
+  box-shadow: inset 0 0 0 2px var(--kaisa-line, #e5e5e0);
+}
+
+.kaisa-spinner__orbit {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  animation: kaisa-spin 0.7s linear infinite;
+}
+
+.kaisa-spinner__orbit--alt {
+  inset: 3px;
+  border-top-color: transparent;
+  border-bottom-color: currentColor;
+  animation-duration: 1s;
+  animation-direction: reverse;
+}
+
+.kaisa-spinner--dash .kaisa-spinner__orbit {
+  border: 2px dashed currentColor;
+  border-right-color: transparent;
+  animation-duration: 0.9s;
+}
+
+.kaisa-spinner--orbit .kaisa-spinner__core {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.kaisa-spinner--orbit .kaisa-spinner__sat {
+  position: absolute;
+  inset: 0;
+  animation: kaisa-spin 0.8s linear infinite;
+}
+
+.kaisa-spinner--orbit .kaisa-spinner__sat::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.kaisa-spinner--sm.kaisa-spinner--orbit .kaisa-spinner__core {
+  width: 5px;
+  height: 5px;
+}
+
+.kaisa-spinner--sm.kaisa-spinner--orbit .kaisa-spinner__sat::after {
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+}
+
+.kaisa-spinner--lg.kaisa-spinner--orbit .kaisa-spinner__core {
+  width: 9px;
+  height: 9px;
+}
+
+.kaisa-spinner--lg.kaisa-spinner--orbit .kaisa-spinner__sat::after {
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+}
+
+.kaisa-spinner--dots i,
+.kaisa-spinner--bars i,
+.kaisa-spinner--wave i {
+  display: block;
+  background: currentColor;
+}
+
+.kaisa-spinner--dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  animation: kaisa-fade-dot 0.9s ease-in-out infinite;
+}
+
+.kaisa-spinner--dots i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.kaisa-spinner--dots i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.kaisa-spinner--bars i {
+  width: 3px;
+  height: 14px;
+  border-radius: 1px;
+  animation: kaisa-bars 0.8s ease-in-out infinite;
+}
+
+.kaisa-spinner--bars i:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.kaisa-spinner--bars i:nth-child(3) {
+  animation-delay: 0.2s;
+}
+.kaisa-spinner--bars i:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+.kaisa-spinner--wave {
+  gap: 3px;
+  align-items: flex-end;
+}
+
+.kaisa-spinner--wave i {
+  width: 4px;
+  height: 12px;
+  border-radius: 1px;
+  animation: kaisa-wave 0.9s ease-in-out infinite;
+}
+
+.kaisa-spinner--wave i:nth-child(2) {
+  animation-delay: 0.08s;
+}
+.kaisa-spinner--wave i:nth-child(3) {
+  animation-delay: 0.16s;
+}
+.kaisa-spinner--wave i:nth-child(4) {
+  animation-delay: 0.24s;
+}
+.kaisa-spinner--wave i:nth-child(5) {
+  animation-delay: 0.32s;
+}
+
+.kaisa-spinner--pulse {
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px currentColor;
+  animation: kaisa-halo 1.1s ease-out infinite;
+}
+
+.kaisa-spinner--diamond {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-radius: 1px;
+  transform: rotate(45deg);
+  animation: kaisa-diamond 0.9s linear infinite;
+}
+
+.kaisa-spinner--sm.kaisa-spinner--diamond {
+  width: 10px;
+  height: 10px;
+}
+
+.kaisa-spinner--lg.kaisa-spinner--diamond {
+  width: 22px;
+  height: 22px;
+}
+
+@keyframes kaisa-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes kaisa-fade-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+@keyframes kaisa-bars {
+  0%,
+  100% {
+    transform: scaleY(0.45);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes kaisa-wave {
+  0%,
+  100% {
+    transform: scaleY(0.4);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes kaisa-halo {
+  0% {
+    transform: scale(0.72);
+    opacity: 0.9;
+  }
+  70% {
+    transform: scale(1);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes kaisa-diamond {
+  0% {
+    transform: rotate(45deg) scale(0.85);
+  }
+  50% {
+    transform: rotate(225deg) scale(1);
+  }
+  100% {
+    transform: rotate(405deg) scale(0.85);
+  }
+}
+
+.kaisa-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 360px;
+  padding: 16px;
+  border: 1px solid var(--kaisa-line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.kaisa-calendar--sm {
+  max-width: 280px;
+  padding: 12px;
+  gap: 10px;
+}
+
+.kaisa-calendar--lg {
+  max-width: 420px;
+  padding: 20px;
+  gap: 14px;
+}
+
+.kaisa-calendar--disabled {
+  background: #f0f0ed;
+  opacity: 0.92;
+}
+
+.kaisa-calendar--readonly {
+  background: #f7f7f5;
+  border-style: dashed;
+}
+
+.kaisa-calendar__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.kaisa-calendar__nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kaisa-calendar__title {
+  min-width: 112px;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: -0.02em;
+}
+
+.kaisa-calendar--sm .kaisa-calendar__title {
+  min-width: 96px;
+  font-size: 14px;
+}
+
+.kaisa-calendar--lg .kaisa-calendar__title {
+  min-width: 128px;
+  font-size: 16px;
+}
+
+.kaisa-calendar__nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0;
+  border: 1px solid var(--kaisa-line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--kaisa-ink);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.kaisa-calendar__nav-btn:hover:not(:disabled) {
+  border-color: rgba(255, 77, 0, 0.45);
+  background: var(--kaisa-cal-accent-soft);
+}
+
+.kaisa-calendar__nav-btn:disabled {
+  background: #f0f0ed;
+  color: #9a9894;
+  cursor: not-allowed;
+}
+
+.kaisa-calendar__weekdays,
+.kaisa-calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.kaisa-calendar--sm .kaisa-calendar__weekdays,
+.kaisa-calendar--sm .kaisa-calendar__grid {
+  gap: 4px;
+}
+
+.kaisa-calendar--lg .kaisa-calendar__weekdays,
+.kaisa-calendar--lg .kaisa-calendar__grid {
+  gap: 8px;
+}
+
+.kaisa-calendar__weekday {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--kaisa-muted);
+  padding-bottom: 2px;
+}
+
+.kaisa-calendar__weekday--sun {
+  color: #e5484d;
+}
+
+.kaisa-calendar__weekday--sat {
+  color: #3b82f6;
+}
+
+.kaisa-calendar__day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: #f3f3f1;
+  color: var(--kaisa-ink);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.kaisa-calendar--sm .kaisa-calendar__day {
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+.kaisa-calendar--lg .kaisa-calendar__day {
+  font-size: 14px;
+  border-radius: 8px;
+}
+
+.kaisa-calendar__day:hover:not(:disabled):not(.kaisa-calendar__day--empty) {
+  border-color: rgba(255, 77, 0, 0.45);
+  background: var(--kaisa-cal-accent-soft);
+}
+
+.kaisa-calendar__day--empty {
+  background: transparent;
+  border-color: transparent;
+  cursor: default;
+  pointer-events: none;
+}
+
+.kaisa-calendar__day--sun:not(.kaisa-calendar__day--selected):not(.kaisa-calendar__day--disabled) {
+  color: #e5484d;
+}
+
+.kaisa-calendar__day--sat:not(.kaisa-calendar__day--selected):not(.kaisa-calendar__day--disabled) {
+  color: #2563eb;
+}
+
+.kaisa-calendar__day--today {
+  border-color: rgba(255, 77, 0, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(255, 77, 0, 0.12);
+}
+
+.kaisa-calendar__day--selected {
+  background: var(--kaisa-cal-accent);
+  border-color: var(--kaisa-cal-accent);
+  color: #fff;
+}
+
+.kaisa-calendar__day--marked-accent:not(.kaisa-calendar__day--selected) {
+  background: var(--kaisa-cal-accent-soft);
+  border-color: rgba(255, 77, 0, 0.22);
+}
+
+.kaisa-calendar__day--marked-muted:not(.kaisa-calendar__day--selected) {
+  background: #ececea;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+.kaisa-calendar__day--marked-danger:not(.kaisa-calendar__day--selected) {
+  background: rgba(229, 72, 77, 0.12);
+  border-color: rgba(229, 72, 77, 0.28);
+  color: #e5484d;
+}
+
+.kaisa-calendar__day--disabled {
+  background: #f0f0ed;
+  color: #9a9894;
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.kaisa-calendar--readonly .kaisa-calendar__day:not(.kaisa-calendar__day--disabled) {
+  cursor: default;
+  background: #fff;
+}
+
+.kaisa-calendar--readonly .kaisa-calendar__day:hover:not(.kaisa-calendar__day--disabled) {
+  border-color: transparent;
+  background: #fff;
+}
+
+.kaisa-calendar--popover {
+  max-width: none;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.kaisa-calendar__legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--kaisa-muted);
+  white-space: nowrap;
+}
+
+.kaisa-calendar__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.kaisa-calendar__dot--accent {
+  background: var(--kaisa-cal-accent);
+}
+
+.kaisa-datepicker,
+.kaisa-colorpicker {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.kaisa-datepicker__control {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.kaisa-datepicker .kaisa-datepicker__input,
+.kaisa-datepicker .kaisa-datepicker__input[type='text'] {
+  width: 100%;
+  max-width: none;
+  padding-right: 72px;
+}
+
+.kaisa-datepicker--sm .kaisa-datepicker__input,
+.kaisa-datepicker--sm .kaisa-datepicker__input[type='text'] {
+  padding-right: 64px;
+}
+
+.kaisa-datepicker--md .kaisa-datepicker__input,
+.kaisa-datepicker--md .kaisa-datepicker__input[type='text'] {
+  padding-right: 72px;
+}
+
+.kaisa-datepicker--lg .kaisa-datepicker__input,
+.kaisa-datepicker--lg .kaisa-datepicker__input[type='text'] {
+  padding-right: 80px;
+}
+
+.kaisa-colorpicker__control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.kaisa-colorpicker__input,
+.kaisa-colorpicker__input[type='text'] {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  max-width: none;
+}
+
+.kaisa-datepicker__actions {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.kaisa-colorpicker__actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 4px;
+}
+
+.kaisa-datepicker__trigger,
+.kaisa-datepicker__clear,
+.kaisa-kit .kaisa-datepicker__trigger,
+.kaisa-kit .kaisa-datepicker__clear {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  max-height: 28px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--kaisa-muted);
+  font: inherit;
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 500;
+  text-shadow: none;
+  cursor: pointer;
+  pointer-events: auto;
+  appearance: none;
+}
+
+.kaisa-datepicker__clear:hover:not(:disabled),
+.kaisa-datepicker__trigger:hover:not(:disabled) {
+  background: var(--kaisa-cal-accent-soft);
+  color: var(--kaisa-cal-accent);
+}
+
+.kaisa-datepicker--open .kaisa-datepicker__trigger {
+  background: var(--kaisa-cal-accent-soft);
+  color: var(--kaisa-cal-accent);
+}
+
+.kaisa-colorpicker__trigger,
+.kaisa-colorpicker__clear,
+.kaisa-colorpicker__swatch {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--kaisa-line);
+  border-radius: var(--kaisa-radius);
+  background: #fff;
+  color: var(--kaisa-ink);
+  cursor: pointer;
+}
+
+.kaisa-colorpicker__trigger:hover,
+.kaisa-colorpicker__clear:hover {
+  background: var(--kaisa-soft);
+}
+
+.kaisa-colorpicker__swatch {
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.kaisa-datepicker__popover,
+.kaisa-colorpicker__popover {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 8px);
+  left: 0;
+  width: min(100vw - 32px, 320px);
+  min-width: 280px;
+  padding: 12px;
+  border: 1px solid var(--kaisa-line);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(26, 26, 24, 0.12);
+  animation: kaisa-pop 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.kaisa-datepicker--sm .kaisa-datepicker__popover {
+  width: min(100%, 300px);
+}
+
+.kaisa-datepicker--lg .kaisa-datepicker__popover {
+  width: min(100%, 420px);
+}
+
+.kaisa-colorpicker__sv {
+  position: relative;
+  height: 140px;
+  border-radius: var(--kaisa-radius);
+  overflow: hidden;
+  cursor: crosshair;
+}
+
+.kaisa-colorpicker__sv-white,
+.kaisa-colorpicker__sv-black {
+  position: absolute;
+  inset: 0;
+}
+
+.kaisa-colorpicker__sv-white {
+  background: linear-gradient(90deg, #fff, transparent);
+}
+
+.kaisa-colorpicker__sv-black {
+  background: linear-gradient(180deg, transparent, #000);
+}
+
+.kaisa-colorpicker__cursor {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+.kaisa-colorpicker__hue {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--kaisa-muted);
+}
+
+.kaisa-colorpicker__hue input {
+  width: 100%;
+  accent-color: var(--kaisa-ink);
+}
+
+.kaisa-colorpicker__preview-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.kaisa-colorpicker__preview {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--kaisa-radius);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+
+.kaisa-colorpicker__presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.kaisa-colorpicker__preset {
+  width: 22px;
+  height: 22px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--kaisa-radius);
+  cursor: pointer;
+}
+
+.kaisa-colorpicker__preset--active {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 3px var(--kaisa-ink);
+}
+
+.kaisa-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(26, 26, 24, 0.45);
+  animation: kaisa-fade 0.22s ease;
+}
+
+.kaisa-overlay .kaisa-btn {
+  border-radius: var(--kaisa-radius);
+}
+
+.kaisa-dialog {
+  width: min(420px, 100%);
+  padding: 24px;
+  border-radius: var(--kaisa-radius);
+  background: #fff;
+  box-shadow: 0 16px 48px rgba(26, 26, 24, 0.16);
+  animation: kaisa-dialog-in 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.kaisa-dialog__title {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.kaisa-dialog__message {
+  margin: 0;
+  color: #3f3f3a;
+  white-space: pre-wrap;
+  line-height: 1.55;
+}
+
+.kaisa-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+@keyframes kaisa-pop {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes kaisa-dialog-in {
+  from {
+    transform: translateY(18px) scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes kaisa-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.kaisa-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  pointer-events: none;
+}
+
+[data-theme='dark'] .kaisa-kit,
+[data-theme='dark'] .kaisa-overlay,
+[data-theme='dark'] .kaisa-loading {
+  --kaisa-accent: var(--color-text);
+  --kaisa-ink: var(--color-text);
+  --kaisa-muted: var(--color-text-muted);
+  --kaisa-line: var(--color-border);
+  --kaisa-soft: var(--color-bg-elevated);
+}
+
+[data-theme='dark'] .kaisa-field__label {
+  color: color-mix(in srgb, var(--color-text-muted) 88%, transparent);
+}
+
+[data-theme='dark'] .kaisa-field:focus-within .kaisa-field__label,
+[data-theme='dark'] .kaisa-field:has(.kaisa-input:not(:placeholder-shown)) .kaisa-field__label,
+[data-theme='dark'] .kaisa-field:has(.kaisa-textarea:not(:placeholder-shown)) .kaisa-field__label,
+[data-theme='dark'] .kaisa-field:has(.kaisa-select) .kaisa-field__label,
+[data-theme='dark'] .kaisa-field:has(.kaisa-datepicker__input:not(:placeholder-shown)) .kaisa-field__label,
+[data-theme='dark'] .kaisa-field:has(.kaisa-colorpicker__input:not(:placeholder-shown)) .kaisa-field__label {
+  color: var(--color-text);
+  background: var(--color-bg-card);
+}
+
+[data-theme='dark'] .kaisa-input,
+[data-theme='dark'] .kaisa-input[type='text'],
+[data-theme='dark'] .kaisa-input[type='email'],
+[data-theme='dark'] .kaisa-input[type='password'],
+[data-theme='dark'] .kaisa-input[type='number'],
+[data-theme='dark'] .kaisa-input[type='search'],
+[data-theme='dark'] .kaisa-input[type='tel'],
+[data-theme='dark'] .kaisa-input[type='url'],
+[data-theme='dark'] .kaisa-datepicker__input,
+[data-theme='dark'] .kaisa-colorpicker__input,
+[data-theme='dark'] .kaisa-colorpicker__hex,
+[data-theme='dark'] .kaisa-select,
+[data-theme='dark'] .kaisa-textarea {
+  background: var(--color-bg-card);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+[data-theme='dark'] .kaisa-input:hover,
+[data-theme='dark'] .kaisa-select:hover,
+[data-theme='dark'] .kaisa-textarea:hover,
+[data-theme='dark'] .kaisa-datepicker__input:hover,
+[data-theme='dark'] .kaisa-colorpicker__input:hover {
+  border-color: color-mix(in srgb, var(--color-text-muted) 55%, transparent);
+}
+
+[data-theme='dark'] .kaisa-input:focus,
+[data-theme='dark'] .kaisa-select:focus,
+[data-theme='dark'] .kaisa-textarea:focus,
+[data-theme='dark'] .kaisa-datepicker__input:focus,
+[data-theme='dark'] .kaisa-colorpicker__input:focus {
+  border-color: color-mix(in srgb, var(--color-text) 70%, transparent);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+}

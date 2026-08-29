@@ -1,47 +1,13 @@
 .game-portal {
   position: relative;
-  min-height: 100vh;
-  min-height: 100dvh;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   padding:
-    var(--kids-pad-top)
+    calc(var(--header-height) + 24px)
     var(--kids-pad)
     var(--kids-pad-bottom)
     var(--kids-pad);
-}
-
-.game-portal__header {
-  position: relative;
-  z-index: 1;
-  flex: 0 0 auto;
-  padding: 20px 0 8px;
-  text-align: center;
-}
-
-.game-portal__title {
-  margin: 0 0 10px;
-  font-family: var(--font-kids-display), var(--font-kids-body), sans-serif;
-  font-size: clamp(32px, 8vw, 56px);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: #5d4037;
-  line-height: 1.1;
-}
-
-.game-portal__title span {
-  display: inline-block;
-  margin-right: 6px;
-  animation: kidsFloat 3.6s ease-in-out infinite;
-}
-
-.game-portal__lead {
-  margin: 0 auto;
-  max-width: 22em;
-  font-size: clamp(15px, 3.4vw, 20px);
-  font-weight: 800;
-  line-height: 1.45;
-  color: #8d6e63;
 }
 
 .game-portal__stage {
@@ -81,7 +47,7 @@
   padding: 20px 18px 18px;
   border: 4px solid #fff;
   border-radius: 28px;
-  background: linear-gradient(180deg, #ffffff 0%, #fff6ea 100%);
+  background: #fff;
   box-shadow:
     0 0 0 4px rgba(255, 167, 38, 0.22),
     0 14px 0 #ffcc80,
@@ -170,85 +136,6 @@
   font-weight: 800;
 }
 
-.game-portal__footer {
-  position: relative;
-  z-index: 1;
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px 16px;
-  margin-top: auto;
-  margin-inline: auto;
-  padding: 36px 0 8px;
-  max-width: 1100px;
-  width: 100%;
-}
-
-.game-portal__aside {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 12px;
-}
-
-.game-portal__langs {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.game-portal__lang {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #8d6e63;
-  font-size: 12px;
-  letter-spacing: 0.04em;
-  line-height: 1.2;
-  cursor: pointer;
-  text-decoration: none;
-}
-
-.game-portal__lang:hover {
-  color: #5d4037;
-}
-
-.game-portal__lang--active {
-  color: #5d4037;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.game-portal__copy {
-  margin: 0;
-  font-size: 12px;
-  letter-spacing: 0.04em;
-  color: #8d6e63;
-}
-
-.game-portal__copy-link {
-  color: inherit;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.game-portal__copy-link:hover {
-  color: #5d4037;
-}
-
-.game-portal__mail {
-  font-size: 13px;
-  line-height: 1.2;
-  color: #5d4037;
-  text-decoration: none;
-}
-
-.game-portal__mail:hover {
-  color: #ff8a65;
-}
-
 @media (min-width: 600px) {
   .game-portal__item {
     flex: 1 1 calc(50% - 14px);
@@ -280,19 +167,6 @@
 }
 
 @media (orientation: landscape) and (max-height: 500px) {
-  .game-portal__header {
-    padding: 8px 0 4px;
-  }
-
-  .game-portal__title {
-    font-size: 28px;
-    margin-bottom: 4px;
-  }
-
-  .game-portal__lead {
-    font-size: 14px;
-  }
-
   .game-portal__stage {
     padding-top: 8px;
   }

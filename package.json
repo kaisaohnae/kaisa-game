@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev -p 8887",
+    "dev": "next dev -p 5555",
     "build": "next build",
-    "start": "next start -p 8887",
+    "start": "next start -p 5555",
     "lint": "next lint",
     "todie:sprites": "node src/games/todie/scripts/gen-dir-sprites.mjs && node src/games/todie/scripts/install-painted-art.mjs",
     "todie:import-warrior": "node src/games/todie/scripts/import-oga-warrior.mjs",
@@ -26,12 +26,15 @@
   "dependencies": {
     "next": "16.2.9",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "react-google-recaptcha": "^3.1.0",
+    "zustand": "^5.0.6"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/react-google-recaptcha": "^2.1.9",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "typescript": "^5"

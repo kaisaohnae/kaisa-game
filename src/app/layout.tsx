@@ -1,6 +1,8 @@
 import type {Metadata, Viewport} from 'next';
-import {Fredoka, Nunito} from 'next/font/google';
+import {DM_Sans, Fredoka, Nunito} from 'next/font/google';
 import '@/app/globals.css';
+import '@/components/layout/site-layout.css';
+import '@/ui-kit/kit.css';
 import GoogleAnalytics from '@/components/google-analytics';
 import GoogleAdsense from '@/components/google-adsense';
 import {LocaleProvider} from '@/i18n/locale-context';
@@ -15,6 +17,12 @@ const fredoka = Fredoka({
 const nunito = Nunito({
   subsets: ['latin'],
   variable: '--font-kids-body',
+  display: 'swap',
+});
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  variable: '--font-body',
   display: 'swap',
 });
 
@@ -56,12 +64,12 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: 'cover',
-  themeColor: '#fff3d9',
+  themeColor: '#f7f7f5',
 };
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
-    <html lang="en" className={`${fredoka.variable} ${nunito.variable}`}>
+    <html lang="en" className={`${fredoka.variable} ${nunito.variable} ${dmSans.variable}`}>
       <head>
         <GoogleAdsense />
       </head>

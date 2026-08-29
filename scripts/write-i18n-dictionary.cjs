@@ -3,10 +3,30 @@ const path = require('path');
 
 /** @type {Record<string, {ko: string, zh: string, hi: string}>} */
 const dictionary = {
-  'Tap and play in our playground': {
-    ko: '톡톡 눌러보는 우리 놀이터',
-    zh: '点一点，来玩我们的乐园',
-    hi: 'टैप करके हमारे खेल के मैदान में खेलें'
+  Games: {
+    ko: '게임',
+    zh: '游戏',
+    hi: 'गेम्स'
+  },
+  'Main navigation': {
+    ko: '주 메뉴',
+    zh: '主导航',
+    hi: 'मुख्य नेविगेशन'
+  },
+  'Mobile navigation': {
+    ko: '모바일 메뉴',
+    zh: '移动导航',
+    hi: 'मोबाइल नेविगेशन'
+  },
+  'Open menu': {
+    ko: '메뉴 열기',
+    zh: '打开菜单',
+    hi: 'मेनू खोलें'
+  },
+  'Close menu': {
+    ko: '메뉴 닫기',
+    zh: '关闭菜单',
+    hi: 'मेनू बंद करें'
   },
   'Game list': {
     ko: '놀이 목록',

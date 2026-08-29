@@ -3,7 +3,7 @@
  * Binds 127.0.0.1 only — API key stays server-side in .env.local
  *
  * Run: npm run studio
- * UI:  npm run dev  →  http://localhost:8887/studio/
+ * UI:  npm run dev  →  http://localhost:5555/studio/
  */
 import fs from 'node:fs';
 import http from 'node:http';
@@ -178,8 +178,8 @@ server.on('error', (err) => {
 
 server.listen(PORT, '127.0.0.1', () => {
   console.log(`PixelLab Studio → http://127.0.0.1:${PORT}`);
-  console.log(`Open UI       → http://localhost:8887/studio/`);
-  console.log(`Map editor    → http://localhost:8887/studio/map/`);
+  console.log(`Open UI       → http://localhost:5555/studio/`);
+  console.log(`Map editor    → http://localhost:5555/studio/map/`);
   if (!API_KEY) {
     console.log('PIXELLAB_API_KEY missing — paste key in /studio/ settings');
   }

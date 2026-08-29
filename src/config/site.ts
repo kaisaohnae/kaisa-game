@@ -1,6 +1,6 @@
-export const SITE_NAME = 'Kaisa Kids';
+export const SITE_NAME = 'Kaisa';
 
-export const SITE_DESCRIPTION = 'A touch playground for phones and tablets — learning games for kids.';
+export const SITE_DESCRIPTION = 'Games from Kaisa — play on phones and tablets.';
 
 export function getSiteUrl(): string {
   const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'http://localhost:8689';
