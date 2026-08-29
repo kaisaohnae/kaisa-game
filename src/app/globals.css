@@ -42,6 +42,7 @@ button {
   --color-text-muted: #6b6964;
   --color-border: rgba(0, 0, 0, 0.08);
   --color-header-bg: rgba(247, 247, 245, 0.88);
+  --color-header-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
   --color-logo-fill: #1a1a18;
   --kids-pad: max(16px, env(safe-area-inset-left));
   --kids-pad-right: max(16px, env(safe-area-inset-right));
