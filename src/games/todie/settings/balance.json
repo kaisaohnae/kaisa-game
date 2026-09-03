@@ -33,7 +33,7 @@
       "slash": {
         "name": "베기",
         "desc": "전방 검기 베기",
-        "mp": 10,
+        "mp": 5,
         "cd": 0.45,
         "damage": 55,
         "radius": 68,
@@ -44,7 +44,7 @@
       "spin": {
         "name": "회전베기",
         "desc": "주변을 가르는 회전 검기",
-        "mp": 100,
+        "mp": 50,
         "cd": 3.5,
         "damage": 70,
         "radius": 96,
@@ -55,7 +55,7 @@
       "bash": {
         "name": "돌진",
         "desc": "돌진 후 충격파",
-        "mp": 140,
+        "mp": 70,
         "cd": 5,
         "damage": 80,
         "radius": 58,
@@ -70,7 +70,7 @@
       "bolt": {
         "name": "마법탄",
         "desc": "전방 3연발 마법탄",
-        "mp": 60,
+        "mp": 30,
         "cd": 0.55,
         "damage": 55,
         "projectileSpeed": 520,
@@ -84,7 +84,7 @@
       "nova": {
         "name": "마법폭발",
         "desc": "넓은 범위 폭발",
-        "mp": 180,
+        "mp": 90,
         "cd": 4.5,
         "damage": 95,
         "radius": 190,
@@ -95,7 +95,7 @@
       "shield": {
         "name": "보호막",
         "desc": "피해 100 흡수",
-        "mp": 120,
+        "mp": 60,
         "cd": 6,
         "damage": 0,
         "shieldHp": 100,
@@ -105,19 +105,114 @@
     }
   },
   "mobs": {
-    "slime": { "hp": 90, "speed": 55, "touchDamage": 18 },
-    "bat": { "hp": 70, "speed": 95, "touchDamage": 18 },
-    "block": { "hp": 120, "speed": 40, "touchDamage": 28 },
-    "wolf": { "hp": 100, "speed": 110, "touchDamage": 22 },
-    "spider": { "hp": 85, "speed": 80, "touchDamage": 24 },
-    "boss": { "hp": 2200, "speed": 70, "touchDamage": 45, "label": "필드 보스" },
-    "bigBoss": { "hp": 5500, "speed": 78, "touchDamage": 70, "label": "빅 보스" },
-    "finalBoss": { "hp": 12000, "speed": 82, "touchDamage": 95, "label": "최종 보스" },
+    "slime": {
+      "hp": 90,
+      "speed": 55,
+      "touchDamage": 18
+    },
+    "bat": {
+      "hp": 70,
+      "speed": 95,
+      "touchDamage": 18
+    },
+    "block": {
+      "hp": 120,
+      "speed": 40,
+      "touchDamage": 28
+    },
+    "wolf": {
+      "hp": 100,
+      "speed": 110,
+      "touchDamage": 22
+    },
+    "spider": {
+      "hp": 85,
+      "speed": 80,
+      "touchDamage": 24
+    },
+    "boss": {
+      "hp": 2200,
+      "speed": 70,
+      "touchDamage": 45,
+      "label": "필드 보스"
+    },
+    "bigBoss": {
+      "hp": 5500,
+      "speed": 78,
+      "touchDamage": 70,
+      "label": "빅정예"
+    },
+    "finalBoss": {
+      "hp": 12000,
+      "speed": 82,
+      "touchDamage": 95,
+      "label": "보스정예"
+    },
     "elite": {
       "hpMult": 2.4,
       "speedMult": 1.15,
       "damageMult": 1.7,
       "label": "정예"
+    },
+    "ghoul": {
+      "hp": 260,
+      "speed": 90,
+      "touchDamage": 32,
+      "label": "구울"
+    },
+    "wraith": {
+      "hp": 220,
+      "speed": 130,
+      "touchDamage": 30,
+      "label": "원혼"
+    },
+    "skeleton": {
+      "hp": 300,
+      "speed": 70,
+      "touchDamage": 36,
+      "label": "해골전사"
+    },
+    "banshee": {
+      "hp": 240,
+      "speed": 100,
+      "touchDamage": 34,
+      "label": "반시"
+    },
+    "direwolf": {
+      "hp": 280,
+      "speed": 150,
+      "touchDamage": 38,
+      "label": "다이어울프"
+    },
+    "reaper": {
+      "hp": 600,
+      "speed": 100,
+      "touchDamage": 60,
+      "label": "사신"
+    },
+    "lich": {
+      "hp": 550,
+      "speed": 80,
+      "touchDamage": 65,
+      "label": "리치"
+    },
+    "deathknight": {
+      "hp": 700,
+      "speed": 95,
+      "touchDamage": 70,
+      "label": "데스나이트"
+    },
+    "nightmare": {
+      "hp": 650,
+      "speed": 140,
+      "touchDamage": 62,
+      "label": "나이트메어"
+    },
+    "wight": {
+      "hp": 620,
+      "speed": 85,
+      "touchDamage": 58,
+      "label": "와이트로드"
     }
   }
 }

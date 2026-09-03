@@ -9,6 +9,8 @@ import {
   loadImageSource,
   PixelLabClient,
 } from './pixellab.mjs';
+import {getEffectiveDescription} from './prompts.mjs';
+import {writeJsonAtomic} from './fs-util.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const STATE_DIR = path.join(__dirname, '..', '..', '.pixellab-studio');
@@ -33,6 +35,9 @@ export class StudioRunner {
     /** @type {Map<string, QueueEntry>} */
     this.queue = new Map();
     this.running = false;
+    this._dirty = false;
+    /** @type {ReturnType<typeof setTimeout> | null} */
+    this._saveTimer = null;
     this.loadState();
   }
 
@@ -62,15 +67,26 @@ export class StudioRunner {
       });
       seeded = true;
     }
-    if (seeded) this.saveState();
+    if (seeded) this.flushState();
   }
 
+  /** Coalesce rapid writes (Windows file locks). */
   saveState() {
-    fs.mkdirSync(STATE_DIR, {recursive: true});
-    fs.writeFileSync(
-      STATE_FILE,
-      JSON.stringify({entries: [...this.queue.values()]}, null, 2),
-    );
+    this._dirty = true;
+    if (this._saveTimer) return;
+    this._saveTimer = setTimeout(() => {
+      this._saveTimer = null;
+      this.flushState();
+    }, 100);
+  }
+
+  flushState() {
+    if (this._saveTimer) {
+      clearTimeout(this._saveTimer);
+      this._saveTimer = null;
+    }
+    this._dirty = false;
+    writeJsonAtomic(STATE_FILE, {entries: [...this.queue.values()]});
   }
 
   /** @param {string} id @param {Partial<QueueEntry>} patch */
@@ -142,6 +158,7 @@ export class StudioRunner {
       }
     } finally {
       this.running = false;
+      this.flushState();
     }
   }
 
@@ -161,8 +178,9 @@ export class StudioRunner {
     }
 
     if (item.type === 'pixflux') {
+      const description = getEffectiveDescription(item);
       const created = await this.client.createPixflux({
-        description: item.description,
+        description,
         image_size: item.imageSize,
       });
 
@@ -188,7 +206,7 @@ export class StudioRunner {
 
     if (item.type === 'generate_character') {
       const created = await this.client.createCharacter8Dir({
-        description: item.description,
+        description: getEffectiveDescription(item),
         image_size: item.imageSize ?? {width: 80, height: 80},
       });
       const characterId = created.character_id ?? created.id;
@@ -208,7 +226,7 @@ export class StudioRunner {
       const created = await this.client.createCharacterState({
         character_id: item.baseCharacterId,
         state_name: item.stateName,
-        description: item.description,
+        description: getEffectiveDescription(item),
       });
       const characterId = created.character_id ?? created.id;
       const jobId = created.background_job_id;

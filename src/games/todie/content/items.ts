@@ -4,7 +4,16 @@ import displayJson from '../settings/display.json';
 import {jobLabel} from './settings';
 import type {JobId} from './types';
 import type {Equipment, GearSlot, Item} from './equip';
-import {EQUIP_SLOTS, ownsSameUniqueGear} from './equip';
+import {
+  EQUIP_SLOTS,
+  ownsSameUniqueGear,
+  clearItem,
+  putItemInBag,
+  sameGear,
+  enhanceStatMultiplier,
+  enhanceSuccessChance,
+  MAX_ENHANCE_LEVEL,
+} from './equip';
 
 export const itemSettings = itemsJson;
 export const dropSettings = dropsJson;
@@ -133,7 +142,14 @@ export function buildItemHelp(item: Item, playerJob: JobId): ItemHelpInfo | null
   if (item.kind === 'gear') {
     const tier = item.tier;
     const meta = tierMeta(tier);
-    const stats = gearStatsFor(tier, item.gearSlot);
+    const baseStats = gearStatsFor(tier, item.gearSlot);
+    const enhanceLevel = item.enhance ?? 0;
+    const mult = enhanceStatMultiplier(enhanceLevel);
+    const stats = {
+      atk: Math.round(baseStats.atk * mult),
+      def: Math.round(baseStats.def * mult),
+      hp: Math.round(baseStats.hp * mult),
+    };
     const usable = !item.job || item.job === playerJob;
     const share = tierDropSharePct(tier);
     const overall = gearDropChancePct(tier);
@@ -142,23 +158,54 @@ export function buildItemHelp(item: Item, playerJob: JobId): ItemHelpInfo | null
     const help =
       (meta as {help?: string} | null)?.help ??
       '장비 아이템입니다. 우클릭으로 장착할 수 있어요.';
+    const enhanceLine =
+      enhanceLevel >= MAX_ENHANCE_LEVEL
+        ? '강화 · 최대 (+10)'
+        : `강화 · +${enhanceLevel} → +${enhanceLevel + 1} 확률 ${Math.round(
+            enhanceSuccessChance(enhanceLevel + 1) * 100,
+          )}% (강화석 우클릭 후 클릭)`;
+    const gradeLine = meta ? `등급 · ${meta.label}${enhanceLevel > 0 ? ` +${enhanceLevel}` : ''}` : null;
     const lines = [
       `슬롯 · ${slotLabel}`,
       item.job ? `직업 · ${jobLabel(item.job)}${usable ? ' (착용 가능)' : ' (착용 불가)'}` : '직업 · 공용',
-      meta ? `등급 · ${meta.label}` : null,
+      gradeLine,
       `드랍 · 장비 중 ${share}% · 전체 약 ${overall}%`,
       `성능 · 공격 +${stats.atk} / 방어 +${stats.def} / 체력 +${stats.hp}`,
+      enhanceLine,
       help,
     ].filter(Boolean) as string[];
 
     return {
-      title: item.name,
+      title: enhanceLevel > 0 ? `+${enhanceLevel} ${item.name}` : item.name,
       tierLabel: meta?.label ?? null,
       tierColor: meta?.color ?? null,
       jobLine: item.job ? `${jobLabel(item.job)} 전용` : null,
       usable,
       dropLine: `장비 중 ${share}% (전체 ≈ ${overall}%)`,
       statsLine: `공격 +${stats.atk} · 방어 +${stats.def} · 체력 +${stats.hp}`,
+      help,
+      lines,
+    };
+  }
+
+  if (item.kind === 'enhanceStone') {
+    const stoneMeta = (
+      itemsJson.consumables as Record<string, {name: string; help?: string; effect?: string}>
+    ).enhanceStone;
+    const help = stoneMeta?.help ?? '장비를 추출해서 얻는 강화 재료입니다.';
+    const lines = [
+      '종류 · 강화 재료',
+      stoneMeta?.effect ? `효과 · ${stoneMeta.effect}` : null,
+      help,
+    ].filter(Boolean) as string[];
+    return {
+      title: item.name,
+      tierLabel: null,
+      tierColor: null,
+      jobLine: null,
+      usable: true,
+      dropLine: null,
+      statsLine: stoneMeta?.effect ?? null,
       help,
       lines,
     };
@@ -192,7 +239,7 @@ export function buildItemHelp(item: Item, playerJob: JobId): ItemHelpInfo | null
   };
 }
 
-/** 장착 장비 합산 성능 */
+/** 장착 장비 합산 성능 (강화 보너스 포함) */
 export function sumEquippedStats(equipped: import('./equip').Equipment): GearStats {
   let atk = 0;
   let def = 0;
@@ -201,9 +248,10 @@ export function sumEquippedStats(equipped: import('./equip').Equipment): GearSta
     const it = equipped[s.id];
     if (!it || it.kind !== 'gear') continue;
     const st = gearStatsFor(it.tier, it.gearSlot);
-    atk += st.atk;
-    def += st.def;
-    hp += st.hp;
+    const mult = enhanceStatMultiplier(it.enhance ?? 0);
+    atk += Math.round(st.atk * mult);
+    def += Math.round(st.def * mult);
+    hp += Math.round(st.hp * mult);
   }
   return {atk, def, hp};
 }
@@ -269,7 +317,6 @@ function draftMatchesEquipped(draft: LootItemDraft, equipped: Equipment): boolea
 
 function isUsefulGearDrop(draft: LootItemDraft, ctx: LootDropContext): boolean {
   if (draft.kind !== 'gear') return true;
-  if (draft.job != null && draft.job !== ctx.job) return false;
   if (draftMatchesEquipped(draft, ctx.equipped)) return false;
   const probe: Item = {
     id: 'loot-probe',
@@ -281,6 +328,7 @@ function isUsefulGearDrop(draft: LootItemDraft, ctx: LootDropContext): boolean {
     gearId: draft.gearId,
     gearSlot: draft.gearSlot,
     tier: draft.tier,
+    enhance: 0,
   };
   if (ownsSameUniqueGear(ctx.bag, ctx.equipped, probe)) return false;
   return true;
@@ -303,13 +351,13 @@ export function rollLootDrop(ctx?: LootDropContext): LootItemDraft {
   return rollConsumable();
 
   function rollGear(): LootItemDraft {
-    const job = ctx?.job
-      ? ctx.job
-      : pickWeighted(
-          (Object.entries(jobWeights ?? {warrior: 50, mage: 50}) as [JobId, number][]).map(
-            ([k, weight]) => ({k, weight}),
-          ),
-        ).k;
+    // 직업별 비중(jobWeights)으로 내 직업/다른 직업 장비가 모두 나올 수 있음 —
+    // 다른 직업 장비는 착용은 못 해도 가방에 찀이고, 인벤에서 클릭해 강화석으로 추출할 수 있다.
+    const job = pickWeighted(
+      (Object.entries(jobWeights ?? {warrior: 50, mage: 50}) as [JobId, number][]).map(
+        ([k, weight]) => ({k, weight}),
+      ),
+    ).k;
     const tier = pickWeighted(tierWeightsFromSettings()).k;
     const slot = pickWeighted(
       (Object.entries(slotWeights) as [GearSlot, number][]).map(([k, weight]) => ({
@@ -402,7 +450,65 @@ export function draftToItem(draft: LootItemDraft): Item {
     gearId: draft.gearId,
     gearSlot: draft.gearSlot,
     tier: draft.tier,
+    enhance: 0,
   };
+}
+
+/** 등급별 강화석 추출량 (settings items.json tiers[].shardValue) */
+export function enhanceStoneValueFor(tier: GearTier | null): number {
+  if (!tier) return 1;
+  const t = itemsJson.tiers[tier] as {shardValue?: number};
+  return t.shardValue ?? 1;
+}
+
+/**
+ * 인벤 클릭 추출 가능 여부:
+ * - 다른 직업 전용 장비 (착용 불가)
+ * - 이미 가방/장착 중인 것과 완전히 같은 장비 (중복 보유)
+ */
+export function isExtractableGear(
+  item: Item,
+  job: JobId,
+  bag: Item[],
+  equipped: Equipment,
+): boolean {
+  if (item.kind !== 'gear' || !item.gearId) return false;
+  if (item.job && item.job !== job) return true;
+  for (const s of EQUIP_SLOTS) {
+    const wearing = equipped[s.id];
+    if (wearing && wearing !== item && sameGear(wearing, item)) return true;
+  }
+  return bag.some((s) => s !== item && s.kind !== 'empty' && sameGear(s, item));
+}
+
+/** 가방의 장비를 강화석으로 추출 (다른 직업 아이템 / 중복 보유 아이템만) */
+export function extractGearToEnhanceStone(
+  bag: Item[],
+  index: number,
+  job: JobId,
+  equipped: Equipment,
+): {ok: boolean; qty: number; itemName: string} | null {
+  const item = bag[index];
+  if (!item || item.kind !== 'gear') return null;
+  if (!isExtractableGear(item, job, bag, equipped)) return null;
+  const qty = enhanceStoneValueFor(item.tier) * Math.max(1, item.qty);
+  const itemName = item.name;
+  clearItem(item);
+  const meta = (itemsJson.consumables as Record<string, {name: string; color: string}>)
+    .enhanceStone ?? {name: '강화석', color: '#80cbc4'};
+  putItemInBag(bag, {
+    id: `stone-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    kind: 'enhanceStone',
+    name: meta.name,
+    qty,
+    color: meta.color,
+    job: null,
+    gearId: null,
+    gearSlot: null,
+    tier: null,
+    enhance: 0,
+  });
+  return {ok: true, qty, itemName};
 }
 
 export function gearIconUrl(job: JobId, gearId: string, tier?: GearTier | null): string | null {
@@ -414,13 +520,18 @@ export function gearIconUrl(job: JobId, gearId: string, tier?: GearTier | null):
 
 const itemsBase = displayJson.consumablePublicBase || '/todie/items';
 
-export type ConsumableKind = 'potion' | 'mana';
+export type ConsumableKind = 'potion' | 'mana' | 'enhanceStone';
+
+const CONSUMABLE_ICON_FILE: Record<ConsumableKind, string> = {
+  potion: 'potion',
+  mana: 'mana',
+  enhanceStone: 'enhance_stone',
+};
 
 export function consumableIconUrl(kind: string): string | null {
-  if (kind === 'potion' || kind === 'mana') {
-    return `${itemsBase}/${kind}.png`;
-  }
-  return null;
+  const file = CONSUMABLE_ICON_FILE[kind as ConsumableKind];
+  if (!file) return null;
+  return `${itemsBase}/${file}.png`;
 }
 
 export function itemIconUrl(item: {
@@ -471,7 +582,7 @@ export async function loadGearImages(): Promise<Record<string, HTMLImageElement>
 }
 
 export async function loadConsumableImages(): Promise<Record<string, HTMLImageElement>> {
-  const kinds: ConsumableKind[] = ['potion', 'mana'];
+  const kinds: ConsumableKind[] = ['potion', 'mana', 'enhanceStone'];
   const map: Record<string, HTMLImageElement> = {};
   await Promise.all(
     kinds.map(
@@ -483,7 +594,7 @@ export async function loadConsumableImages(): Promise<Record<string, HTMLImageEl
             resolve();
           };
           img.onerror = () => resolve();
-          img.src = `${itemsBase}/${k}.png`;
+          img.src = `${itemsBase}/${CONSUMABLE_ICON_FILE[k]}.png`;
         }),
     ),
   );

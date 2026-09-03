@@ -1,0 +1,921 @@
+{
+  "version": 1,
+  "objects": [
+    {
+      "name": "object-1",
+      "desc": "small muddy puddle on wastel",
+      "remoteId": "fbe57e3e-b893-4d52-ac63-173214f48a81",
+      "frames": [
+        "frame_0",
+        "frame_1",
+        "frame_2",
+        "frame_3",
+        "frame_4",
+        "frame_5",
+        "frame_6",
+        "frame_7",
+        "frame_8",
+        "frame_9",
+        "frame_10",
+        "frame_11",
+        "frame_12",
+        "frame_13",
+        "frame_14",
+        "frame_15"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "object-2",
+      "desc": "friendly cobblestone plaza til",
+      "remoteId": "096937e8-4a35-499a-a581-13d5b93f3d65",
+      "frames": [
+        "frame_0",
+        "frame_1",
+        "frame_2",
+        "frame_3",
+        "frame_4",
+        "frame_5",
+        "frame_6",
+        "frame_7",
+        "frame_8",
+        "frame_9",
+        "frame_10",
+        "frame_11",
+        "frame_12",
+        "frame_13",
+        "frame_14",
+        "frame_15"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "object-3",
+      "desc": "top-down dead tree stump in wa",
+      "remoteId": "92a72d2c-66db-4e33-ba6a-ab7076729176",
+      "frames": [
+        "frame_0",
+        "frame_1",
+        "frame_2",
+        "frame_3",
+        "frame_4",
+        "frame_5",
+        "frame_6",
+        "frame_7",
+        "frame_8",
+        "frame_9",
+        "frame_10",
+        "frame_11",
+        "frame_12",
+        "frame_13",
+        "frame_14",
+        "frame_15"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "object-4",
+      "desc": "small top-down pixel rock clus",
+      "remoteId": "0b760495-95bd-4791-8c65-e2e80757fa58",
+      "frames": [
+        "frame_0",
+        "frame_1",
+        "frame_2",
+        "frame_3",
+        "frame_4",
+        "frame_5",
+        "frame_6",
+        "frame_7",
+        "frame_8",
+        "frame_9",
+        "frame_10",
+        "frame_11",
+        "frame_12",
+        "frame_13",
+        "frame_14",
+        "frame_15"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "object-5",
+      "desc": "top-down tile edge transition",
+      "remoteId": "35c76ded-600d-4fe2-9cde-e657abbe3f3c",
+      "frames": [
+        "frame_0",
+        "frame_1",
+        "frame_2",
+        "frame_3",
+        "frame_4",
+        "frame_5",
+        "frame_6",
+        "frame_7",
+        "frame_8",
+        "frame_9",
+        "frame_10",
+        "frame_11",
+        "frame_12",
+        "frame_13",
+        "frame_14",
+        "frame_15"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "object-6",
+      "desc": "seamless wasteland dirt tile v",
+      "remoteId": "df08e2ae-c298-46c6-90f4-09989a266be2",
+      "frames": [
+        "frame_0",
+        "frame_1",
+        "frame_2",
+        "frame_3",
+        "frame_4",
+        "frame_5",
+        "frame_6",
+        "frame_7",
+        "frame_8",
+        "frame_9",
+        "frame_10",
+        "frame_11",
+        "frame_12",
+        "frame_13",
+        "frame_14",
+        "frame_15"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "object-7",
+      "desc": "seamless top-down dry wastelan",
+      "remoteId": "94f5cf4b-0532-4ab0-89a7-0ef7efb3e632",
+      "frames": [
+        "frame_0",
+        "frame_1",
+        "frame_2",
+        "frame_3",
+        "frame_4",
+        "frame_5",
+        "frame_6",
+        "frame_7",
+        "frame_8",
+        "frame_9",
+        "frame_10",
+        "frame_11",
+        "frame_12",
+        "frame_13",
+        "frame_14",
+        "frame_15"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "object-8",
+      "desc": "seamless top-down grass tile v",
+      "remoteId": "8348a8f1-95fb-4d7e-8272-e7e183556c82",
+      "frames": [
+        "frame_0",
+        "frame_1",
+        "frame_2",
+        "frame_3",
+        "frame_4",
+        "frame_5",
+        "frame_6",
+        "frame_7",
+        "frame_8",
+        "frame_9",
+        "frame_10",
+        "frame_11",
+        "frame_12",
+        "frame_13",
+        "frame_14",
+        "frame_15"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "object-9",
+      "desc": "seamless top-down grass meadow",
+      "remoteId": "996d684a-0bea-45cf-bada-86c3bb37456d",
+      "frames": [
+        "frame_0",
+        "frame_1",
+        "frame_2",
+        "frame_3",
+        "frame_4",
+        "frame_5",
+        "frame_6",
+        "frame_7",
+        "frame_8",
+        "frame_9",
+        "frame_10",
+        "frame_11",
+        "frame_12",
+        "frame_13",
+        "frame_14",
+        "frame_15"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "object-10",
+      "desc": "seamless game tile, volcanic l",
+      "remoteId": "03dd5df8-c9a6-41ed-852e-8a6ef5b51805",
+      "frames": [
+        "frame_0",
+        "frame_1",
+        "frame_2",
+        "frame_3",
+        "frame_4",
+        "frame_5",
+        "frame_6",
+        "frame_7",
+        "frame_8",
+        "frame_9",
+        "frame_10",
+        "frame_11",
+        "frame_12",
+        "frame_13",
+        "frame_14",
+        "frame_15"
+      ],
+      "syncedAt": "2026-09-03T06:56:55.939Z"
+    },
+    {
+      "name": "object-11",
+      "desc": "seamless top-down game terrain",
+      "remoteId": "b80439b0-f9c7-4dd2-ada0-4a42a1e9f6fd",
+      "frames": [
+        "frame_0",
+        "frame_1",
+        "frame_2",
+        "frame_3",
+        "frame_4",
+        "frame_5",
+        "frame_6",
+        "frame_7",
+        "frame_8",
+        "frame_9",
+        "frame_10",
+        "frame_11",
+        "frame_12",
+        "frame_13",
+        "frame_14",
+        "frame_15"
+      ],
+      "syncedAt": "2026-09-03T06:56:55.939Z"
+    }
+  ],
+  "tiles": [
+    {
+      "name": "tile-1",
+      "desc": "shimmering wavy water surface with gentle ripples ↗ lush grassy field with varied green blades",
+      "remoteId": "f2b28fd9-1a75-49a5-b5fe-b6d24e0a5b0a",
+      "tiles": [
+        "wang_0",
+        "wang_1",
+        "wang_2",
+        "wang_3",
+        "wang_4",
+        "wang_5",
+        "wang_6",
+        "wang_7",
+        "wang_8",
+        "wang_9",
+        "wang_10",
+        "wang_11",
+        "wang_12",
+        "wang_13",
+        "wang_14",
+        "wang_15"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "tile-2",
+      "desc": "shimmering wavy water surface with gentle ripples ↗ lush grassy field with varied green blades",
+      "remoteId": "ef4d616f-759d-41e5-9ba0-8fc97cd9db52",
+      "tiles": [
+        "wang_0",
+        "wang_1",
+        "wang_2",
+        "wang_3",
+        "wang_4",
+        "wang_5",
+        "wang_6",
+        "wang_7",
+        "wang_8",
+        "wang_9",
+        "wang_10",
+        "wang_11",
+        "wang_12",
+        "wang_13",
+        "wang_14",
+        "wang_15"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "tile-3",
+      "desc": "shimmering wavy water surface with gentle ripples ↗ lush grassy field with varied green blades",
+      "remoteId": "f7479e74-f1f8-44c8-a407-e5f8899decd8",
+      "tiles": [
+        "wang_0",
+        "wang_1",
+        "wang_2",
+        "wang_3",
+        "wang_4",
+        "wang_5",
+        "wang_6",
+        "wang_7",
+        "wang_8",
+        "wang_9",
+        "wang_10",
+        "wang_11",
+        "wang_12",
+        "wang_13",
+        "wang_14",
+        "wang_15"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "tile-4",
+      "desc": "seamless top-down game terrain tile, stylized ↗ seamless top-down game terrain tile, elevated",
+      "remoteId": "9cebb8aa-5bc0-411a-8a0a-bc6271a45bbf",
+      "tiles": [
+        "wang_0",
+        "wang_1",
+        "wang_2",
+        "wang_3",
+        "wang_4",
+        "wang_5",
+        "wang_6",
+        "wang_7",
+        "wang_8",
+        "wang_9",
+        "wang_10",
+        "wang_11",
+        "wang_12",
+        "wang_13",
+        "wang_14",
+        "wang_15"
+      ],
+      "syncedAt": "2026-09-03T06:56:55.939Z"
+    },
+    {
+      "name": "tile-5",
+      "desc": "seamless game tile, volcanic lava ground, dark ↗ seamless game tile, raised volcanic lava terrain",
+      "remoteId": "e38e4dd4-4eb6-4ed4-b0c9-2e533b5801e0",
+      "tiles": [
+        "wang_0",
+        "wang_1",
+        "wang_2",
+        "wang_3",
+        "wang_4",
+        "wang_5",
+        "wang_6",
+        "wang_7",
+        "wang_8",
+        "wang_9",
+        "wang_10",
+        "wang_11",
+        "wang_12",
+        "wang_13",
+        "wang_14",
+        "wang_15"
+      ],
+      "syncedAt": "2026-09-03T06:56:55.939Z"
+    }
+  ],
+  "characters": [
+    {
+      "name": "character-1",
+      "desc": "몬스터 늑대인간 느낌으로 보스느낌으로 한들어줘 · 달리기 모션",
+      "remoteId": "0c48c8e8-f2ff-46d1-bd49-6134925b0b0c",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-2",
+      "desc": "몬스터 늑대인간 느낌으로 보스느낌으로 한들어줘 · 공격 모션",
+      "remoteId": "65d43fab-f07e-4f6b-aa6a-bc547c965794",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-3",
+      "desc": "몬스터 곰인간 느낌으로 보스느낌 · 달리기 모션",
+      "remoteId": "93c8929f-a4a0-4fd9-ab1c-99b498f865e1",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-4",
+      "desc": "몬스터 곰인간 느낌으로 보스느낌 · 공격 모션",
+      "remoteId": "0dc44c5a-8ed6-4b13-a962-08ce19064c92",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-5",
+      "desc": "몬스터 곰인간 느낌으로 보스느낌 · Idle",
+      "remoteId": "b8f2d109-1554-47b2-94cd-3c1c348b0089",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-6",
+      "desc": "몬스터 늑대인간 느낌으로 보스느낌으로 한들어줘 · Idle",
+      "remoteId": "4baebe5b-a605-4f37-89e0-8d7de387845f",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-7",
+      "desc": "아이 검사같은 느낌으로 귀여운 케릭터 · 너무 원처럼 구르지 않는 구르기 모션좀",
+      "remoteId": "646673cb-413c-4934-9ec4-71e77677b7bf",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-8",
+      "desc": "아이 검사같은 느낌으로 귀여운 케릭터 · 기어가기 모션 추가해줘",
+      "remoteId": "98e527c0-36d3-496b-9c10-2323964efc7f",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-9",
+      "desc": "아이 검사같은 느낌으로 귀여운 케릭터 · 아래에서 위로 올려베는 모션 추가해줘",
+      "remoteId": "68a5e569-9095-42ed-ae7a-f16c2c2222eb",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-10",
+      "desc": "아이 검사같은 느낌으로 귀여운 케릭터 · 하체 베기 모션 추가해줘",
+      "remoteId": "d801b8a6-789d-49e0-9717-0c3f8ee78806",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-11",
+      "desc": "아이 검사같은 느낌으로 귀여운 케릭터 · 상체 베기 모션 추가해줘",
+      "remoteId": "ff178326-fa76-4537-ae26-54effce86e7f",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-12",
+      "desc": "아이 검사같은 느낌으로 귀여운 케릭터 · 앉아 걷기 모션 추가해줘",
+      "remoteId": "6ef8a367-9595-4ca0-9c8a-56fbf131f1ba",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-13",
+      "desc": "아이 검사같은 느낌으로 귀여운 케릭터 · 점프모션 추가해줘",
+      "remoteId": "24cb3ff3-0e66-498a-81d5-bebf14a42947",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-14",
+      "desc": "아이 검사같은 느낌으로 귀여운 케릭터 · 달리기 모션 추가해줘",
+      "remoteId": "77e81ff7-e2b8-4d03-91e3-7dfd6890b9ba",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-15",
+      "desc": "아이 검사같은 느낌으로 귀여운 케릭터 · 검과 방패를 들고 있게 해주고 갑옷도",
+      "remoteId": "b5453cb5-a0e0-4875-abf1-826641737302",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-16",
+      "desc": "앞뒤로만 움직이는 게임을 만들건데 검사 케릭터 하나 만들어줘  · 미래전사 느낌으로 만들어줘봐 케릭얼굴",
+      "remoteId": "5f9a9c04-708f-4e4c-af8e-4314ea3374e4",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-17",
+      "desc": "앞뒤로만 움직이는 게임을 만들건데 검사 케릭터 하나 만들어줘  · Idle",
+      "remoteId": "823217e0-682b-4429-bfe5-792e598580bf",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-18",
+      "desc": "검사 동서남북 고퀄 케릭터\n · 공격 모션",
+      "remoteId": "4eea48c8-5fe3-40ee-8bc6-552ae987ef77",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-19",
+      "desc": "검사 동서남북 고퀄 케릭터\n · 걷기 모션",
+      "remoteId": "efbc1c37-5987-41b8-bf94-bfd9cf18c2c4",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-20",
+      "desc": "검사 동서남북 고퀄 케릭터\n · 귀여운 궁수스타일",
+      "remoteId": "ecadbd82-fcfb-4cdf-8563-94dcfad029cf",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-21",
+      "desc": "검사 동서남북 고퀄 케릭터\n · 공격모션 만들어줘",
+      "remoteId": "bf21e19b-7d24-4ba3-870c-92b4f3cb8398",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-22",
+      "desc": "검사 동서남북 고퀄 케릭터\n · 공격모션 만들어줘",
+      "remoteId": "fbe9029c-7ec3-4558-8def-84162cdb5528",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-23",
+      "desc": "검사 동서남북 고퀄 케릭터\n · 걷기모션 만들어줘",
+      "remoteId": "0ad17b16-ffef-4435-a785-3ae6d9235ef6",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-24",
+      "desc": "검사 동서남북 고퀄 케릭터\n · 걷기 모션 만들어줘",
+      "remoteId": "16c3fd35-4d06-4fa3-881b-a0ec311917ee",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-25",
+      "desc": "검사 동서남북 고퀄 케릭터\n · 같은 스타일에 법사로  하나만들어줘",
+      "remoteId": "2d9739a9-a8bd-48c3-9f9b-29c4d5a9c212",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-26",
+      "desc": "검사 동서남북 고퀄 케릭터\n · 귀여운 스타일로",
+      "remoteId": "ea44260c-bc21-4d99-b777-59500df403cd",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T05:57:53.930Z"
+    },
+    {
+      "name": "character-27",
+      "desc": "흑마법사느낌의 근접 마전사  · 흰색 머리의 검사",
+      "remoteId": "319415a0-4962-4957-ab1d-b46d2239e41d",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T06:56:55.939Z"
+    },
+    {
+      "name": "character-28",
+      "desc": "몬스터 1: 무서운 해골 · 배경에 찌꺼기가 있음 제거해서 다시",
+      "remoteId": "65eb885d-43ff-4032-946d-fb1011db4fd8",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T06:56:55.939Z"
+    },
+    {
+      "name": "character-29",
+      "desc": "몬스터 2: 용암 골렘 · Idle",
+      "remoteId": "851c2de9-fc49-4cea-903f-4f204ddb8430",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T06:56:55.939Z"
+    },
+    {
+      "name": "character-30",
+      "desc": "몬스터 1: 무서운 해골 · Idle",
+      "remoteId": "0b163a53-a661-4ec6-a33f-7c47597e0360",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T06:56:55.939Z"
+    },
+    {
+      "name": "character-31",
+      "desc": "위험한 전설의 몬스터 · 전설의 몬스터가 모시는 왕",
+      "remoteId": "9d45a3d6-e3c4-4ca9-b74d-35952932e75a",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T06:56:55.939Z"
+    },
+    {
+      "name": "character-32",
+      "desc": "위험한 전설의 몬스터 · Idle",
+      "remoteId": "f905bad9-3843-4bdb-85ce-cc10b5f7002d",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T06:56:55.939Z"
+    },
+    {
+      "name": "character-33",
+      "desc": "흑마법사느낌의 근접 마전사  · Idle",
+      "remoteId": "f7426256-b361-4456-93e5-7a74a7ae6a7f",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "syncedAt": "2026-09-03T06:56:55.939Z"
+    }
+  ]
+}

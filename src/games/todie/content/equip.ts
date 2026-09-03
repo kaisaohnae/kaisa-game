@@ -36,7 +36,7 @@ export function isUniqueOwnGearSlot(slot: GearSlot | null | undefined): boolean 
   return Boolean(def && UNIQUE_OWN_GROUPS.has(def.group));
 }
 
-function sameGear(a: Item, b: Item): boolean {
+export function sameGear(a: Item, b: Item): boolean {
   return (
     a.kind === 'gear' &&
     b.kind === 'gear' &&
@@ -62,7 +62,7 @@ export function ownsSameUniqueGear(
   return bag.some((s) => s.kind !== 'empty' && sameGear(s, item));
 }
 
-export type ItemKind = 'potion' | 'mana' | 'gear' | 'empty';
+export type ItemKind = 'potion' | 'mana' | 'enhanceStone' | 'gear' | 'empty';
 
 export type Item = {
   id: string;
@@ -74,6 +74,8 @@ export type Item = {
   gearId: string | null;
   gearSlot: GearSlot | null;
   tier: GearTier | null;
+  /** 강화 단계 (0~MAX_ENHANCE_LEVEL), gear 아이템에만 의미 있음 */
+  enhance: number;
 };
 
 export type Equipment = Record<GearSlot, Item | null>;
@@ -102,6 +104,7 @@ export function emptyItem(id: string): Item {
     gearId: null,
     gearSlot: null,
     tier: null,
+    enhance: 0,
   };
 }
 
@@ -114,6 +117,7 @@ export function clearItem(slot: Item) {
   slot.gearId = null;
   slot.gearSlot = null;
   slot.tier = null;
+  slot.enhance = 0;
 }
 
 export function copyItem(item: Item): Item {
@@ -140,6 +144,7 @@ function writeItemInto(slot: Item, item: Item) {
   slot.gearId = item.gearId;
   slot.gearSlot = item.gearSlot;
   slot.tier = item.tier;
+  slot.enhance = item.enhance ?? 0;
 }
 
 /** Find first empty bag index (skips hotbar potion/mana slots). */
@@ -347,4 +352,105 @@ export function unequipSlot(
   if (!putItemInBag(bag, wearing)) return '가방이 가득 차 해제 불가';
   equipped[slot] = null;
   return `${wearing.name} 해제`;
+}
+
+// ── 강화(Enhance) ───────────────────────────────────────────────────────
+
+type EnhanceConfig = {
+  maxLevel: number;
+  highTierUpTo: number;
+  highChance: number;
+  lowChance: number;
+  statPctPerLevel: number;
+};
+
+const ENHANCE_CFG: EnhanceConfig = (equipJson as {enhance?: EnhanceConfig}).enhance ?? {
+  maxLevel: 10,
+  highTierUpTo: 5,
+  highChance: 0.5,
+  lowChance: 0.2,
+  statPctPerLevel: 0.05,
+};
+
+export const MAX_ENHANCE_LEVEL = ENHANCE_CFG.maxLevel;
+
+/** 다음 강화 단계(1~10)의 성공 확률 — 1~5강은 highChance, 6~10강은 lowChance */
+export function enhanceSuccessChance(nextLevel: number): number {
+  return nextLevel <= ENHANCE_CFG.highTierUpTo ? ENHANCE_CFG.highChance : ENHANCE_CFG.lowChance;
+}
+
+/** 강화 단계에 따른 스탯 배율 (기본 1 + 강화단계 * statPctPerLevel) */
+export function enhanceStatMultiplier(level: number): number {
+  return 1 + Math.max(0, level) * ENHANCE_CFG.statPctPerLevel;
+}
+
+export type EnhanceOutcome = {
+  applied: boolean;
+  success: boolean;
+  newLevel: number;
+  message: string;
+};
+
+/**
+ * 가방의 강화석 1개를 소모해 target 장비를 강화 시도.
+ * target은 bag/equipped 어디에 있든 참조로 전달 — 성공 시 그 자리에서 enhance += 1.
+ */
+export function applyEnhanceStone(
+  bag: Item[],
+  stoneIndex: number,
+  target: Item,
+): EnhanceOutcome | null {
+  const stone = bag[stoneIndex];
+  if (!stone || stone.kind !== 'enhanceStone' || stone.qty < 1) return null;
+  if (target.kind !== 'gear') return null;
+  const level = target.enhance ?? 0;
+  if (level >= MAX_ENHANCE_LEVEL) {
+    return {
+      applied: false,
+      success: false,
+      newLevel: level,
+      message: `이미 최대 강화(+${MAX_ENHANCE_LEVEL})예요`,
+    };
+  }
+  stone.qty -= 1;
+  if (stone.qty <= 0) clearItem(stone);
+
+  const nextLevel = level + 1;
+  const chance = enhanceSuccessChance(nextLevel);
+  const success = Math.random() < chance;
+  if (success) {
+    target.enhance = nextLevel;
+    return {
+      applied: true,
+      success: true,
+      newLevel: nextLevel,
+      message: `${target.name} +${nextLevel} 강화 성공! (${Math.round(chance * 100)}%)`,
+    };
+  }
+  return {
+    applied: true,
+    success: false,
+    newLevel: level,
+    message: `${target.name} 강화 실패... (+${level} 유지, 확률 ${Math.round(chance * 100)}%)`,
+  };
+}
+
+// ── 스테이지(Stage) ─────────────────────────────────────────────────────
+
+/**
+ * 장착 8슬롯 전부가 채워져 있고 전부 해당 등급 이상일 때만 통과.
+ * 스테이지 판정 기준: 장착 중인 8슬롯 전부.
+ */
+function allEquippedAtLeast(equipped: Equipment, minTier: GearTier): boolean {
+  return EQUIP_SLOTS.every((s) => {
+    const it = equipped[s.id];
+    return Boolean(it) && tierRank(it!.tier) >= tierRank(minTier);
+  });
+}
+
+/** 장착 장비 등급으로 현재 도달 가능한 스테이지(1~3)를 판정 */
+export function stageForEquipped(equipped: Equipment): number {
+  if (allEquippedAtLeast(equipped, 'mythic')) return 3;
+  if (allEquippedAtLeast(equipped, 'hero')) return 2;
+  return 1;
 }

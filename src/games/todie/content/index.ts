@@ -28,8 +28,12 @@ export {
   allGearDefs,
   starterGearItem,
   draftToItem,
+  enhanceStoneValueFor,
+  isExtractableGear,
+  extractGearToEnhanceStone,
 } from './items';
 export {spawnSettings, pickSpawnKind} from './spawn';
+export type {SpawnMobKind} from './spawn';
 export {loadMobImages, mobSpriteKey, mobDrawSize} from './mobs';
 export type {MobSpriteId} from './mobs';
 export {
@@ -39,6 +43,7 @@ export {
   prepareTileCanvases,
   pickTileId,
   TILE_DEFS,
+  DEFAULT_MAP_TILE,
   getTileId,
   tileDef,
   MAP_TILE_SIZE,
@@ -66,8 +71,14 @@ export {
   isHotbarConsumableBagIndex,
   HOTBAR_POTION_BAG,
   HOTBAR_MANA_BAG,
+  sameGear,
+  MAX_ENHANCE_LEVEL,
+  enhanceSuccessChance,
+  enhanceStatMultiplier,
+  applyEnhanceStone,
+  stageForEquipped,
 } from './equip';
-export type {GearSlot, Item, Equipment, ItemKind} from './equip';
+export type {GearSlot, Item, Equipment, ItemKind, EnhanceOutcome} from './equip';
 export {preloadAllTodieAssets} from './preload';
 export type {JobId, ActionId, CardinalDir, RuntimeSkill, SkillBalance} from './types';
 export type {LoadedImages} from './jobAssets';

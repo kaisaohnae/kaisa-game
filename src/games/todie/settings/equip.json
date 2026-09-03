@@ -1,14 +1,57 @@
 {
   "slots": [
-    { "id": "head", "label": "머리", "group": "armor" },
-    { "id": "armor", "label": "갑옷", "group": "armor" },
-    { "id": "weapon", "label": "무기", "group": "weapon" },
-    { "id": "gloves", "label": "장갑", "group": "armor" },
-    { "id": "shoes", "label": "신발", "group": "armor" },
-    { "id": "necklace", "label": "목걸이", "group": "accessory" },
-    { "id": "earring", "label": "귀걸이", "group": "accessory" },
-    { "id": "ring", "label": "반지", "group": "accessory" }
+    {
+      "id": "head",
+      "label": "머리",
+      "group": "armor"
+    },
+    {
+      "id": "armor",
+      "label": "갑옷",
+      "group": "armor"
+    },
+    {
+      "id": "weapon",
+      "label": "무기",
+      "group": "weapon"
+    },
+    {
+      "id": "gloves",
+      "label": "장갑",
+      "group": "armor"
+    },
+    {
+      "id": "shoes",
+      "label": "신발",
+      "group": "armor"
+    },
+    {
+      "id": "necklace",
+      "label": "목걸이",
+      "group": "accessory"
+    },
+    {
+      "id": "earring",
+      "label": "귀걸이",
+      "group": "accessory"
+    },
+    {
+      "id": "ring",
+      "label": "반지",
+      "group": "accessory"
+    }
   ],
-  "uniqueOwnGroups": ["armor", "weapon", "accessory"],
-  "alreadyOwnedToast": "이미 가지고 있는 장비예요"
+  "uniqueOwnGroups": [
+    "armor",
+    "weapon",
+    "accessory"
+  ],
+  "alreadyOwnedToast": "이미 가지고 있는 장비예요",
+  "enhance": {
+    "maxLevel": 10,
+    "highTierUpTo": 5,
+    "highChance": 0.5,
+    "lowChance": 0.2,
+    "statPctPerLevel": 0.05
+  }
 }

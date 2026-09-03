@@ -43,6 +43,44 @@ export class PixelLabClient {
     return this.request(`/characters/${id}`);
   }
 
+  /**
+   * create-object 페이지에서 만든 Objects 목록
+   * @param {{ limit?: number, offset?: number }} [opts]
+   */
+  listObjects(opts = {}) {
+    const limit = opts.limit ?? 50;
+    const offset = opts.offset ?? 0;
+    return this.request(`/objects?limit=${limit}&offset=${offset}`);
+  }
+
+  /** @param {string} id */
+  getObject(id) {
+    return this.request(`/objects/${id}`);
+  }
+
+  /**
+   * review 상태 object에서 프레임을 completed 로 승격
+   * @param {string} id @param {number[]} indices
+   */
+  selectObjectFrames(id, indices) {
+    return this.request(`/objects/${id}/select-frames`, {
+      method: 'POST',
+      body: JSON.stringify({indices}),
+    });
+  }
+
+  /** @param {{ limit?: number, offset?: number }} [opts] */
+  listTilesets(opts = {}) {
+    const limit = opts.limit ?? 50;
+    const offset = opts.offset ?? 0;
+    return this.request(`/tilesets?limit=${limit}&offset=${offset}`);
+  }
+
+  /** @param {string} id */
+  getTileset(id) {
+    return this.request(`/tilesets/${id}`);
+  }
+
   /** @param {string} jobId */
   getBackgroundJob(jobId) {
     return this.request(`/background-jobs/${jobId}`);

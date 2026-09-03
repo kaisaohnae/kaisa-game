@@ -13,6 +13,7 @@ import {
   type ObstacleSpriteKind,
 } from './obstacleAssets';
 import {CAR_RUN_VEHICLES, DEFAULT_VEHICLE_ID, isPickerVehicleId, pickObstacleVehicleId} from './vehicles';
+import {resolveCarDifficulty, type CarStageId} from './stages';
 import './car-run.css';
 
 type Phase = 'ready' | 'playing' | 'over';
@@ -53,18 +54,14 @@ type GameState = {
   invulnUntil: number;
 };
 
-const START_SPEED = 110;
-const MAX_SPEED = 345;
 const CAR_DISPLAY_H = 81;
 const ROAD_RATIO = 0.8;
 const LANE_COUNT = 4;
 const START_LIVES = 3;
 const MAX_LIVES = 5;
 const HIT_INVULN_MS = 1200;
-const HEART_SPAWN_CHANCE = 0.075;
-/** 장애물이 좌우로 움직이는 낮은 확률 */
-const MOVING_OBSTACLE_CHANCE = 0.16;
 const VEHICLE_STORAGE_KEY = 'kaisa-car-run-vehicle';
+const STAGE_BANNER_MS = 2200;
 
 function clamp(n: number, min: number, max: number) {
   return Math.min(max, Math.max(min, n));
@@ -97,17 +94,21 @@ function spawnObstacle(
   roadLeft: number,
   roadWidth: number,
   nextId: number,
-  opts?: {
+  opts: {
     kind?: ObstacleKind;
     selectedVehicleId?: string;
     vehicles?: Map<string, LoadedVehicle>;
+    movingChance: number;
+    zigVxMin: number;
+    zigVxMax: number;
+    heavyBias: number;
   },
 ): Obstacle {
-  const selectedVehicleId = opts?.selectedVehicleId ?? DEFAULT_VEHICLE_ID;
-  const vehicles = opts?.vehicles;
+  const selectedVehicleId = opts.selectedVehicleId ?? DEFAULT_VEHICLE_ID;
+  const vehicles = opts.vehicles;
   const playerVehicle = vehicles?.get(selectedVehicleId);
 
-  let kind: ObstacleKind = opts?.kind ?? 'vehicle';
+  let kind: ObstacleKind = opts.kind ?? 'vehicle';
   let vehicleId: string | undefined;
   let w: number;
   let h: number;
@@ -116,7 +117,7 @@ function spawnObstacle(
     ({w, h} = HEART_SIZE);
   } else {
     kind = 'vehicle';
-    vehicleId = pickObstacleVehicleId(selectedVehicleId, vehicles?.keys());
+    vehicleId = pickObstacleVehicleId(selectedVehicleId, vehicles?.keys(), opts.heavyBias);
     ({w, h} = sizeForObstacleVehicle(vehicleId, vehicles, playerVehicle));
   }
 
@@ -126,7 +127,9 @@ function spawnObstacle(
   const jitter = (Math.random() - 0.5) * laneW * 0.28;
   const minX = roadLeft + w * 0.55;
   const maxX = roadLeft + roadWidth - w * 0.55;
-  const moving = kind !== 'heart' && Math.random() < MOVING_OBSTACLE_CHANCE;
+  const moving = kind !== 'heart' && Math.random() < opts.movingChance;
+  const zig =
+    opts.zigVxMin + Math.random() * Math.max(0, opts.zigVxMax - opts.zigVxMin);
   return {
     id: nextId,
     x: clamp(laneCenter + jitter, minX, maxX),
@@ -136,22 +139,8 @@ function spawnObstacle(
     kind,
     vehicleId,
     speedMul: obstacleSpeedMul(kind),
-    vx: moving ? (Math.random() < 0.5 ? -1 : 1) * (55 + Math.random() * 85) : 0,
+    vx: moving ? (Math.random() < 0.5 ? -1 : 1) * zig : 0,
   };
-}
-
-function spawnGapMs(speed: number) {
-  // 장애물 밀도 살짝 올림
-  return Math.max(480, 1040 - speed * 1.12);
-}
-
-/** 거리 따라 가속 — 초반부터 체감, 상한까지 조금 더 빠르게 */
-function speedFromDistance(distance: number) {
-  const meters = distance / 10;
-  const early = Math.min(1, meters / 340);
-  const late = 1 - Math.exp(-meters / 760);
-  const t = early * 0.52 + late * 0.48;
-  return START_SPEED + (MAX_SPEED - START_SPEED) * t;
 }
 
 function rectsOverlap(
@@ -352,7 +341,7 @@ function createInitialState(canvasW: number): GameState {
     pointerX: null,
     obstacles: [],
     distance: 0,
-    speed: START_SPEED,
+    speed: resolveCarDifficulty(0).speed,
     lastSpawn: 0,
     nextId: 1,
     scroll: 0,
@@ -384,6 +373,11 @@ export default function CarRunGame() {
   const [lives, setLives] = useState(START_LIVES);
   const [assetsReady, setAssetsReady] = useState(false);
   const [selectedVehicleId, setSelectedVehicleId] = useState(DEFAULT_VEHICLE_ID);
+  const [stageId, setStageId] = useState<CarStageId>(1);
+  const [stageLabel, setStageLabel] = useState('연습 도로');
+  const [stageBanner, setStageBanner] = useState<string | null>(null);
+  const stageIdRef = useRef<CarStageId>(1);
+  const stageBannerUntilRef = useRef(0);
 
   const clampCarX = useCallback((x: number, canvasW: number, carW: number) => {
     const roadLeft = canvasW * (1 - ROAD_RATIO) / 2;
@@ -430,6 +424,11 @@ export default function CarRunGame() {
     keysRef.current.right = false;
     setScore(0);
     setLives(START_LIVES);
+    setStageId(1);
+    setStageLabel('연습 도로');
+    setStageBanner(null);
+    stageIdRef.current = 1;
+    stageBannerUntilRef.current = 0;
     phaseRef.current = 'playing';
     setPhase('playing');
   }, [clampCarX]);
@@ -446,6 +445,11 @@ export default function CarRunGame() {
     keysRef.current.right = false;
     setScore(0);
     setLives(START_LIVES);
+    setStageId(1);
+    setStageLabel('연습 도로');
+    setStageBanner(null);
+    stageIdRef.current = 1;
+    stageBannerUntilRef.current = 0;
     phaseRef.current = 'ready';
     setPhase('ready');
   }, [clampCarX]);
@@ -545,9 +549,22 @@ export default function CarRunGame() {
       const {width: carW, height: carH} = carSize(vehicle);
 
       if (phaseRef.current === 'playing') {
-        game.speed = speedFromDistance(game.distance);
+        const meters = game.distance / 10;
+        const diff = resolveCarDifficulty(meters);
+        game.speed = diff.speed;
         game.distance += game.speed * dt;
         game.scroll += game.speed * dt;
+
+        if (diff.id !== stageIdRef.current) {
+          stageIdRef.current = diff.id;
+          setStageId(diff.id);
+          setStageLabel(diff.label);
+          setStageBanner(`STAGE ${diff.id} · ${diff.label}`);
+          stageBannerUntilRef.current = now + STAGE_BANNER_MS;
+        } else if (now > stageBannerUntilRef.current && stageBannerUntilRef.current > 0) {
+          stageBannerUntilRef.current = 0;
+          setStageBanner(null);
+        }
 
         let steerInput = 0;
         if (keysRef.current.left && !keysRef.current.right) steerInput = -1;
@@ -557,7 +574,7 @@ export default function CarRunGame() {
           if (Math.abs(dx) > 10) steerInput = Math.sign(dx);
         }
 
-        const speedRatio = game.speed / START_SPEED;
+        const speedRatio = game.speed / Math.max(100, diff.speedMin);
         const maxSteerSpeed = 95 + game.speed * 0.72;
         const steerAccel = 1600 + 900 * Math.min(1.6, speedRatio);
         if (steerInput !== 0) {
@@ -595,12 +612,16 @@ export default function CarRunGame() {
           })
           .filter((o) => o.y < h + 60);
 
-        if (now - game.lastSpawn >= spawnGapMs(game.speed)) {
+        if (now - game.lastSpawn >= diff.spawnGapMs) {
           const spawnOpts = {
             selectedVehicleId: selectedVehicleRef.current,
             vehicles: vehiclesRef.current,
+            movingChance: diff.movingChance,
+            zigVxMin: diff.zigVxMin,
+            zigVxMax: diff.zigVxMax,
+            heavyBias: diff.heavyBias,
           };
-          if (Math.random() < HEART_SPAWN_CHANCE) {
+          if (Math.random() < diff.heartChance) {
             game.obstacles.push(
               spawnObstacle(roadLeft, roadWidth, game.nextId, {...spawnOpts, kind: 'heart'}),
             );
@@ -609,7 +630,7 @@ export default function CarRunGame() {
           }
           game.nextId += 1;
 
-          if (Math.random() < 0.34) {
+          if (Math.random() < diff.doubleSpawnChance) {
             const extra = spawnObstacle(roadLeft, roadWidth, game.nextId, spawnOpts);
             extra.y -= 80 + Math.random() * 120;
             game.obstacles.push(extra);
@@ -791,6 +812,9 @@ export default function CarRunGame() {
         {phase === 'playing' ? (
           <div className="car-run__hud" aria-live="polite">
             <div className="car-run__hud-score">{score}m</div>
+            <div className="car-run__hud-stage" aria-label={`스테이지 ${stageId}`}>
+              S{stageId} · {stageLabel}
+            </div>
             <div className="car-run__hearts" aria-label={`하트 ${lives}개`}>
               {Array.from({length: lives}, (_, i) => (
                 <img
@@ -806,6 +830,12 @@ export default function CarRunGame() {
           </div>
         ) : null}
 
+        {phase === 'playing' && stageBanner ? (
+          <div className="car-run__stage-banner" aria-live="assertive">
+            {stageBanner}
+          </div>
+        ) : null}
+
         {showSetup ? (
           <div className="car-run__setup" role="dialog" aria-labelledby="car-run-setup-title">
             {phase === 'over' ? (
@@ -814,6 +844,9 @@ export default function CarRunGame() {
                   하트가 다 떨어졌어요
                 </p>
                 <p className="car-run__setup-score">{score}m 달렸어요</p>
+                <p className="car-run__setup-best">
+                  도달 S{stageId} · {stageLabel}
+                </p>
                 {best > 0 ? <p className="car-run__setup-best">최고 {best}m</p> : null}
               </>
             ) : (

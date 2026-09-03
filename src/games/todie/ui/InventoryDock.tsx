@@ -1,6 +1,12 @@
 'use client';
 
-import {useEffect, useRef, useState, type PointerEvent as ReactPointerEvent} from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+} from 'react';
 import {createPortal} from 'react-dom';
 import {EQUIP_SLOTS, type Equipment, type GearSlot, type Item} from '../content/equip';
 import {
@@ -8,12 +14,14 @@ import {
   isHotbarConsumableBagIndex,
   HOTBAR_MANA_BAG,
   HOTBAR_POTION_BAG,
+  type EnhanceOutcome,
 } from '../content/equip';
 import {jobLabel, type JobId, type LoadedImages} from '../content';
 import {displaySettings} from '../content/settings';
 import {drawJobPreview} from '../render/drawCharacter';
 import {
   buildItemHelp,
+  isExtractableGear,
   itemIconUrl,
   sumEquippedStats,
   tierMeta,
@@ -54,7 +62,15 @@ function CharPreview({
   );
 }
 
-function ItemIcon({item, forbidden = false}: {item: Item; forbidden?: boolean}) {
+function ItemIcon({
+  item,
+  forbidden = false,
+  extractable = false,
+}: {
+  item: Item;
+  forbidden?: boolean;
+  extractable?: boolean;
+}) {
   if (item.kind === 'empty') return null;
   const src = itemIconUrl(item);
   const tier = tierMeta(item.tier);
@@ -74,6 +90,12 @@ function ItemIcon({item, forbidden = false}: {item: Item; forbidden?: boolean}) 
         </span>
       )}
       {forbidden && <span className="todie__forbid-mark" aria-hidden title="사용 불가" />}
+      {extractable && (
+        <span className="todie__extract-mark" aria-hidden title="클릭해서 강화석으로 추출" />
+      )}
+      {item.kind === 'gear' && (item.enhance ?? 0) > 0 && (
+        <span className="todie__enhance-badge">+{item.enhance}</span>
+      )}
     </>
   );
 }
@@ -82,10 +104,12 @@ function ItemBubble({
   info,
   x,
   y,
+  extractable = false,
 }: {
   info: ItemHelpInfo;
   x: number;
   y: number;
+  extractable?: boolean;
 }) {
   const left = Math.max(12, Math.min(x, (typeof window !== 'undefined' ? window.innerWidth : x) - 12));
   const top = Math.max(12, y);
@@ -123,6 +147,11 @@ function ItemBubble({
         </div>
       )}
       {info.help && <p className="todie__item-bubble-desc">{info.help}</p>}
+      {extractable && (
+        <p className="todie__item-bubble-desc todie__item-bubble-extract">
+          클릭하면 추출 가능한 아이템을 전체 강화석으로 추출해요
+        </p>
+      )}
       <span className="todie__item-bubble-tail" aria-hidden />
     </div>
   );
@@ -141,6 +170,8 @@ export function InventoryDock({
   onToast,
   onToggleEquip,
   onUnequip,
+  onExtract,
+  onEnhance,
 }: {
   bag: Item[];
   equipped: Equipment;
@@ -154,15 +185,39 @@ export function InventoryDock({
   onToast: (msg: string) => void;
   onToggleEquip: (bagIndex: number) => void;
   onUnequip: (slot: GearSlot) => void;
+  onExtract: () => void;
+  onEnhance: (
+    stoneIndex: number,
+    target: {source: 'bag'; index: number} | {source: 'equip'; slot: GearSlot},
+  ) => EnhanceOutcome | null | undefined;
 }) {
   const [dragFrom, setDragFrom] = useState<number | null>(null);
+  const [enhanceFrom, setEnhanceFrom] = useState<number | null>(null);
   const [over, setOver] = useState<number | null>(null);
-  const [tip, setTip] = useState<{info: ItemHelpInfo; x: number; y: number} | null>(null);
+  const [tip, setTip] = useState<{info: ItemHelpInfo; x: number; y: number; extractable: boolean} | null>(null);
+  const [enhanceFx, setEnhanceFx] = useState<{id: number; success: boolean; level: number} | null>(
+    null,
+  );
   const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastTapRef = useRef<{key: string; t: number} | null>(null);
   const tapStartRef = useRef<{x: number; y: number} | null>(null);
   const dropHandledRef = useRef(false);
   const dragFromRef = useRef<number | null>(null);
+  const fxIdRef = useRef(0);
+  const fxTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const triggerEnhanceFx = (success: boolean, level: number) => {
+    fxIdRef.current += 1;
+    setEnhanceFx({id: fxIdRef.current, success, level});
+    if (fxTimerRef.current) clearTimeout(fxTimerRef.current);
+    fxTimerRef.current = setTimeout(() => setEnhanceFx(null), 1000);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (fxTimerRef.current) clearTimeout(fxTimerRef.current);
+    };
+  }, []);
 
   const tryEquipBag = (index: number, item: Item) => {
     if (isHotbarConsumableBagIndex(index)) {
@@ -214,6 +269,7 @@ export function InventoryDock({
       info,
       x: r.left + r.width / 2,
       y: r.top,
+      extractable: isExtractableGear(item, job, bag, equipped),
     });
   };
 
@@ -273,7 +329,10 @@ export function InventoryDock({
     >
       {tip &&
         typeof document !== 'undefined' &&
-        createPortal(<ItemBubble info={tip.info} x={tip.x} y={tip.y} />, document.body)}
+        createPortal(
+          <ItemBubble info={tip.info} x={tip.x} y={tip.y} extractable={tip.extractable} />,
+          document.body,
+        )}
 
       <button
         type="button"
@@ -284,6 +343,39 @@ export function InventoryDock({
       >
         −
       </button>
+
+      {enhanceFrom != null && (
+        <div className="todie__enhance-banner">
+          강화할 장비를 클릭하세요 · 강화석 다시 클릭하면 취소
+        </div>
+      )}
+
+      {enhanceFx && (
+        <div
+          key={enhanceFx.id}
+          className={`todie__enhance-fx${enhanceFx.success ? ' is-success' : ' is-fail'}`}
+          aria-hidden
+        >
+          <div className="todie__enhance-fx-burst" />
+          {enhanceFx.success &&
+            Array.from({length: 12}).map((_, idx) => {
+              const angle = (Math.PI * 2 * idx) / 12;
+              const dist = 46 + (idx % 3) * 16;
+              const dx = Math.cos(angle) * dist;
+              const dy = Math.sin(angle) * dist;
+              return (
+                <span
+                  key={idx}
+                  className="todie__enhance-fx-spark"
+                  style={{'--dx': `${dx}px`, '--dy': `${dy}px`} as CSSProperties}
+                />
+              );
+            })}
+          <div className="todie__enhance-fx-text">
+            {enhanceFx.success ? `강화 성공! +${enhanceFx.level}` : '강화 실패…'}
+          </div>
+        </div>
+      )}
 
       <aside className="todie__inv-equip">
         <div className="todie__inv-equip-head">
@@ -321,13 +413,29 @@ export function InventoryDock({
                 type="button"
                 className={`todie__equip-slot${it ? ' has-item' : ''}${
                   it?.tier ? ` is-tier-${it.tier}` : ''
-                }`}
+                }${enhanceFrom != null && it ? ' is-enhance-target' : ''}`}
                 onMouseEnter={(e) => showTip(it, e.currentTarget)}
                 onMouseLeave={hideTipSoon}
                 onFocus={(e) => showTip(it, e.currentTarget)}
                 onBlur={hideTipSoon}
+                onClick={(e) => {
+                  if (enhanceFrom == null) return;
+                  e.stopPropagation();
+                  if (it) {
+                    const stoneIdx = enhanceFrom;
+                    const outcome = onEnhance(stoneIdx, {source: 'equip', slot: s.id});
+                    if (outcome?.applied) triggerEnhanceFx(outcome.success, outcome.newLevel);
+                    const stone = bag[stoneIdx];
+                    if (!stone || stone.kind !== 'enhanceStone' || stone.qty <= 0) {
+                      setEnhanceFrom(null);
+                    }
+                  } else {
+                    onToast('강화 대상이 아니에요');
+                  }
+                }}
                 onDoubleClick={(e) => {
                   e.preventDefault();
+                  if (enhanceFrom != null) return;
                   if (it) onUnequip(s.id);
                 }}
                 onPointerDown={markTapStart}
@@ -365,6 +473,7 @@ export function InventoryDock({
             {bag.map((it, i) => {
               const wrongJob = Boolean(it.job && it.job !== job);
               const blocked = wrongJob;
+              const extractable = it.kind === 'gear' && isExtractableGear(it, job, bag, equipped);
               const hotbarLock = isHotbarConsumableBagIndex(i);
               const hotbarLabel =
                 i === HOTBAR_POTION_BAG ? '4 체력' : i === HOTBAR_MANA_BAG ? '5 마나' : null;
@@ -375,12 +484,53 @@ export function InventoryDock({
                     over === i ? ' is-over' : ''
                   }${it.tier ? ` is-tier-${it.tier}` : ''}${blocked ? ' is-blocked' : ''}${
                     hotbarLock ? ' is-hotbar-lock' : ''
+                  }${extractable ? ' is-extractable' : ''}${
+                    enhanceFrom != null &&
+                    (i === enhanceFrom || (it.kind === 'gear' && (!it.job || it.job === job)))
+                      ? ' is-enhance-target'
+                      : ''
                   }`}
                   draggable={it.kind !== 'empty'}
                   onMouseEnter={(e) => showTip(it, e.currentTarget)}
                   onMouseLeave={hideTipSoon}
+                  onClick={(e) => {
+                    if (it.kind === 'enhanceStone') {
+                      e.stopPropagation();
+                      if (enhanceFrom === i) {
+                        setEnhanceFrom(null);
+                        onToast('강화 취소');
+                      } else {
+                        setEnhanceFrom(i);
+                        onToast('강화할 장비를 클릭하세요');
+                      }
+                      return;
+                    }
+                    if (enhanceFrom != null) {
+                      e.stopPropagation();
+                      if (it.kind === 'gear' && (!it.job || it.job === job)) {
+                        const stoneIdx = enhanceFrom;
+                        const outcome = onEnhance(stoneIdx, {source: 'bag', index: i});
+                        if (outcome?.applied) triggerEnhanceFx(outcome.success, outcome.newLevel);
+                        const stone = bag[stoneIdx];
+                        if (!stone || stone.kind !== 'enhanceStone' || stone.qty <= 0) {
+                          setEnhanceFrom(null);
+                        }
+                      } else {
+                        onToast('강화 대상이 아니에요');
+                      }
+                      return;
+                    }
+                    if (!extractable) return;
+                    e.stopPropagation();
+                    if (
+                      window.confirm('추출 가능한 아이템을 전체 추출할까요? (되돌릴 수 없어요)')
+                    ) {
+                      onExtract();
+                    }
+                  }}
                   onDoubleClick={(e) => {
                     e.preventDefault();
+                    if (enhanceFrom != null) return;
                     tryEquipBag(i, it);
                   }}
                   onPointerDown={markTapStart}
@@ -425,6 +575,16 @@ export function InventoryDock({
                       onToast('4·5번 물약 칸은 고정이에요');
                       return;
                     }
+                    if (it.kind === 'enhanceStone') {
+                      if (enhanceFrom === i) {
+                        setEnhanceFrom(null);
+                        onToast('강화 취소');
+                      } else {
+                        setEnhanceFrom(i);
+                        onToast('강화할 장비를 클릭하세요');
+                      }
+                      return;
+                    }
                     if (it.kind === 'gear') onToggleEquip(i);
                     else if (it.kind !== 'empty') onToast('장비만 장착할 수 있어요');
                   }}
@@ -432,7 +592,7 @@ export function InventoryDock({
                   <span className="todie__slot-idx">{hotbarLabel ?? i + 1}</span>
                   {it.kind !== 'empty' && (
                     <>
-                      <ItemIcon item={it} forbidden={blocked} />
+                      <ItemIcon item={it} forbidden={blocked} extractable={extractable} />
                       <span className={`todie__slot-qty${blocked ? ' is-blocked' : ''}`}>
                         {it.qty}
                       </span>

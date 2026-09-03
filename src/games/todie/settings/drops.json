@@ -2,7 +2,7 @@
   "note": "드랍 확률·직업비중·슬롯비중. 등급 비중은 items.json tiers.dropWeight 사용",
   "groundTtlSec": 180,
   "alreadyOwnedTtlSec": 1,
-  "pickupRadius": 42,
+  "pickupRadius": 56,
   "wrongJobToastCooldown": 1.2,
   "alwaysDrop": true,
   "rolls": {

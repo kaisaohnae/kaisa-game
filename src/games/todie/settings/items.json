@@ -11,46 +11,103 @@
       "color": "#b0bec5",
       "dropWeight": 40,
       "help": "초보 장비. 자주 드랍됩니다.",
-      "stats": { "atk": 5, "def": 3, "hp": 30 }
+      "stats": {
+        "atk": 5,
+        "def": 3,
+        "hp": 30
+      },
+      "shardValue": 1
     },
     "ascend": {
       "label": "전승템",
       "color": "#42a5f5",
       "dropWeight": 32,
       "help": "전승 등급. 기본보다 강하고 드랍이 줄어듭니다.",
-      "stats": { "atk": 14, "def": 10, "hp": 80 }
+      "stats": {
+        "atk": 14,
+        "def": 10,
+        "hp": 80
+      },
+      "shardValue": 2
     },
     "unique": {
       "label": "유일템",
       "color": "#ffd54f",
       "dropWeight": 18,
       "help": "유일 등급. 희귀하며 성능이 뛰어납니다.",
-      "stats": { "atk": 28, "def": 18, "hp": 150 }
+      "stats": {
+        "atk": 28,
+        "def": 18,
+        "hp": 150
+      },
+      "shardValue": 4
     },
     "hero": {
       "label": "영웅템",
       "color": "#e65100",
       "dropWeight": 8,
       "help": "영웅 등급. 매우 희귀하고 성능이 높습니다.",
-      "stats": { "atk": 48, "def": 30, "hp": 260 }
+      "stats": {
+        "atk": 48,
+        "def": 30,
+        "hp": 260
+      },
+      "shardValue": 8
     },
     "mythic": {
       "label": "신화템",
       "color": "#ab47bc",
       "dropWeight": 2,
       "help": "신화 등급. 가장 희귀하며 성능이 최상입니다.",
-      "stats": { "atk": 72, "def": 45, "hp": 380 }
+      "stats": {
+        "atk": 72,
+        "def": 45,
+        "hp": 380
+      },
+      "shardValue": 16
     }
   },
   "slotStatFocus": {
-    "weapon": { "atk": 1.6, "def": 0.15, "hp": 0.2 },
-    "head": { "atk": 0.25, "def": 1.1, "hp": 0.6 },
-    "armor": { "atk": 0.2, "def": 1.6, "hp": 1.1 },
-    "gloves": { "atk": 0.7, "def": 0.8, "hp": 0.4 },
-    "shoes": { "atk": 0.35, "def": 0.9, "hp": 0.5 },
-    "necklace": { "atk": 0.9, "def": 0.4, "hp": 0.8 },
-    "earring": { "atk": 0.85, "def": 0.4, "hp": 0.5 },
-    "ring": { "atk": 1.15, "def": 0.35, "hp": 0.4 }
+    "weapon": {
+      "atk": 1.6,
+      "def": 0.15,
+      "hp": 0.2
+    },
+    "head": {
+      "atk": 0.25,
+      "def": 1.1,
+      "hp": 0.6
+    },
+    "armor": {
+      "atk": 0.2,
+      "def": 1.6,
+      "hp": 1.1
+    },
+    "gloves": {
+      "atk": 0.7,
+      "def": 0.8,
+      "hp": 0.4
+    },
+    "shoes": {
+      "atk": 0.35,
+      "def": 0.9,
+      "hp": 0.5
+    },
+    "necklace": {
+      "atk": 0.9,
+      "def": 0.4,
+      "hp": 0.8
+    },
+    "earring": {
+      "atk": 0.85,
+      "def": 0.4,
+      "hp": 0.5
+    },
+    "ring": {
+      "atk": 1.15,
+      "def": 0.35,
+      "hp": 0.4
+    }
   },
   "starter": {
     "gearId": "stick",
@@ -73,89 +130,387 @@
       "color": "#42a5f5",
       "help": "마나를 크게 회복합니다.",
       "effect": "MP 회복"
+    },
+    "enhanceStone": {
+      "name": "강화석",
+      "color": "#80cbc4",
+      "help": "장비를 강화할 때 쓰는 재료예요. 다른 직업 장비나 이미 가진 장비를 인벤토리에서 클릭하면 추출할 수 있어요.",
+      "effect": "강화 재료"
     }
   },
   "gear": {
     "warrior": {
       "basic": [
-        { "id": "stick", "name": "초심 작대기", "slot": "weapon", "color": "#a1887f", "droppable": false },
-        { "id": "cloth_wrap", "name": "수련 두건", "slot": "head", "color": "#90a4ae" },
-        { "id": "ragged_vest", "name": "낡은 흉갑", "slot": "armor", "color": "#8d6e63" },
-        { "id": "wrap_gloves", "name": "손싸개", "slot": "gloves", "color": "#a1887f" },
-        { "id": "straw_shoes", "name": "황야 짚신", "slot": "shoes", "color": "#6d4c41" }
+        {
+          "id": "stick",
+          "name": "초심 작대기",
+          "slot": "weapon",
+          "color": "#a1887f",
+          "droppable": false
+        },
+        {
+          "id": "cloth_wrap",
+          "name": "수련 두건",
+          "slot": "head",
+          "color": "#90a4ae"
+        },
+        {
+          "id": "ragged_vest",
+          "name": "낡은 흉갑",
+          "slot": "armor",
+          "color": "#8d6e63"
+        },
+        {
+          "id": "wrap_gloves",
+          "name": "손싸개",
+          "slot": "gloves",
+          "color": "#a1887f"
+        },
+        {
+          "id": "straw_shoes",
+          "name": "황야 짚신",
+          "slot": "shoes",
+          "color": "#6d4c41"
+        }
       ],
       "ascend": [
-        { "id": "iron_sword", "name": "전승 강철검", "slot": "weapon", "color": "#cfd8dc" },
-        { "id": "knight_helm", "name": "전승 투구", "slot": "head", "color": "#90a4ae" },
-        { "id": "blue_plate", "name": "전승 청동갑", "slot": "armor", "color": "#5c6bc0" },
-        { "id": "iron_gauntlets", "name": "전승 철장갑", "slot": "gloves", "color": "#78909c" },
-        { "id": "march_boots", "name": "전승 행군화", "slot": "shoes", "color": "#5d4037" }
+        {
+          "id": "iron_sword",
+          "name": "전승 강철검",
+          "slot": "weapon",
+          "color": "#cfd8dc"
+        },
+        {
+          "id": "knight_helm",
+          "name": "전승 투구",
+          "slot": "head",
+          "color": "#90a4ae"
+        },
+        {
+          "id": "blue_plate",
+          "name": "전승 청동갑",
+          "slot": "armor",
+          "color": "#5c6bc0"
+        },
+        {
+          "id": "iron_gauntlets",
+          "name": "전승 철장갑",
+          "slot": "gloves",
+          "color": "#78909c"
+        },
+        {
+          "id": "march_boots",
+          "name": "전승 행군화",
+          "slot": "shoes",
+          "color": "#5d4037"
+        }
       ],
       "unique": [
-        { "id": "courage_pendant", "name": "유일 용맹의 목걸이", "slot": "necklace", "color": "#ffd54f" },
-        { "id": "battle_ear", "name": "유일 혈투 귀걸이", "slot": "earring", "color": "#ffcc80" },
-        { "id": "power_ring", "name": "유일 파워 반지", "slot": "ring", "color": "#ef9a9a" }
+        {
+          "id": "courage_pendant",
+          "name": "유일 용맹의 목걸이",
+          "slot": "necklace",
+          "color": "#ffd54f"
+        },
+        {
+          "id": "battle_ear",
+          "name": "유일 혈투 귀걸이",
+          "slot": "earring",
+          "color": "#ffcc80"
+        },
+        {
+          "id": "power_ring",
+          "name": "유일 파워 반지",
+          "slot": "ring",
+          "color": "#ef9a9a"
+        }
       ],
       "hero": [
-        { "id": "wasteland_blade", "name": "영웅 황무지검", "slot": "weapon", "color": "#e65100" },
-        { "id": "war_crown", "name": "영웅 전장관", "slot": "head", "color": "#ef6c00" },
-        { "id": "hero_plate", "name": "영웅 불멸갑", "slot": "armor", "color": "#d84315" },
-        { "id": "hero_gauntlets", "name": "영웅 멸살장갑", "slot": "gloves", "color": "#ff7043" },
-        { "id": "hero_greaves", "name": "영웅 돌격각반", "slot": "shoes", "color": "#bf360c" },
-        { "id": "hero_pendant", "name": "영웅 불멸의 목걸이", "slot": "necklace", "color": "#ff9100" },
-        { "id": "hero_ear", "name": "영웅 혈광 귀걸이", "slot": "earring", "color": "#ffab40" },
-        { "id": "hero_ring", "name": "영웅 멸살 반지", "slot": "ring", "color": "#ff6e40" }
+        {
+          "id": "wasteland_blade",
+          "name": "영웅 황무지검",
+          "slot": "weapon",
+          "color": "#e65100"
+        },
+        {
+          "id": "war_crown",
+          "name": "영웅 전장관",
+          "slot": "head",
+          "color": "#ef6c00"
+        },
+        {
+          "id": "hero_plate",
+          "name": "영웅 불멸갑",
+          "slot": "armor",
+          "color": "#d84315"
+        },
+        {
+          "id": "hero_gauntlets",
+          "name": "영웅 멸살장갑",
+          "slot": "gloves",
+          "color": "#ff7043"
+        },
+        {
+          "id": "hero_greaves",
+          "name": "영웅 돌격각반",
+          "slot": "shoes",
+          "color": "#bf360c"
+        },
+        {
+          "id": "hero_pendant",
+          "name": "영웅 불멸의 목걸이",
+          "slot": "necklace",
+          "color": "#ff9100"
+        },
+        {
+          "id": "hero_ear",
+          "name": "영웅 혈광 귀걸이",
+          "slot": "earring",
+          "color": "#ffab40"
+        },
+        {
+          "id": "hero_ring",
+          "name": "영웅 멸살 반지",
+          "slot": "ring",
+          "color": "#ff6e40"
+        }
       ],
       "mythic": [
-        { "id": "void_blade", "name": "신화 공허검", "slot": "weapon", "color": "#ab47bc" },
-        { "id": "myth_helm", "name": "신화 심연관", "slot": "head", "color": "#9c27b0" },
-        { "id": "myth_plate", "name": "신화 성역갑", "slot": "armor", "color": "#7b1fa2" },
-        { "id": "myth_gauntlets", "name": "신화 파멸장갑", "slot": "gloves", "color": "#ce93d8" },
-        { "id": "myth_greaves", "name": "신화 차원각반", "slot": "shoes", "color": "#6a1b9a" },
-        { "id": "myth_pendant", "name": "신화 공허의 목걸이", "slot": "necklace", "color": "#ea80fc" },
-        { "id": "myth_ear", "name": "신화 심연 귀걸이", "slot": "earring", "color": "#e1bee7" },
-        { "id": "myth_ring", "name": "신화 차원 반지", "slot": "ring", "color": "#ba68c8" }
+        {
+          "id": "void_blade",
+          "name": "신화 공허검",
+          "slot": "weapon",
+          "color": "#ab47bc"
+        },
+        {
+          "id": "myth_helm",
+          "name": "신화 심연관",
+          "slot": "head",
+          "color": "#9c27b0"
+        },
+        {
+          "id": "myth_plate",
+          "name": "신화 성역갑",
+          "slot": "armor",
+          "color": "#7b1fa2"
+        },
+        {
+          "id": "myth_gauntlets",
+          "name": "신화 파멸장갑",
+          "slot": "gloves",
+          "color": "#ce93d8"
+        },
+        {
+          "id": "myth_greaves",
+          "name": "신화 차원각반",
+          "slot": "shoes",
+          "color": "#6a1b9a"
+        },
+        {
+          "id": "myth_pendant",
+          "name": "신화 공허의 목걸이",
+          "slot": "necklace",
+          "color": "#ea80fc"
+        },
+        {
+          "id": "myth_ear",
+          "name": "신화 심연 귀걸이",
+          "slot": "earring",
+          "color": "#e1bee7"
+        },
+        {
+          "id": "myth_ring",
+          "name": "신화 차원 반지",
+          "slot": "ring",
+          "color": "#ba68c8"
+        }
       ]
     },
     "mage": {
       "basic": [
-        { "id": "stick", "name": "초심 작대기", "slot": "weapon", "color": "#a1887f", "droppable": false },
-        { "id": "apprentice_cap", "name": "견습 마법모자", "slot": "head", "color": "#b39ddb" },
-        { "id": "plain_robe", "name": "수련 로브", "slot": "armor", "color": "#9575cd" },
-        { "id": "soft_gloves", "name": "마력 손싸개", "slot": "gloves", "color": "#ce93d8" },
-        { "id": "cloth_shoes", "name": "별빛 천신", "slot": "shoes", "color": "#8e24aa" }
+        {
+          "id": "stick",
+          "name": "초심 작대기",
+          "slot": "weapon",
+          "color": "#a1887f",
+          "droppable": false
+        },
+        {
+          "id": "apprentice_cap",
+          "name": "견습 마법모자",
+          "slot": "head",
+          "color": "#b39ddb"
+        },
+        {
+          "id": "plain_robe",
+          "name": "수련 로브",
+          "slot": "armor",
+          "color": "#9575cd"
+        },
+        {
+          "id": "soft_gloves",
+          "name": "마력 손싸개",
+          "slot": "gloves",
+          "color": "#ce93d8"
+        },
+        {
+          "id": "cloth_shoes",
+          "name": "별빛 천신",
+          "slot": "shoes",
+          "color": "#8e24aa"
+        }
       ],
       "ascend": [
-        { "id": "crystal_staff", "name": "전승 수정지팡이", "slot": "weapon", "color": "#81d4fa" },
-        { "id": "wizard_hat", "name": "전승 마법사 모자", "slot": "head", "color": "#7e57c2" },
-        { "id": "arcane_robe", "name": "전승 비전로브", "slot": "armor", "color": "#5e35b1" },
-        { "id": "silk_gloves", "name": "전승 비단장갑", "slot": "gloves", "color": "#ce93d8" },
-        { "id": "mana_boots", "name": "전승 마나장화", "slot": "shoes", "color": "#6a1b9a" }
+        {
+          "id": "crystal_staff",
+          "name": "전승 수정지팡이",
+          "slot": "weapon",
+          "color": "#81d4fa"
+        },
+        {
+          "id": "wizard_hat",
+          "name": "전승 마법사 모자",
+          "slot": "head",
+          "color": "#7e57c2"
+        },
+        {
+          "id": "arcane_robe",
+          "name": "전승 비전로브",
+          "slot": "armor",
+          "color": "#5e35b1"
+        },
+        {
+          "id": "silk_gloves",
+          "name": "전승 비단장갑",
+          "slot": "gloves",
+          "color": "#ce93d8"
+        },
+        {
+          "id": "mana_boots",
+          "name": "전승 마나장화",
+          "slot": "shoes",
+          "color": "#6a1b9a"
+        }
       ],
       "unique": [
-        { "id": "wisdom_pendant", "name": "유일 지혜의 목걸이", "slot": "necklace", "color": "#80deea" },
-        { "id": "mana_ear", "name": "유일 마력 귀걸이", "slot": "earring", "color": "#a5d6a7" },
-        { "id": "mind_ring", "name": "유일 정신 반지", "slot": "ring", "color": "#90caf9" }
+        {
+          "id": "wisdom_pendant",
+          "name": "유일 지혜의 목걸이",
+          "slot": "necklace",
+          "color": "#80deea"
+        },
+        {
+          "id": "mana_ear",
+          "name": "유일 마력 귀걸이",
+          "slot": "earring",
+          "color": "#a5d6a7"
+        },
+        {
+          "id": "mind_ring",
+          "name": "유일 정신 반지",
+          "slot": "ring",
+          "color": "#90caf9"
+        }
       ],
       "hero": [
-        { "id": "wasteland_staff", "name": "영웅 황무지 지팡이", "slot": "weapon", "color": "#e65100" },
-        { "id": "arcane_circlet", "name": "영웅 비전관", "slot": "head", "color": "#ef6c00" },
-        { "id": "hero_robe", "name": "영웅 심연로브", "slot": "armor", "color": "#d84315" },
-        { "id": "hero_gloves", "name": "영웅 마력장갑", "slot": "gloves", "color": "#ff7043" },
-        { "id": "hero_slippers", "name": "영웅 별걸음", "slot": "shoes", "color": "#bf360c" },
-        { "id": "hero_pendant", "name": "영웅 심연의 목걸이", "slot": "necklace", "color": "#ff9100" },
-        { "id": "hero_ear", "name": "영웅 별빛 귀걸이", "slot": "earring", "color": "#ffab40" },
-        { "id": "hero_ring", "name": "영웅 마력 반지", "slot": "ring", "color": "#ff6e40" }
+        {
+          "id": "wasteland_staff",
+          "name": "영웅 황무지 지팡이",
+          "slot": "weapon",
+          "color": "#e65100"
+        },
+        {
+          "id": "arcane_circlet",
+          "name": "영웅 비전관",
+          "slot": "head",
+          "color": "#ef6c00"
+        },
+        {
+          "id": "hero_robe",
+          "name": "영웅 심연로브",
+          "slot": "armor",
+          "color": "#d84315"
+        },
+        {
+          "id": "hero_gloves",
+          "name": "영웅 마력장갑",
+          "slot": "gloves",
+          "color": "#ff7043"
+        },
+        {
+          "id": "hero_slippers",
+          "name": "영웅 별걸음",
+          "slot": "shoes",
+          "color": "#bf360c"
+        },
+        {
+          "id": "hero_pendant",
+          "name": "영웅 심연의 목걸이",
+          "slot": "necklace",
+          "color": "#ff9100"
+        },
+        {
+          "id": "hero_ear",
+          "name": "영웅 별빛 귀걸이",
+          "slot": "earring",
+          "color": "#ffab40"
+        },
+        {
+          "id": "hero_ring",
+          "name": "영웅 마력 반지",
+          "slot": "ring",
+          "color": "#ff6e40"
+        }
       ],
       "mythic": [
-        { "id": "void_staff", "name": "신화 공허지팡이", "slot": "weapon", "color": "#ab47bc" },
-        { "id": "myth_circlet", "name": "신화 별무관", "slot": "head", "color": "#9c27b0" },
-        { "id": "myth_robe", "name": "신화 성역로브", "slot": "armor", "color": "#7b1fa2" },
-        { "id": "myth_gloves", "name": "신화 영력장갑", "slot": "gloves", "color": "#ce93d8" },
-        { "id": "myth_slippers", "name": "신화 은하걸음", "slot": "shoes", "color": "#6a1b9a" },
-        { "id": "myth_pendant", "name": "신화 성역의 목걸이", "slot": "necklace", "color": "#ea80fc" },
-        { "id": "myth_ear", "name": "신화 은하 귀걸이", "slot": "earring", "color": "#e1bee7" },
-        { "id": "myth_ring", "name": "신화 영력 반지", "slot": "ring", "color": "#ba68c8" }
+        {
+          "id": "void_staff",
+          "name": "신화 공허지팡이",
+          "slot": "weapon",
+          "color": "#ab47bc"
+        },
+        {
+          "id": "myth_circlet",
+          "name": "신화 별무관",
+          "slot": "head",
+          "color": "#9c27b0"
+        },
+        {
+          "id": "myth_robe",
+          "name": "신화 성역로브",
+          "slot": "armor",
+          "color": "#7b1fa2"
+        },
+        {
+          "id": "myth_gloves",
+          "name": "신화 영력장갑",
+          "slot": "gloves",
+          "color": "#ce93d8"
+        },
+        {
+          "id": "myth_slippers",
+          "name": "신화 은하걸음",
+          "slot": "shoes",
+          "color": "#6a1b9a"
+        },
+        {
+          "id": "myth_pendant",
+          "name": "신화 성역의 목걸이",
+          "slot": "necklace",
+          "color": "#ea80fc"
+        },
+        {
+          "id": "myth_ear",
+          "name": "신화 은하 귀걸이",
+          "slot": "earring",
+          "color": "#e1bee7"
+        },
+        {
+          "id": "myth_ring",
+          "name": "신화 영력 반지",
+          "slot": "ring",
+          "color": "#ba68c8"
+        }
       ]
     }
   }

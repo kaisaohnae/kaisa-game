@@ -1,4 +1,5 @@
 import type {Metadata} from 'next';
+import StudioNav from './studio-nav';
 
 export const metadata: Metadata = {
   title: 'Asset Studio',
@@ -6,5 +7,10 @@ export const metadata: Metadata = {
 };
 
 export default function StudioLayout({children}: {children: React.ReactNode}) {
-  return children;
+  return (
+    <>
+      <StudioNav />
+      {children}
+    </>
+  );
 }

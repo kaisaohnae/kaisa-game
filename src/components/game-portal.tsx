@@ -9,6 +9,7 @@ import {useT} from '@/i18n/locale-context';
 import warriorCardIcon from '@/games/todie/jobs/warrior/actions/idle_down.png';
 
 const CAR_RUN_CARD_ICON = '/car-run/vehicles/Police_animation/1.png';
+const PLANE_SHOOT_CARD_ICON = '/plane-shoot/planes/jet-blue.png';
 
 function starsLabel(level: GameLevel) {
   return '★'.repeat(level);
@@ -41,6 +42,13 @@ export default function GamePortal() {
                     <img
                       className="game-portal__char-icon"
                       src={CAR_RUN_CARD_ICON}
+                      alt=""
+                      draggable={false}
+                    />
+                  ) : game.id === 'plane-shoot' ? (
+                    <img
+                      className="game-portal__char-icon"
+                      src={PLANE_SHOOT_CARD_ICON}
                       alt=""
                       draggable={false}
                     />

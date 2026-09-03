@@ -4,17 +4,21 @@ import {
   parseMapObjects,
   type MapObjectPlacement,
 } from './mapObjects';
+import {isLibraryTileId, parseLibraryTileId} from './pixellabLibrary';
 
 export type {MapObjectKind, MapObjectPlacement} from './mapObjects';
-export {MAP_OBJECT_DEFS, MAP_OBJECT_IDS, mapObjectDef, mapObjectUrl} from './mapObjects';
+export {
+  MAP_OBJECT_DEFS,
+  MAP_OBJECT_IDS,
+  mapObjectDef,
+  mapObjectUrl,
+  mapObjectImageKey,
+  isBuiltinMapObject,
+  isPlaceableMapObjectKind,
+} from './mapObjects';
 
-export type TileId =
-  | 'grass_a'
-  | 'grass_b'
-  | 'wasteland_a'
-  | 'wasteland_b'
-  | 'stone_path'
-  | 'water_shallow';
+/** Library tile ref `tile-N/wang_K` (or legacy leftover strings) */
+export type TileId = string;
 
 export type TileDef = {
   id: TileId;
@@ -23,26 +27,38 @@ export type TileDef = {
   fill: string;
 };
 
-export const TILE_DEFS: TileDef[] = [
-  {id: 'grass_a', label: '잔디 A', fill: '#6f9458'},
-  {id: 'grass_b', label: '잔디 B', fill: '#62874e'},
-  {id: 'wasteland_a', label: '황무지 A', fill: '#9a7b5c'},
-  {id: 'wasteland_b', label: '황무지 B', fill: '#8a6d52'},
-  {id: 'stone_path', label: '돌길', fill: '#8d8f8a'},
-  {id: 'water_shallow', label: '얕은 물', fill: '#4f8fb8'},
-];
+/** Default fill after removing builtin biome tiles */
+export const DEFAULT_MAP_TILE: TileId = 'tile-1/wang_0';
 
-export const TILE_IDS = TILE_DEFS.map((t) => t.id);
+/** @deprecated empty — use PixelLab library tiles */
+export const TILE_DEFS: TileDef[] = [];
 
-export const TILE_INDEX: Record<TileId, number> = Object.fromEntries(
-  TILE_DEFS.map((t, i) => [t.id, i]),
-) as Record<TileId, number>;
+export const TILE_IDS: string[] = [];
+
+export const TILE_INDEX: Record<string, number> = {};
+
+export function isBuiltinTileId(_id: string): boolean {
+  return false;
+}
+
+export function isValidMapTileId(id: string): boolean {
+  return isLibraryTileId(id);
+}
 
 export const MAP_WORLD_SIZE = 10_000;
 export const MAP_TILE_SIZE = 100;
 export const MAP_COLS = MAP_WORLD_SIZE / MAP_TILE_SIZE; // 100
 export const MAP_ROWS = MAP_WORLD_SIZE / MAP_TILE_SIZE; // 100
 export const MAP_URL = '/todie/map/world.json';
+
+/**
+ * 스테이지별 맵 파일 경로. `/studio/map/`에서 'stage2'·'stage3' 이름으로 맵을
+ * 만들어 저장하면 자동으로 사용된다 — 없으면 기본 맵(world.json)으로 폴백.
+ */
+export function mapUrlForStage(stage: number): string {
+  if (stage >= 2) return `/todie/map/stage${stage}.json`;
+  return MAP_URL;
+}
 
 export type TodieMapJson = {
   version: 1;
@@ -61,11 +77,14 @@ export type TodieMapJson = {
 };
 
 export function tileDef(id: TileId): TileDef {
-  return TILE_DEFS.find((t) => t.id === id) ?? TILE_DEFS[0]!;
+  const lib = parseLibraryTileId(id);
+  if (lib) {
+    return {id, label: `${lib.name} ${lib.wang}`, fill: '#5a6a5a'};
+  }
+  return {id, label: String(id), fill: '#5a6a5a'};
 }
 
-export function emptyMap(fill: TileId = 'grass_a'): TodieMapJson {
-  const idx = TILE_INDEX[fill] ?? 0;
+export function emptyMap(fill: TileId = DEFAULT_MAP_TILE): TodieMapJson {
   return {
     version: 1,
     name: 'todie-world',
@@ -73,72 +92,16 @@ export function emptyMap(fill: TileId = 'grass_a'): TodieMapJson {
     tileSize: MAP_TILE_SIZE,
     cols: MAP_COLS,
     rows: MAP_ROWS,
-    palette: [...TILE_IDS],
-    cells: Array.from({length: MAP_COLS * MAP_ROWS}, () => idx),
+    palette: [fill],
+    cells: Array.from({length: MAP_COLS * MAP_ROWS}, () => 0),
     objects: [],
     nextObjectId: 1,
   };
 }
 
-function hash01(tx: number, ty: number, salt = 0) {
-  let n = (tx * 374761393 + ty * 668265263 + salt * 982451653) >>> 0;
-  n = (n ^ (n >>> 13)) >>> 0;
-  n = Math.imul(n, 1274126177) >>> 0;
-  return (n % 10000) / 10000;
-}
-
-function smoothstep(t: number) {
-  const x = Math.min(1, Math.max(0, t));
-  return x * x * (3 - 2 * x);
-}
-
-/** Procedural starter map — large contiguous biomes (no checkerboard) */
+/** Flat library-tile map (no procedural biomes / builtin props) */
 export function generateDefaultMap(): TodieMapJson {
-  const map = emptyMap('grass_a');
-  const {cols, rows} = map;
-  for (let ty = 0; ty < rows; ty += 1) {
-    for (let tx = 0; tx < cols; tx += 1) {
-      const nx = tx / cols - 0.5;
-      const ny = ty / rows - 0.5;
-      const dist = Math.hypot(nx, ny);
-      const ring = smoothstep((dist - 0.16) / 0.34);
-      const lobes =
-        hash01(Math.floor(tx / 8), Math.floor(ty / 8), 11) * 0.5 +
-        hash01(Math.floor(tx / 5), Math.floor(ty / 5), 29) * 0.5;
-      const waste = Math.min(1, Math.max(0, ring * 0.75 + (lobes - 0.42) * 0.9));
-      // keep spawn basin grassy
-      const spawn = Math.hypot(tx - cols / 2, ty - rows / 2) < 8;
-      let id: TileId = 'grass_a';
-      if (spawn) {
-        id = 'grass_a';
-      } else if (waste < 0.18 && hash01(tx, ty, 3) > 0.94) {
-        id = 'water_shallow';
-      } else if (waste > 0.32 && waste < 0.58 && hash01(tx, ty, 7) > 0.91) {
-        id = 'stone_path';
-      } else if (waste >= 0.48) {
-        // chunky wasteland regions
-        const chunk = hash01(Math.floor(tx / 4), Math.floor(ty / 4), 41);
-        id = chunk > 0.5 ? 'wasteland_b' : 'wasteland_a';
-      } else {
-        const chunk = hash01(Math.floor(tx / 6), Math.floor(ty / 6), 17);
-        id = chunk > 0.55 ? 'grass_b' : 'grass_a';
-      }
-      map.cells[ty * cols + tx] = TILE_INDEX[id];
-    }
-  }
-  // sparse starter props away from spawn
-  const spawnTx = Math.floor(cols / 2);
-  const spawnTy = Math.floor(rows / 2);
-  const kinds = ['tree_oak', 'tree_pine', 'bush', 'rock', 'flowers'] as const;
-  for (let i = 0; i < 180; i += 1) {
-    const tx = Math.floor(hash01(i, 3, 9) * cols);
-    const ty = Math.floor(hash01(i, 7, 13) * rows);
-    if (Math.hypot(tx - spawnTx, ty - spawnTy) < 10) continue;
-    if (hash01(tx, ty, 71) < 0.55) continue;
-    const kind = kinds[Math.floor(hash01(tx, ty, 99) * kinds.length)]!;
-    map.objects.push({id: map.nextObjectId++, kind, tx, ty});
-  }
-  return map;
+  return emptyMap(DEFAULT_MAP_TILE);
 }
 
 export function placeMapObject(
@@ -146,11 +109,17 @@ export function placeMapObject(
   tx: number,
   ty: number,
   kind: MapObjectPlacement['kind'],
+  frame?: string,
 ) {
   if (tx < 0 || ty < 0 || tx >= map.cols || ty >= map.rows) return;
-  // one prop per cell
   map.objects = map.objects.filter((o) => !(o.tx === tx && o.ty === ty));
-  map.objects.push({id: map.nextObjectId++, kind, tx, ty});
+  map.objects.push({
+    id: map.nextObjectId++,
+    kind,
+    ...(frame ? {frame} : {}),
+    tx,
+    ty,
+  });
 }
 
 export function eraseMapObject(map: TodieMapJson, tx: number, ty: number) {
@@ -166,9 +135,9 @@ export function cellIndex(map: TodieMapJson, tx: number, ty: number) {
 }
 
 export function getTileId(map: TodieMapJson, tx: number, ty: number): TileId {
-  if (tx < 0 || ty < 0 || tx >= map.cols || ty >= map.rows) return 'grass_a';
+  if (tx < 0 || ty < 0 || tx >= map.cols || ty >= map.rows) return DEFAULT_MAP_TILE;
   const i = map.cells[cellIndex(map, tx, ty)] ?? 0;
-  return map.palette[i] ?? map.palette[0] ?? 'grass_a';
+  return map.palette[i] ?? map.palette[0] ?? DEFAULT_MAP_TILE;
 }
 
 export function setTileId(map: TodieMapJson, tx: number, ty: number, id: TileId) {
@@ -233,6 +202,17 @@ export function parseMapJson(data: unknown): TodieMapJson {
     ...objects.map((o) => o.id + 1),
     1,
   );
+  let palette = raw.palette.filter((p): p is TileId => typeof p === 'string' && isValidMapTileId(p));
+  if (!palette.length) palette = [DEFAULT_MAP_TILE];
+  // Remap cells if old palette entries were stripped
+  const remapped = cells.map((ci) => {
+    const id = raw.palette[ci];
+    if (typeof id === 'string' && isValidMapTileId(id)) {
+      const pi = palette.indexOf(id);
+      return pi >= 0 ? pi : 0;
+    }
+    return 0;
+  });
   return {
     version: 1,
     name: typeof raw.name === 'string' ? raw.name : 'todie-world',
@@ -240,8 +220,8 @@ export function parseMapJson(data: unknown): TodieMapJson {
     tileSize: Number(raw.tileSize) || MAP_TILE_SIZE,
     cols,
     rows,
-    palette: raw.palette.filter((p): p is TileId => TILE_IDS.includes(p as TileId)),
-    cells,
+    palette,
+    cells: remapped,
     objects,
     nextObjectId,
   };

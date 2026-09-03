@@ -301,6 +301,16 @@ export const dictionary: Record<string, LocaleEntry> = {
     "zh": "落子并吃掉对方棋子",
     "hi": "पत्थर रखें और समूह पकड़ें"
   },
+  "Plane Shoot": {
+    "ko": "비행기 슈팅",
+    "zh": "飞机射击",
+    "hi": "विमान शूट"
+  },
+  "Fly up and shoot zigzag enemy planes": {
+    "ko": "지그재그 적기를 쏘며 날아요",
+    "zh": "射击之字形敌机飞行",
+    "hi": "ज़िगज़ैग दुश्मन विमानों को गोली मारें"
+  },
   "Car Race": {
     "ko": "자동차 달리기",
     "zh": "汽车奔跑",

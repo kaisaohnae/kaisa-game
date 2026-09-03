@@ -1,0 +1,97 @@
+.plane-picker {
+  width: min(100%, 360px);
+  margin: 0 auto;
+}
+
+.plane-picker__label {
+  margin: 0 0 clamp(12px, 2.5vh, 18px);
+  text-align: center;
+  font-family: var(--font-kids-display), var(--font-kids-body), sans-serif;
+  font-size: clamp(17px, 4vw, 22px);
+  font-weight: 800;
+  color: #37474f;
+}
+
+.plane-picker__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(10px, 2.5vw, 14px);
+}
+
+.plane-picker__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: clamp(108px, 22vw, 128px);
+  padding: 10px 8px 12px;
+  border: 3px solid #fff;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #e3f2fd 0%, #bbdefb 100%);
+  box-shadow: 0 5px 0 #90caf9;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.plane-picker__item.is-selected {
+  border-color: #42a5f5;
+  background: linear-gradient(180deg, #bbdefb 0%, #90caf9 100%);
+  box-shadow:
+    0 0 0 3px rgba(66, 165, 245, 0.45),
+    0 6px 0 #1e88e5;
+  transform: translateY(-2px);
+}
+
+.plane-picker__item:active {
+  transform: translateY(2px);
+  box-shadow: 0 3px 0 #90caf9;
+}
+
+.plane-picker__item.is-selected:active {
+  transform: translateY(0);
+}
+
+.plane-picker__thumb {
+  display: grid;
+  place-items: center;
+  width: clamp(56px, 14vw, 72px);
+  height: clamp(72px, 16vw, 88px);
+}
+
+.plane-picker__img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.12));
+}
+
+.plane-picker__name {
+  font-size: clamp(12px, 3vw, 14px);
+  font-weight: 800;
+  color: #37474f;
+  text-align: center;
+  line-height: 1.2;
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .plane-picker__item {
+    min-height: 92px;
+    padding: 8px 6px 10px;
+  }
+
+  .plane-picker__thumb {
+    width: 44px;
+    height: 56px;
+  }
+
+  .plane-picker__label {
+    margin-bottom: 8px;
+    font-size: 16px;
+  }
+}

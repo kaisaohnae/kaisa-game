@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 
 /** @typedef {'sync_character' | 'generate_character' | 'generate_character_state' | 'pixflux' | 'tileset'} ManifestType */
 
-/** @typedef {'todie' | 'car-run'} GameId */
+/** @typedef {'todie' | 'car-run' | 'plane-shoot'} GameId */
 
 /** @typedef {{ job: string, action: string }} CharacterInstall */
 
@@ -47,8 +47,14 @@ const STYLE_SUFFIX =
 const CAR_STYLE =
   ', top-down overhead view looking straight down, vehicle nose pointing DOWN toward bottom of image (6 o clock), headlights at BOTTOM, rear bumper at TOP, Unlucky Studio style topdown vehicle sprite, retro arcade racing game, crisp pixels, transparent background';
 
+const PLANE_STYLE =
+  ', top-down overhead view looking straight down, airplane nose pointing UP toward top of image (12 o clock), cockpit near front/top, engines and tail at BOTTOM, retro arcade shooter sprite, crisp pixels, transparent background';
+
 const HEART_STYLE =
   ', cute pixel heart pickup icon for racing game HUD, bright red heart with soft shine, centered, transparent background, no text';
+
+const PLANE_HEART_STYLE =
+  ', cute pixel heart pickup icon for airplane shooter HUD, bright red heart with soft shine, centered, transparent background, no text';
 
 const TIER_VISUAL = {
   basic: 'simple worn starter gear',
@@ -83,51 +89,33 @@ export const MANIFEST = [
   ...todieMob('wolf_elite', 'elite black wolf with red eyes and scar'),
   ...todieMob('spider', 'small brown spider enemy top-down, eight legs'),
   ...todieMob('spider_elite', 'elite giant spider, green toxic markings'),
+  // -- stage 2 stronger mobs --
+  ...todieMob('ghoul', 'undead ghoul enemy top-down, rotting green flesh, clawed hands, glowing yellow eyes'),
+  ...todieMob('ghoul_elite', 'elite ghoul top-down, brighter toxic green aura, larger claws, crown spikes'),
+  ...todieMob('wraith', 'ghostly wraith enemy top-down, translucent pale blue robed spirit, glowing cyan eyes'),
+  ...todieMob('wraith_elite', 'elite wraith top-down, brighter cyan spectral glow, crown of light spikes'),
+  ...todieMob('skeleton', 'undead skeleton warrior enemy top-down, bone white, red glowing eyes'),
+  ...todieMob('skeleton_elite', 'elite skeleton warrior top-down, golden trim armor, brighter red eyes, crown spikes'),
+  ...todieMob('banshee', 'wailing banshee ghost enemy top-down, purple translucent robed spirit, glowing magenta eyes'),
+  ...todieMob('banshee_elite', 'elite banshee top-down, brighter magenta spectral glow, crown of light spikes'),
+  ...todieMob('direwolf', 'dark dire wolf enemy top-down, dark slate fur, glowing red eyes, running pose'),
+  ...todieMob('direwolf_elite', 'elite dire wolf top-down, brighter red glow, crown spikes, scarred fur'),
+  // -- stage 3 even stronger mobs --
+  ...todieMob('reaper', 'grim reaper enemy top-down, black hooded robe, glowing orange eyes, ominous aura'),
+  ...todieMob('reaper_elite', 'elite grim reaper top-down, brighter orange aura, crown spikes, scythe glow'),
+  ...todieMob('lich', 'undead lich sorcerer enemy top-down, purple robes, bone white skull face, glowing green eyes'),
+  ...todieMob('lich_elite', 'elite lich sorcerer top-down, brighter green arcane aura, crown spikes'),
+  ...todieMob('deathknight', 'death knight enemy top-down, dark red black armor, glowing red eyes, ominous presence'),
+  ...todieMob('deathknight_elite', 'elite death knight top-down, brighter red glow, crown spikes, cracked armor'),
+  ...todieMob('nightmare', 'nightmare horse enemy top-down, deep violet black fur, blazing orange mane, glowing eyes'),
+  ...todieMob('nightmare_elite', 'elite nightmare horse top-down, brighter fiery mane, crown spikes'),
+  ...todieMob('wight', 'undead wight enemy top-down, pale blue-gray skin, icy glowing eyes, tattered robes'),
+  ...todieMob('wight_elite', 'elite wight top-down, brighter icy glow, crown spikes, frost aura'),
   ...todieMob('boss', 'mid boss orc warlord top-down, orange armor, big axe'),
   ...todieMob('bigBoss', 'large demon knight boss top-down, red black armor, horns'),
   ...todieMob('finalBoss', 'final boss void lich king top-down, pale violet robes, dark aura'),
 
-  // ── Todie: 타일 (seamless set · 64px) ──
-  ...todieTile(
-    'grass_a',
-    '잔디 타일 A',
-    'seamless tileable top-down grass meadow floor tile, soft green #6f9458 base, tiny soft flowers, NO border, edges must match when repeated, flat RPG tileset',
-  ),
-  ...todieTile(
-    'grass_b',
-    '잔디 타일 B',
-    'seamless tileable top-down grass floor tile variant matching grass_a palette, slightly darker green #62874e patches, NO border, edges match neighbors, flat RPG tileset',
-  ),
-  ...todieTile(
-    'wasteland_a',
-    '황무지 타일 A',
-    'seamless tileable top-down dry dirt wasteland floor tile, brown #9a7b5c cracked soil, NO border, edges match when tiled, flat RPG tileset',
-  ),
-  ...todieTile(
-    'wasteland_b',
-    '황무지 타일 B',
-    'seamless tileable top-down wasteland dirt floor tile variant matching wasteland_a, pebbles dry weeds #8a6d52, NO border, edges match, flat RPG tileset',
-  ),
-  ...todieTile(
-    'stone_path',
-    '돌길 타일',
-    'seamless tileable top-down cobblestone path floor tile, gray stones #8d8f8a, NO border, edges match when repeated, flat RPG tileset',
-  ),
-  ...todieTile(
-    'water_shallow',
-    '얕은 물 타일',
-    'seamless tileable top-down shallow water floor tile, light blue #4f8fb8 soft ripples, NO border, edges match when tiled, flat RPG tileset',
-  ),
-
-  // ── Todie: 맵 오브젝트 ──
-  ...todieObject('tree_oak', '참나무', 'top-down oak tree canopy circle with brown trunk center, soft green leaves, RPG map prop, centered, transparent background'),
-  ...todieObject('tree_pine', '소나무', 'top-down pine tree canopy, dark green pointed foliage circle, brown trunk center, RPG map prop, centered, transparent background'),
-  ...todieObject('bush', '덤불', 'top-down small round green bush shrub, RPG map decoration, centered, transparent background'),
-  ...todieObject('rock', '바위', 'top-down gray rock boulder stone, RPG map prop, centered, transparent background'),
-  ...todieObject('stump', '그루터기', 'top-down cut tree stump rings wood, RPG map prop, centered, transparent background'),
-  ...todieObject('flowers', '꽃밭', 'top-down small wildflower patch pink yellow white blooms on grass, RPG decoration, centered, transparent background'),
-  ...todieObject('crate', '상자', 'top-down wooden crate box, RPG map prop, centered, transparent background'),
-  ...todieObject('barrel', '통', 'top-down wooden barrel top view, RPG map prop, centered, transparent background'),
+  // ── Todie: 타일/맵오브젝트는 PixelLab 공통 라이브러리 사용 (builtin 제거) ──
 
   // ── Todie: 소모품 ──
   ...todieConsumable('potion', '체력포션', 'red health potion bottle icon, heart label, glass shine, 48x48 inventory icon'),
@@ -151,6 +139,79 @@ export const MANIFEST = [
 
   // ── Car Run: 하트 픽업 (소형 프롭 장애물은 게임에서 미사용) ──
   ...carHeart(),
+
+  // ── Plane Shoot: 플레이어 기체 3 (에셋 12시 / 적기는 게임에서 6시로 회전) ──
+  ...planeStatic('jet-blue', '블루제트', 'sleek blue fighter jet top-down, nose at top, twin engines at bottom', 'player'),
+  ...planeStatic('jet-red', '레드에이스', 'red ace fighter jet top-down, nose at top, yellow accents', 'player'),
+  ...planeStatic('jet-green', '그린윙', 'green wing fighter jet top-down, nose at top, soft cockpit glow', 'player'),
+
+  // ── Plane Shoot: 적기 10 ──
+  ...planeStatic('scout', '스카웃', 'small gray scout plane top-down, nose at top', 'enemy'),
+  ...planeStatic('drone', '드론', 'wide gray combat drone top-down, nose sensors at top', 'enemy'),
+  ...planeStatic('raider', '레이더', 'purple raider fighter top-down, nose at top', 'enemy'),
+  ...planeStatic('bomber', '밤버', 'heavy brown bomber plane top-down, wide wings, nose at top', 'enemy'),
+  ...planeStatic('stealth', '스텔스', 'dark stealth fighter top-down, angular wings, nose at top', 'enemy'),
+  ...planeStatic('biplane', '복엽기', 'orange biplane top-down, double wings, nose at top', 'enemy'),
+  ...planeStatic('yellow-jet', '옐로제트', 'bright yellow jet top-down, nose at top', 'enemy'),
+  ...planeStatic('cargo', '카고', 'gray cargo transport plane top-down, bulky body, nose at top', 'enemy'),
+  ...planeStatic('dark-ace', '다크에이스', 'black ace fighter top-down, red accents, nose at top', 'enemy'),
+  ...planeStatic('titan', '타이탄', 'large blue titan warplane top-down, wide wings, nose at top', 'enemy'),
+
+  ...planeHeart(),
+
+  // ── Plane Shoot: 발사체 ──
+  ...planeProjectile(
+    'basic',
+    '기본탄',
+    'yellow energy bolt projectile for airplane shooter, pointed tip up, glowing trail, transparent background',
+  ),
+  ...planeProjectile(
+    'spread',
+    '스프레드탄',
+    'cyan triple-arrow spread shot projectile icon for airplane shooter, three blue darts, transparent background',
+  ),
+  ...planeProjectile(
+    'laser',
+    '레이저',
+    'bright green laser beam projectile vertical for airplane shooter, neon glow, transparent background',
+  ),
+  ...planeProjectile(
+    'plasma',
+    '플라즈마',
+    'purple plasma orb projectile for airplane shooter, glowing violet core, transparent background',
+  ),
+  ...planeProjectile(
+    'star',
+    '스타샷',
+    'golden sparkling star projectile for airplane shooter, ornate glowing star, transparent background',
+  ),
+  ...planeProjectile(
+    'enemy-bolt',
+    '적탄',
+    'red enemy bolt projectile for airplane shooter, tip pointing down, hostile glow, transparent background',
+  ),
+
+  // ── Plane Shoot: 무기 변경 아이템 ──
+  ...planeWeaponItem(
+    'weapon-spread',
+    '아이템: 스프레드',
+    'cute power-up pickup icon letter S for spread weapon, cyan circular badge, arcade shooter item, transparent background',
+  ),
+  ...planeWeaponItem(
+    'weapon-laser',
+    '아이템: 레이저',
+    'cute power-up pickup icon letter L for laser weapon, green circular badge, arcade shooter item, transparent background',
+  ),
+  ...planeWeaponItem(
+    'weapon-plasma',
+    '아이템: 플라즈마',
+    'cute power-up pickup icon letter P for plasma weapon, purple circular badge, arcade shooter item, transparent background',
+  ),
+  ...planeWeaponItem(
+    'weapon-star',
+    '아이템: 스타샷',
+    'cute power-up pickup icon golden star badge for star weapon, arcade shooter item, transparent background',
+  ),
 ];
 
 function todieCharacterSync() {
@@ -210,6 +271,23 @@ function todieMob(id, desc) {
   ];
 }
 
+/**
+ * Shared description builder for one biome's A~F tile family — always emphasizes
+ * seamless self-tiling AND natural blending with its sibling variants, so any mix
+ * of the set placed edge-to-edge reads as one continuous surface (no seams).
+ * @param {string} biomeEn @param {string} hex @param {string} detail
+ */
+function tileFamilyDesc(biomeEn, hex, detail) {
+  return (
+    `seamless tileable top-down ${biomeEn} floor tile, ${hex} base tone, ${detail}, ` +
+    `NO border or frame, tiles seamlessly with itself on all 4 edges, and must blend ` +
+    `naturally with the other variants in the same ${biomeEn} tile family (same palette ` +
+    `and lighting, only subtle texture differences) so tiles from the set placed edge-to-edge ` +
+    `in any combination read as one continuous ${biomeEn} surface with no visible seams, ` +
+    `flat overhead RPG tileset`
+  );
+}
+
 /** @param {string} id @param {string} label @param {string} desc */
 function todieTile(id, label, desc) {
   return [
@@ -237,6 +315,22 @@ function todieObject(id, label, desc) {
       type: 'pixflux',
       description: `${desc}${STYLE_SUFFIX}`,
       imageSize: {width: 64, height: 64},
+      fileInstall: {path: `public/todie/objects/${id}.png`},
+    },
+  ];
+}
+
+/** Larger map object (buildings/shops) — bigger canvas for more structural detail. @param {string} id @param {string} label @param {string} desc */
+function todieBuilding(id, label, desc) {
+  return [
+    {
+      id: `obj-${id}`,
+      game: 'todie',
+      category: 'object',
+      label: `맵오브젝트: ${label}`,
+      type: 'pixflux',
+      description: `${desc}${STYLE_SUFFIX}`,
+      imageSize: {width: 128, height: 128},
       fileInstall: {path: `public/todie/objects/${id}.png`},
     },
   ];
@@ -358,6 +452,74 @@ function carHeart() {
   ];
 }
 
+/**
+ * @param {string} id
+ * @param {string} label
+ * @param {string} desc
+ * @param {'player' | 'enemy'} role
+ */
+function planeStatic(id, label, desc, role) {
+  return [
+    {
+      id: `plane-${id}`,
+      game: 'plane-shoot',
+      category: role === 'player' ? 'player-plane' : 'enemy-plane',
+      label: role === 'player' ? `플레이어: ${label}` : `적기: ${label}`,
+      type: 'pixflux',
+      description: `${desc}${PLANE_STYLE}`,
+      imageSize: {width: 64, height: 96},
+      fileInstall: {path: `public/plane-shoot/planes/${id}.png`},
+    },
+  ];
+}
+
+function planeHeart() {
+  return [
+    {
+      id: 'plane-fx-heart',
+      game: 'plane-shoot',
+      category: 'fx',
+      label: '픽업: 하트',
+      type: 'pixflux',
+      description: `airplane shooter life pickup heart${PLANE_HEART_STYLE}`,
+      imageSize: {width: 48, height: 48},
+      fileInstall: {path: 'public/plane-shoot/fx/heart.png'},
+    },
+  ];
+}
+
+/** @param {string} id @param {string} label @param {string} desc */
+function planeProjectile(id, label, desc) {
+  return [
+    {
+      id: `plane-proj-${id}`,
+      game: 'plane-shoot',
+      category: 'projectile',
+      label: `발사체: ${label}`,
+      type: 'pixflux',
+      description: `${desc}, crisp pixels, transparent background`,
+      imageSize: {width: 32, height: 48},
+      fileInstall: {path: `public/plane-shoot/projectiles/${id}.png`},
+    },
+  ];
+}
+
+/** @param {string} id @param {string} label @param {string} desc */
+function planeWeaponItem(id, label, desc) {
+  return [
+    {
+      id: `plane-item-${id}`,
+      game: 'plane-shoot',
+      category: 'weapon-item',
+      label,
+      type: 'pixflux',
+      description: `${desc}, crisp pixels, transparent background`,
+      imageSize: {width: 48, height: 48},
+      fileInstall: {path: `public/plane-shoot/items/${id}.png`},
+    },
+  ];
+}
+
 export const DIR_MAP = {
   down: 'south',
   downRight: 'south-east',
@@ -369,6 +531,13 @@ export const DIR_MAP = {
   downLeft: 'south-west',
 };
 
+function previewUrlFromInstall(filePath) {
+  if (!filePath) return undefined;
+  const norm = filePath.replace(/\\/g, '/');
+  if (norm.startsWith('public/')) return `/${norm.slice('public/'.length)}`;
+  return undefined;
+}
+
 export function manifestForApi() {
   return MANIFEST.map((item) => ({
     id: item.id,
@@ -377,5 +546,7 @@ export function manifestForApi() {
     label: item.label,
     type: item.type,
     costsGenerations: item.type !== 'sync_character',
+    previewUrl: previewUrlFromInstall(item.fileInstall?.path),
+    defaultDescription: item.description ?? '',
   }));
 }

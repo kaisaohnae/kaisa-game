@@ -12,6 +12,10 @@ import {
   emptyEquipment,
   ensureHotbarConsumableSlots,
   EQUIP_SLOTS,
+  extractGearToEnhanceStone,
+  applyEnhanceStone,
+  isExtractableGear,
+  stageForEquipped,
   facingToCardinal,
   gearImageKey,
   JOB_ART,
@@ -23,6 +27,7 @@ import {
   alreadyOwnedToast,
   pickSpawnKind,
   getTileId,
+  DEFAULT_MAP_TILE,
   tileDef,
   mapObjectDef,
   preloadAllTodieAssets,
@@ -37,6 +42,7 @@ import {
   toggleEquipFromBag,
   unequipSlot,
   wrongJobColor,
+  loadTodieMap,
   type ActionId,
   type Equipment,
   type GearSlot,
@@ -45,6 +51,7 @@ import {
   type JobId,
   type LoadedImages,
   type RuntimeSkill,
+  type SpawnMobKind,
   type TodieAssetBundle,
 } from './content';
 import {drawJobCharacter, drawSkillSprite, walkSheetFrameCount} from './render/drawCharacter';
@@ -112,8 +119,9 @@ function formatPlayTime(totalSeconds: number) {
   const s = totalSeconds % 60;
   return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
-const NAME_COOKIE = 'todie_char_name';
-const GEAR_COOKIE = 'todie_gear';
+const NAME_STORAGE_KEY = 'todie_char_name';
+const GEAR_STORAGE_KEY = 'todie_gear';
+const BAG_STORAGE_KEY = 'todie_bag';
 const MAP_NAME = '죽음의 황무지';
 const NAME_MAX = 10;
 
@@ -137,15 +145,7 @@ type GroundDrop = {
   maxLife: number;
 };
 
-type MobKind =
-  | 'slime'
-  | 'bat'
-  | 'block'
-  | 'wolf'
-  | 'spider'
-  | 'boss'
-  | 'bigBoss'
-  | 'finalBoss';
+type MobKind = SpawnMobKind | 'boss' | 'bigBoss' | 'finalBoss';
 
 const isAnyBoss = (k: MobKind) =>
   k === 'boss' || k === 'bigBoss' || k === 'finalBoss';
@@ -244,7 +244,20 @@ function emptyBag(): Item[] {
     gearId: null,
     gearSlot: null,
     tier: null,
+    enhance: 0,
   }));
+}
+
+type StageDef = {id: number; name: string; label: string};
+
+const STAGE_DEFS: StageDef[] = [
+  {id: 1, name: '죽음의 황무지', label: '스테이지 1 · 죽음의 황무지'},
+  {id: 2, name: '죽음의 문', label: '스테이지 2 · 죽음의 문'},
+  {id: 3, name: '죽음', label: '스테이지 3 · 죽음'},
+];
+
+function stageDef(id: number): StageDef {
+  return STAGE_DEFS[Math.min(STAGE_DEFS.length, Math.max(1, id)) - 1] ?? STAGE_DEFS[0];
 }
 
 function canPickupItem(item: Item, job: JobId) {
@@ -273,19 +286,31 @@ function drawForbidMark(ctx: CanvasRenderingContext2D, cx: number, cy: number, r
 }
 
 function readNameCookie() {
-  if (typeof document === 'undefined') return '';
-  const m = document.cookie.match(/(?:^|; )todie_char_name=([^;]*)/);
-  return m ? decodeURIComponent(m[1]).slice(0, NAME_MAX) : '';
+  if (typeof window === 'undefined') return '';
+  try {
+    const v = window.localStorage.getItem(NAME_STORAGE_KEY);
+    return v ? v.slice(0, NAME_MAX) : '';
+  } catch {
+    return '';
+  }
 }
 
 function writeNameCookie(name: string) {
-  const v = encodeURIComponent(name.slice(0, NAME_MAX));
-  document.cookie = `${NAME_COOKIE}=${v};path=/;max-age=31536000;SameSite=Lax`;
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(NAME_STORAGE_KEY, name.slice(0, NAME_MAX));
+  } catch {
+    /* ignore */
+  }
 }
 
 function clearNameCookie() {
-  if (typeof document === 'undefined') return;
-  document.cookie = `${NAME_COOKIE}=;path=/;max-age=0;SameSite=Lax`;
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.removeItem(NAME_STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
 }
 
 type SavedGearItem = {
@@ -298,6 +323,7 @@ type SavedGearItem = {
   gearId: string | null;
   gearSlot: GearSlot | null;
   tier: GearTier | null;
+  enhance?: number;
 };
 
 type GearSave = {
@@ -328,37 +354,40 @@ function serializeGearItem(it: Item): SavedGearItem | null {
     gearId: it.gearId,
     gearSlot: it.gearSlot,
     tier: it.tier,
+    enhance: it.enhance ?? 0,
   };
 }
 
 function writeGearCookie(save: GearSave) {
-  if (typeof document === 'undefined') return;
+  if (typeof window === 'undefined') return;
   try {
-    const raw = encodeURIComponent(JSON.stringify(save));
-    // cookie ~4KB limit — equipment only stays small
-    if (raw.length > 3500) return;
-    document.cookie = `${GEAR_COOKIE}=${raw};path=/;max-age=31536000;SameSite=Lax`;
+    window.localStorage.setItem(GEAR_STORAGE_KEY, JSON.stringify(save));
+  } catch {
+    /* ignore (private mode / quota) */
+  }
+}
+
+function clearGearCookie() {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.removeItem(GEAR_STORAGE_KEY);
   } catch {
     /* ignore */
   }
 }
 
-function clearGearCookie() {
-  if (typeof document === 'undefined') return;
-  document.cookie = `${GEAR_COOKIE}=;path=/;max-age=0;SameSite=Lax`;
-}
-
 function clearAllTodieProgress() {
   clearNameCookie();
   clearGearCookie();
+  clearBagCookie();
 }
 
 function readGearCookie(): GearSave | null {
-  if (typeof document === 'undefined') return null;
-  const m = document.cookie.match(/(?:^|; )todie_gear=([^;]*)/);
-  if (!m) return null;
+  if (typeof window === 'undefined') return null;
   try {
-    const data = JSON.parse(decodeURIComponent(m[1])) as GearSave;
+    const raw = window.localStorage.getItem(GEAR_STORAGE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw) as GearSave;
     if (!data || data.v !== 1 || (data.job !== 'warrior' && data.job !== 'mage')) return null;
     return data;
   } catch {
@@ -403,6 +432,7 @@ function equipmentFromSave(save: GearSave): Equipment {
       gearId,
       gearSlot: slot,
       tier: raw.tier,
+      enhance: raw.enhance ?? 0,
     };
   }
   return eq;
@@ -415,6 +445,105 @@ function gearSaveFromEquipment(name: string, job: JobId, equipped: Equipment): G
     equippedOut[s.id] = it ? serializeGearItem(it) : null;
   }
   return {v: 1, name: name.slice(0, NAME_MAX), job, equipped: equippedOut};
+}
+
+type SavedBagItem = {
+  id: string;
+  kind: Item['kind'];
+  name: string;
+  qty: number;
+  color: string;
+  job: JobId | null;
+  gearId: string | null;
+  gearSlot: GearSlot | null;
+  tier: GearTier | null;
+  enhance?: number;
+};
+
+type BagSave = {
+  v: 1;
+  job: JobId;
+  items: (SavedBagItem | null)[];
+};
+
+function serializeBagItem(it: Item): SavedBagItem | null {
+  if (it.kind === 'empty' || it.qty <= 0) return null;
+  return {
+    id: it.id,
+    kind: it.kind,
+    name: it.name,
+    qty: it.qty,
+    color: it.color,
+    job: it.job,
+    gearId: it.gearId,
+    gearSlot: it.gearSlot,
+    tier: it.tier,
+    enhance: it.enhance ?? 0,
+  };
+}
+
+function bagSaveFromBag(job: JobId, bag: Item[]): BagSave {
+  return {v: 1, job, items: bag.map((it) => serializeBagItem(it))};
+}
+
+function writeBagCookie(save: BagSave) {
+  if (typeof window === 'undefined') return;
+  try {
+    // Bag can hold up to 80 slots of Korean-named items — that easily blows past a
+    // cookie's ~4KB budget (Korean text triple-encodes via encodeURIComponent), so this
+    // persists to localStorage instead, which has no such practical size limit.
+    window.localStorage.setItem(BAG_STORAGE_KEY, JSON.stringify(save));
+  } catch {
+    /* ignore (private mode / quota) */
+  }
+}
+
+function clearBagCookie() {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.removeItem(BAG_STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+function readBagCookie(): BagSave | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(BAG_STORAGE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw) as BagSave;
+    if (!data || data.v !== 1 || !Array.isArray(data.items)) return null;
+    if (data.job !== 'warrior' && data.job !== 'mage') return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+function bagItemFromSaved(raw: SavedBagItem, i: number): Item {
+  return {
+    id: raw.id || `slot-${i}`,
+    kind: raw.kind,
+    name: raw.name,
+    qty: Math.max(0, raw.qty || 0),
+    color: raw.color || '#555',
+    job: raw.job ?? null,
+    gearId: raw.gearId ?? null,
+    gearSlot: raw.gearSlot ?? null,
+    tier: raw.tier ?? null,
+    enhance: raw.enhance ?? 0,
+  };
+}
+
+/** Overlays saved bag contents onto a freshly-built bag (in place) — restores potions, mana, stones, wrong-job/duplicate gear, etc. */
+function applyBagSave(save: BagSave, bag: Item[]) {
+  for (let i = 0; i < bag.length; i += 1) {
+    const raw = save.items[i];
+    if (raw && raw.kind !== 'empty' && raw.qty > 0) {
+      bag[i] = bagItemFromSaved(raw, i);
+    }
+  }
 }
 
 
@@ -606,6 +735,14 @@ export default function TodieGame() {
   const wipeProgressRef = useRef(false);
   /** 인벤 기본: 최소(접힘) */
   const [invExpanded, setInvExpanded] = useState(false);
+  /** 인벤 열림 여부를 게임 루프(effect)에서 읽기 위한 ref */
+  const invExpandedRef = useRef(invExpanded);
+  invExpandedRef.current = invExpanded;
+  /** 현재 스테이지(1~3) — 장착 장비 등급으로 판정 */
+  const stageRef = useRef(1);
+  const [stageLabel, setStageLabel] = useState(STAGE_DEFS[0].label);
+  /** 게임 루프(effect) 안에서 정의되는 스테이지 전환 처리를 바깥에서 트리거하기 위한 ref */
+  const stageTransitionRef = useRef<(stage: number) => void>(() => {});
   /** Virtual joystick direction (normalized -1..1) for mobile */
   const joystickRef = useRef({dx: 0, dy: 0, active: false});
   const knobElRef = useRef<HTMLDivElement | null>(null);
@@ -653,6 +790,7 @@ export default function TodieGame() {
         return;
       }
       writeGearCookie(gearSaveFromEquipment(charName, startJob, equippedRef.current));
+      writeBagCookie(bagSaveFromBag(startJob, bagRef.current));
     };
     const onHide = () => {
       if (document.visibilityState === 'hidden') persist();
@@ -694,6 +832,12 @@ export default function TodieGame() {
     setBagTick((t) => t + 1);
     if (started) {
       writeGearCookie(gearSaveFromEquipment(charName, startJob, equippedRef.current));
+      writeBagCookie(bagSaveFromBag(startJob, bagRef.current));
+      const newStage = stageForEquipped(equippedRef.current);
+      if (newStage > stageRef.current) {
+        stageRef.current = newStage;
+        stageTransitionRef.current(newStage);
+      }
     }
   };
 
@@ -711,7 +855,19 @@ export default function TodieGame() {
       /* start() will retry */
     }
     try {
-      const bundle = await preloadAllTodieAssets();
+      const savedForStage = readGearCookie();
+      const restoreForStage =
+        savedForStage &&
+        savedForStage.job === pickJobUi &&
+        gearSaveHasEquipped(savedForStage);
+      const initialStage =
+        restoreForStage && savedForStage
+          ? stageForEquipped(equipmentFromSave(savedForStage))
+          : 1;
+      stageRef.current = initialStage;
+      setStageLabel(stageDef(initialStage).label);
+
+      const bundle = await preloadAllTodieAssets(initialStage);
       assetsRef.current = bundle;
       setAssetsVersion((v) => v + 1);
       writeNameCookie(n);
@@ -729,6 +885,7 @@ export default function TodieGame() {
         gearId: null,
         gearSlot: null,
         tier: null,
+        enhance: 0,
       };
       bag[1] = {
         id: 'start-m',
@@ -740,6 +897,7 @@ export default function TodieGame() {
         gearId: null,
         gearSlot: null,
         tier: null,
+        enhance: 0,
       };
 
       const saved = readGearCookie();
@@ -762,6 +920,10 @@ export default function TodieGame() {
         clearItem(bag[2]);
         equippedRef.current = eq;
         writeGearCookie(gearSaveFromEquipment(n, pickJobUi, eq));
+      }
+      const savedBagForStage = readBagCookie();
+      if (savedBagForStage && savedBagForStage.job === pickJobUi) {
+        applyBagSave(savedBagForStage, bagRef.current);
       }
       ensureHotbarConsumableSlots(bagRef.current);
       // Start BGM in the same turn as gameplay begin (after unlock finished).
@@ -849,7 +1011,7 @@ export default function TodieGame() {
     const mobImages: Record<string, HTMLImageElement> = assetsRef.current?.mobs ?? {};
     const tileImages = assetsRef.current?.tiles ?? {};
     const objectImages = assetsRef.current?.objects ?? {};
-    const worldMap = assetsRef.current?.map ?? null;
+    let worldMap = assetsRef.current?.map ?? null;
 
 
     let mobs: Mob[] = [];
@@ -921,6 +1083,24 @@ export default function TodieGame() {
     };
     toastFnRef.current = showToast;
 
+    /** 스테이지2/3 전용 맵이 스튜디오에 저장돼 있으면 갈아끼우고, 없으면 기존 맵 유지 */
+    const reloadStageMap = async (stage: number) => {
+      try {
+        const m = await loadTodieMap(stage);
+        worldMap = m;
+      } catch {
+        /* keep current map */
+      }
+    };
+
+    stageTransitionRef.current = (stage: number) => {
+      const def = stageDef(stage);
+      setStageLabel(def.label);
+      showToast(`🎉 ${def.label} 진입! 전 슬롯 ${stage === 3 ? '신화템' : '영웅템'} 이상 달성`);
+      toastT = 4.5;
+      void reloadStageMap(stage);
+    };
+
     const applyMinimapLayout = () => {
       const compact = screenW < 1000;
       miniBox.w = compact ? Math.round(MINI_FULL.w / 2) : MINI_FULL.w;
@@ -960,7 +1140,7 @@ export default function TodieGame() {
     const margin = spawn.worldMargin ?? 80;
 
     const makeMobAt = (x: number, y: number, kind?: MobKind): Mob => {
-      const k = kind ?? pickSpawnKind();
+      const k = kind ?? pickSpawnKind(stageRef.current);
       const mb = bal.mobs[k] as {hp: number; speed: number; touchDamage: number};
       const eliteCfg = (bal.mobs as {elite?: {hpMult?: number; speedMult?: number}})
         .elite;
@@ -1263,14 +1443,6 @@ export default function TodieGame() {
           keep.push(d);
           continue;
         }
-        if (!canPickupItem(d.item, player.job)) {
-          if (wrongJobToastCd <= 0 && d.item.job) {
-            showToast(`${d.item.name} · 집을 수 없음`);
-            wrongJobToastCd = drops.wrongJobToastCooldown;
-          }
-          keep.push(d);
-          continue;
-        }
         if (ownsSameUniqueGear(inventory, equippedRef.current, d.item)) {
           if (wrongJobToastCd <= 0) {
             showToast(alreadyOwnedToast());
@@ -1282,6 +1454,8 @@ export default function TodieGame() {
           keep.push(d);
           continue;
         }
+        // 다른 직업 장비도 그대로 습득 — 장착은 못 해도 가방에 쌓이고,
+        // 인벤에서 클릭하면 강화석으로 추출할 수 있음.
         const picked = pickupOrAutoEquip(
           inventory,
           equippedRef.current,
@@ -1304,7 +1478,11 @@ export default function TodieGame() {
             text: `+${d.item.name}`,
             color: d.item.color,
           });
-          showToast(`${d.item.name} 획득!`);
+          const wrongJobHint =
+            d.item.kind === 'gear' && d.item.job && d.item.job !== player.job
+              ? ' (다른 직업 · 강화석 추출 가능)'
+              : '';
+          showToast(`${d.item.name} 획득!${wrongJobHint}`);
         }
       }
       groundDrops = keep;
@@ -1868,34 +2046,32 @@ export default function TodieGame() {
                     ? '#6d4c41'
                     : m.kind === 'spider'
                       ? '#37474f'
-                      : '#5d4037';
+                      : m.kind === 'ghoul'
+                        ? '#556b2f'
+                        : m.kind === 'wraith'
+                          ? '#78909c'
+                          : m.kind === 'skeleton'
+                            ? '#d7ccc8'
+                            : m.kind === 'banshee'
+                              ? '#ce93d8'
+                              : m.kind === 'direwolf'
+                                ? '#37474f'
+                                : m.kind === 'reaper'
+                                  ? '#212121'
+                                  : m.kind === 'lich'
+                                    ? '#6a1b9a'
+                                    : m.kind === 'deathknight'
+                                      ? '#4a0e0e'
+                                      : m.kind === 'nightmare'
+                                        ? '#1a0033'
+                                        : m.kind === 'wight'
+                                          ? '#5c6bc0'
+                                          : '#5d4037';
         c.beginPath();
         c.ellipse(0, 0, size * 0.35, size * 0.32, 0, 0, Math.PI * 2);
         c.fill();
       }
       c.restore();
-
-      if (isFinalBoss(m.kind)) {
-        c.fillStyle = 'rgba(245, 245, 255, 0.98)';
-        c.font = 'bold 12px "Fredoka", "Nunito", sans-serif';
-        c.textAlign = 'center';
-        c.fillText('FINAL', 0, size * 0.48);
-      } else if (isBigBoss(m.kind)) {
-        c.fillStyle = 'rgba(255, 205, 210, 0.98)';
-        c.font = 'bold 12px "Fredoka", "Nunito", sans-serif';
-        c.textAlign = 'center';
-        c.fillText('BIG', 0, size * 0.48);
-      } else if (m.kind === 'boss') {
-        c.fillStyle = 'rgba(255, 224, 130, 0.95)';
-        c.font = 'bold 11px "Fredoka", "Nunito", sans-serif';
-        c.textAlign = 'center';
-        c.fillText('BOSS', 0, size * 0.48);
-      } else if (m.elite) {
-        c.fillStyle = 'rgba(224, 170, 255, 0.95)';
-        c.font = 'bold 10px "Fredoka", "Nunito", sans-serif';
-        c.textAlign = 'center';
-        c.fillText('정예', 0, size * 0.46);
-      }
 
       const barW = isFinalBoss(m.kind)
         ? 110
@@ -1907,6 +2083,30 @@ export default function TodieGame() {
               ? 40
               : 34;
       const barY = -(size * 0.52);
+      const labelY = barY - 5;
+
+      if (isFinalBoss(m.kind)) {
+        c.fillStyle = 'rgba(245, 245, 255, 0.98)';
+        c.font = 'bold 12px "Fredoka", "Nunito", sans-serif';
+        c.textAlign = 'center';
+        c.fillText('보스정예', 0, labelY);
+      } else if (isBigBoss(m.kind)) {
+        c.fillStyle = 'rgba(255, 205, 210, 0.98)';
+        c.font = 'bold 12px "Fredoka", "Nunito", sans-serif';
+        c.textAlign = 'center';
+        c.fillText('빅정예', 0, labelY);
+      } else if (m.kind === 'boss') {
+        c.fillStyle = 'rgba(255, 224, 130, 0.95)';
+        c.font = 'bold 11px "Fredoka", "Nunito", sans-serif';
+        c.textAlign = 'center';
+        c.fillText('정예', 0, labelY);
+      } else if (m.elite) {
+        c.fillStyle = 'rgba(224, 170, 255, 0.95)';
+        c.font = 'bold 10px "Fredoka", "Nunito", sans-serif';
+        c.textAlign = 'center';
+        c.fillText('정예', 0, labelY);
+      }
+
       c.fillStyle = 'rgba(0,0,0,0.55)';
       roundRect(c, -barW / 2 - 1, barY - 1, barW + 2, 7, 3);
       c.fill();
@@ -1970,9 +2170,7 @@ export default function TodieGame() {
           }
           const id = worldMap
             ? getTileId(worldMap, tx, ty)
-            : biomeWasteland(tx, ty) >= 0.45
-              ? 'wasteland_a'
-              : 'grass_a';
+            : DEFAULT_MAP_TILE;
           const prepared = tileImages[id];
           if (prepared) {
             ctx.drawImage(prepared, tx * TILE, ty * TILE, TILE, TILE);
@@ -1996,7 +2194,8 @@ export default function TodieGame() {
             continue;
           }
           const def = mapObjectDef(o.kind);
-          const img = objectImages[o.kind];
+          const imgKey = o.frame ? `${o.kind}:${o.frame}` : o.kind;
+          const img = objectImages[imgKey] ?? objectImages[o.kind];
           const sz = def.size;
           if (img && img.complete && img.naturalWidth > 0) {
             ctx.drawImage(img, ox - sz / 2, oy - sz / 2, sz, sz);
@@ -2038,7 +2237,8 @@ export default function TodieGame() {
         const bob = Math.sin(performance.now() / 220 + d.uid) * 3;
         const mine = canPickupItem(d.item, player.job);
         const alreadyOwned = ownsSameUniqueGear(inventory, equippedRef.current, d.item);
-        const blocked = !mine || alreadyOwned;
+        // 다른 직업 장비는 이제 습득 가능 — 진입금지 마크는 "이미 보유" 케이스에만 표시
+        const blocked = alreadyOwned;
         const ttlRatio = d.life / d.maxLife;
         ctx.globalAlpha = 1;
         // shadow
@@ -2056,7 +2256,7 @@ export default function TodieGame() {
           ctx.imageSmoothingEnabled = displaySettings.character.imageSmoothing !== false;
           ctx.drawImage(gimg, d.x - sz / 2, d.y - sz / 2 + bob, sz, sz);
         } else {
-          ctx.fillStyle = blocked ? wrongJobColor() : d.item.color;
+          ctx.fillStyle = blocked || !mine ? wrongJobColor() : d.item.color;
           ctx.beginPath();
           ctx.arc(d.x, d.y + bob, 9, 0, Math.PI * 2);
           ctx.fill();
@@ -2064,14 +2264,14 @@ export default function TodieGame() {
         if (blocked) {
           drawForbidMark(ctx, d.x, d.y + bob, sz * 0.38);
         }
-        // ground name (red if blocked)
+        // ground name (red if blocked/이미 보유, 다른 직업이면 옅은 경고색)
         if (showNameOnGround() && d.item.name) {
           ctx.font = 'bold 10px sans-serif';
           ctx.textAlign = 'center';
           ctx.lineWidth = 3;
           ctx.strokeStyle = 'rgba(0,0,0,0.65)';
           ctx.strokeText(d.item.name, d.x, d.y - 14 + bob);
-          ctx.fillStyle = blocked ? wrongJobColor() : '#fffde7';
+          ctx.fillStyle = blocked || !mine ? wrongJobColor() : '#fffde7';
           ctx.fillText(d.item.name, d.x, d.y - 14 + bob);
         }
         // ttl bar
@@ -2383,9 +2583,7 @@ export default function TodieGame() {
           const ty = Math.floor(((v + 0.5) / miniBox.h) * (WORLD / TILE));
           const id = worldMap
             ? getTileId(worldMap, tx, ty)
-            : biomeWasteland(tx, ty) >= 0.45
-              ? 'wasteland_a'
-              : 'grass_a';
+            : DEFAULT_MAP_TILE;
           mctx.fillStyle = tileDef(id).fill;
           mctx.fillRect(u, v, step, step);
         }
@@ -2714,7 +2912,7 @@ export default function TodieGame() {
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
 
-      if (alive) {
+      if (alive && !invExpandedRef.current) {
         // regen
         player.stamina = Math.min(player.maxStamina, player.stamina + (player.maxStamina / (MAX_ROLLS_EQUIV * 1.6)) * dt);
         player.mp = Math.min(player.maxMp, player.mp + bal.player.mpRegenPerSec * dt);
@@ -3153,6 +3351,10 @@ export default function TodieGame() {
       <div className="todie__play-timer" aria-label="플레이 시간">
         ⏱ {formatPlayTime(playSeconds)}
       </div>
+      <div className="todie__stage-badge" aria-label="현재 스테이지">
+        {stageLabel}
+      </div>
+      {invExpanded && <div className="todie__paused-badge">일시정지</div>}
       <div className="todie__minimap-wrap">
         <div className="todie__top-actions">
           <button
@@ -3245,6 +3447,49 @@ export default function TodieGame() {
           const msg = unequipSlot(bagRef.current, equippedRef.current, slot);
           if (msg) toastFnRef.current(msg);
           syncBag();
+        }}
+        onExtract={() => {
+          const bag = bagRef.current;
+          const targets: number[] = [];
+          for (let i = 0; i < bag.length; i += 1) {
+            const it = bag[i];
+            if (it.kind === 'gear' && isExtractableGear(it, startJob, bag, equippedRef.current)) {
+              targets.push(i);
+            }
+          }
+          let stones = 0;
+          let count = 0;
+          for (const idx of targets) {
+            const res = extractGearToEnhanceStone(bag, idx, startJob, equippedRef.current);
+            if (res) {
+              stones += res.qty;
+              count += 1;
+            }
+          }
+          if (count > 0) {
+            toastFnRef.current(`아이템 ${count}개 → 강화석 x${stones} 추출!`);
+          } else {
+            toastFnRef.current('추출할 수 있는 아이템이 없어요');
+          }
+          syncBag();
+        }}
+        onEnhance={(stoneIndex, target) => {
+          const targetItem =
+            target.source === 'equip'
+              ? equippedRef.current[target.slot]
+              : bagRef.current[target.index];
+          if (!targetItem) {
+            toastFnRef.current('강화 대상이 아니에요');
+            return null;
+          }
+          const res = applyEnhanceStone(bagRef.current, stoneIndex, targetItem);
+          if (!res) {
+            toastFnRef.current('강화석이 아니에요');
+            return null;
+          }
+          toastFnRef.current(res.message);
+          syncBag();
+          return res;
         }}
       />
     </div>

@@ -60,11 +60,13 @@
   flex-direction: column;
 }
 
-.game-page--car-run {
+.game-page--car-run,
+.game-page--plane-shoot {
   padding: 0;
 }
 
-.game-page--car-run .game-page__stage {
+.game-page--car-run .game-page__stage,
+.game-page--plane-shoot .game-page__stage {
   justify-content: flex-start;
   min-height: 100dvh;
   padding:

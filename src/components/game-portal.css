@@ -126,13 +126,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: var(--kids-touch);
-  min-width: 140px;
-  padding: 0 18px;
+  min-height: 36px;
+  min-width: 0;
+  padding: 0 12px;
   border-radius: 999px;
   background: #ff8a65;
   color: #fff;
-  font-size: 17px;
+  font-size: 13px;
   font-weight: 800;
 }
 
@@ -177,6 +177,8 @@
   }
 
   .game-portal__go {
-    min-height: 44px;
+    min-height: 32px;
+    font-size: 12px;
+    padding: 0 10px;
   }
 }

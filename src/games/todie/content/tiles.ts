@@ -1,16 +1,19 @@
-import {MAP_OBJECT_IDS} from './mapObjects';
 import {displaySettings} from './settings';
+import {libraryPropUrl, libraryTileUrl, parseLibraryTileId} from './pixellabLibrary';
 import {
+  DEFAULT_MAP_TILE,
   MAP_URL,
   TILE_DEFS,
   TILE_IDS,
   generateDefaultMap,
+  mapUrlForStage,
   parseMapJson,
   type TileId,
   type TodieMapJson,
 } from './mapTypes';
 
 export {
+  DEFAULT_MAP_TILE,
   TILE_DEFS,
   TILE_IDS,
   MAP_WORLD_SIZE,
@@ -21,6 +24,7 @@ export {
   MAP_OBJECT_DEFS,
   MAP_OBJECT_IDS,
   generateDefaultMap,
+  mapUrlForStage,
   getTileId,
   setTileId,
   paintBrush,
@@ -44,6 +48,8 @@ export function tilePublicBase(): string {
 }
 
 export function tileSpriteUrl(id: TileId): string {
+  const lib = parseLibraryTileId(id);
+  if (lib) return libraryTileUrl(lib.name, lib.wang);
   return `${tilePublicBase()}/${id}.png`;
 }
 
@@ -64,34 +70,15 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-/** Near-black → transparent so seamless fillColor shows through */
-function punchDarkToAlpha(img: HTMLImageElement, size: number): HTMLCanvasElement {
-  const c = document.createElement('canvas');
-  c.width = size;
-  c.height = size;
-  const g = c.getContext('2d')!;
-  g.imageSmoothingEnabled = false;
-  g.drawImage(img, 0, 0, size, size);
-  const data = g.getImageData(0, 0, size, size);
-  const px = data.data;
-  for (let i = 0; i < px.length; i += 4) {
-    const r = px[i]!;
-    const gr = px[i + 1]!;
-    const b = px[i + 2]!;
-    if (r + gr + b < 48) {
-      px[i + 3] = 0;
-    }
-  }
-  g.putImageData(data, 0, 0);
-  return c;
-}
+export type PreparedTiles = Partial<Record<string, HTMLCanvasElement>>;
 
-export type PreparedTiles = Partial<Record<TileId, HTMLCanvasElement>>;
-
-export async function loadTileImages(): Promise<Partial<Record<TileId, HTMLImageElement>>> {
-  const out: Partial<Record<TileId, HTMLImageElement>> = {};
+export async function loadTileImages(
+  extraIds: string[] = [],
+): Promise<Partial<Record<string, HTMLImageElement>>> {
+  const out: Partial<Record<string, HTMLImageElement>> = {};
+  const ids = [...new Set([DEFAULT_MAP_TILE, ...extraIds])];
   await Promise.all(
-    TILE_IDS.map(async (id) => {
+    ids.map(async (id) => {
       try {
         out[id] = await loadImage(tileSpriteUrl(id));
       } catch {
@@ -102,67 +89,76 @@ export async function loadTileImages(): Promise<Partial<Record<TileId, HTMLImage
   return out;
 }
 
-/** Fill color + punched sprite, cached per tile size */
+/** Draw library tiles full-bleed (no punch); fill under if needed */
 export function prepareTileCanvases(
-  images: Partial<Record<TileId, HTMLImageElement>>,
+  images: Partial<Record<string, HTMLImageElement>>,
   tileSize: number,
+  extraIds: string[] = [],
 ): PreparedTiles {
   const out: PreparedTiles = {};
-  for (const def of TILE_DEFS) {
+  const ids = [...new Set([DEFAULT_MAP_TILE, ...extraIds, ...Object.keys(images)])];
+  for (const id of ids) {
     const c = document.createElement('canvas');
     c.width = tileSize;
     c.height = tileSize;
     const g = c.getContext('2d')!;
     g.imageSmoothingEnabled = false;
-    g.fillStyle = def.fill;
+    g.fillStyle = '#5a6a5a';
     g.fillRect(0, 0, tileSize, tileSize);
-    const img = images[def.id];
+    const img = images[id];
     if (img && img.complete && img.naturalWidth > 0) {
-      const punched = punchDarkToAlpha(img, tileSize);
-      // Higher fill + softer overlay = neighboring tiles share base hue (fewer seams)
-      g.globalAlpha =
-        def.id === 'stone_path' || def.id === 'water_shallow' ? 0.78 : 0.42;
-      g.drawImage(punched, 0, 0);
-      g.globalAlpha = 1;
+      g.drawImage(img, 0, 0, tileSize, tileSize);
     }
-    out[def.id] = c;
+    out[id] = c;
   }
   return out;
 }
 
-export async function loadMapObjectImages(): Promise<Partial<Record<string, HTMLImageElement>>> {
+export async function loadMapObjectImages(
+  extras: {kind: string; frame?: string}[] = [],
+): Promise<Partial<Record<string, HTMLImageElement>>> {
   const out: Partial<Record<string, HTMLImageElement>> = {};
-  await Promise.all(
-    MAP_OBJECT_IDS.map(async (id) => {
-      try {
-        out[id] = await loadImage(objectSpriteUrl(id));
-      } catch {
-        /* fallback fill */
-      }
-    }),
-  );
+  const jobs: Promise<void>[] = [];
+  for (const ex of extras) {
+    const key = ex.frame ? `${ex.kind}:${ex.frame}` : ex.kind;
+    const url = libraryPropUrl(ex.kind, ex.frame) ?? objectSpriteUrl(ex.kind);
+    jobs.push(
+      (async () => {
+        try {
+          out[key] = await loadImage(url);
+        } catch {
+          /* ignore */
+        }
+      })(),
+    );
+  }
+  await Promise.all(jobs);
   return out;
 }
 
-export async function loadTodieMap(): Promise<TodieMapJson> {
-  try {
-    const res = await fetch(MAP_URL, {cache: 'no-store'});
-    if (!res.ok) throw new Error(`map ${res.status}`);
-    return parseMapJson(await res.json());
-  } catch {
-    return generateDefaultMap();
+export async function loadTodieMap(stage = 1): Promise<TodieMapJson> {
+  const urls = stage >= 2 ? [mapUrlForStage(stage), MAP_URL] : [MAP_URL];
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, {cache: 'no-store'});
+      if (!res.ok) continue;
+      return parseMapJson(await res.json());
+    } catch {
+      /* try next */
+    }
   }
+  return generateDefaultMap();
 }
 
-/** @deprecated use map cells */
+/** @deprecated */
 export function pickTileId(
-  tx: number,
-  ty: number,
-  waste: number,
-  seed: number,
+  _tx: number,
+  _ty: number,
+  _waste: number,
+  _seed: number,
 ): TileId {
-  if (waste < 0.2 && seed > 0.93) return 'water_shallow';
-  if (waste > 0.28 && waste < 0.62 && seed > 0.9) return 'stone_path';
-  if (waste >= 0.45) return seed > 0.5 ? 'wasteland_b' : 'wasteland_a';
-  return (tx + ty) % 2 === 0 ? 'grass_a' : 'grass_b';
+  return DEFAULT_MAP_TILE;
 }
+
+void TILE_DEFS;
+void TILE_IDS;

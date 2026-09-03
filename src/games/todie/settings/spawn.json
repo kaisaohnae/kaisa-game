@@ -24,12 +24,57 @@
   "finalBossDeaggroRange": 4500,
   "eliteChance": 0.12,
   "eliteDropCount": 5,
-  "kinds": ["slime", "bat", "block", "wolf", "spider"],
+  "kinds": [
+    "slime",
+    "bat",
+    "block",
+    "wolf",
+    "spider",
+    "ghoul",
+    "wraith",
+    "skeleton",
+    "banshee",
+    "direwolf",
+    "reaper",
+    "lich",
+    "deathknight",
+    "nightmare",
+    "wight"
+  ],
   "kindWeights": {
     "slime": 28,
     "bat": 22,
     "block": 16,
     "wolf": 18,
     "spider": 16
+  },
+  "kindWeightsStage2": {
+    "slime": 14,
+    "bat": 11,
+    "block": 8,
+    "wolf": 9,
+    "spider": 8,
+    "ghoul": 12,
+    "wraith": 10,
+    "skeleton": 10,
+    "banshee": 9,
+    "direwolf": 9
+  },
+  "kindWeightsStage3": {
+    "slime": 5,
+    "bat": 4,
+    "block": 3,
+    "wolf": 4,
+    "spider": 3,
+    "ghoul": 8,
+    "wraith": 7,
+    "skeleton": 7,
+    "banshee": 6,
+    "direwolf": 6,
+    "reaper": 10,
+    "lich": 9,
+    "deathknight": 10,
+    "nightmare": 9,
+    "wight": 9
   }
 }

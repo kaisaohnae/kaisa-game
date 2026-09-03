@@ -26,14 +26,44 @@
     "y": 0.004,
     "note": "손 위치(캐릭터 중심 기준, worldSize 비율). 스윙 피벗"
   },
-  "equipLayerOrder": ["shoes", "armor", "head", "necklace", "earring", "weapon", "gloves", "ring"],
-  "equipUnderWeapon": ["shoes", "armor", "head", "necklace", "earring"],
-  "equipOverWeapon": ["gloves", "ring"],
+  "equipLayerOrder": [
+    "shoes",
+    "armor",
+    "head",
+    "necklace",
+    "earring",
+    "weapon",
+    "gloves",
+    "ring"
+  ],
+  "equipUnderWeapon": [
+    "shoes",
+    "armor",
+    "head",
+    "necklace",
+    "earring"
+  ],
+  "equipOverWeapon": [
+    "gloves",
+    "ring"
+  ],
   "actions": {
-    "idle": { "fps": 1, "loop": true },
-    "walk": { "fps": 8, "loop": true },
-    "roll": { "fps": 14, "loop": false },
-    "attack": { "fps": 12, "loop": false }
+    "idle": {
+      "fps": 1,
+      "loop": true
+    },
+    "walk": {
+      "fps": 8,
+      "loop": true
+    },
+    "roll": {
+      "fps": 14,
+      "loop": false
+    },
+    "attack": {
+      "fps": 12,
+      "loop": false
+    }
   },
   "skillFx": {
     "size": 128,
@@ -52,9 +82,19 @@
       "block": 74,
       "wolf": 76,
       "spider": 72,
-      "boss": 140,
-      "bigBoss": 200,
-      "finalBoss": 240
+      "boss": 122,
+      "bigBoss": 176,
+      "finalBoss": 240,
+      "ghoul": 82,
+      "wraith": 80,
+      "skeleton": 84,
+      "banshee": 80,
+      "direwolf": 86,
+      "reaper": 96,
+      "lich": 92,
+      "deathknight": 98,
+      "nightmare": 94,
+      "wight": 92
     }
   },
   "tiles": {

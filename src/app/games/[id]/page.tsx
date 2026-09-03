@@ -27,12 +27,14 @@ export default async function GamePage({params}: PageProps) {
   if (!game) notFound();
 
   const Game = game.Component;
-  const isCarRun = id === 'car-run';
+  const isImmersive = id === 'car-run' || id === 'plane-shoot';
 
   return (
     <>
       <JsonLd data={gameJsonLd(game)} />
-      <main className={`game-page${isCarRun ? ' game-page--car-run' : ''}`}>
+      <main
+        className={`game-page${isImmersive ? ` game-page--${id}` : ''}`}
+      >
         <header className="game-page__header">
           <Link href="/" className="game-page__back">
             🏠 홈으로

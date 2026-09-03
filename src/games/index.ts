@@ -4,6 +4,7 @@ import {BalloonPopGame} from './level1/balloon-pop';
 import {ColorTouchGame} from './level1/color-touch';
 import {BadukGame} from './level2/baduk';
 import {CarRunGame} from './level2/car-run';
+import {PlaneShootGame} from './level2/plane-shoot';
 import {ChessGame} from './level2/chess';
 import {CountFruitGame} from './level2/count-fruit';
 import {DragFruitGame} from './level2/drag-fruit';
@@ -23,6 +24,13 @@ import {TodieGame} from './todie';
  * 새 게임은 맨 위에 추가.
  */
 export const GAMES: GameModule[] = [
+  {
+    id: 'plane-shoot',
+    title: 'Plane Shoot',
+    description: 'Fly up and shoot zigzag enemy planes',
+    level: 2,
+    Component: PlaneShootGame,
+  },
   {
     id: 'car-run',
     title: 'Car Race',

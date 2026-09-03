@@ -1,6 +1,8 @@
 import {loadConsumableImages, loadGearImages} from './items';
 import {loadMobImages} from './mobs';
 import {JOB_ART, loadJobImages, type LoadedImages} from './jobAssets';
+import {isLibraryTileId} from './pixellabLibrary';
+import {isBuiltinMapObject} from './mapObjects';
 import {
   loadMapObjectImages,
   loadTileImages,
@@ -22,21 +24,26 @@ export type TodieAssetBundle = {
 };
 
 /** Preload every job action/skill + gear/consumable/mob/tile/map before gameplay starts. */
-export async function preloadAllTodieAssets(): Promise<TodieAssetBundle> {
-  const [warrior, mage, gear, consumables, mobs, tileImgs, objects, map] = await Promise.all([
+export async function preloadAllTodieAssets(stage = 1): Promise<TodieAssetBundle> {
+  const map = await loadTodieMap(stage);
+  const libTiles = map.palette.filter((id) => isLibraryTileId(id));
+  const libProps = map.objects
+    .filter((o) => !isBuiltinMapObject(o.kind))
+    .map((o) => ({kind: o.kind, frame: o.frame}));
+
+  const [warrior, mage, gear, consumables, mobs, tileImgs, objects] = await Promise.all([
     loadJobImages('warrior'),
     loadJobImages('mage'),
     loadGearImages(),
     loadConsumableImages(),
     loadMobImages(),
-    loadTileImages(),
-    loadMapObjectImages(),
-    loadTodieMap(),
+    loadTileImages(libTiles),
+    loadMapObjectImages(libProps),
   ]);
 
   void JOB_ART;
 
-  const tiles = prepareTileCanvases(tileImgs, map.tileSize);
+  const tiles = prepareTileCanvases(tileImgs, map.tileSize, libTiles);
 
   return {
     jobs: {warrior, mage},

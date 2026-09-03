@@ -46,8 +46,8 @@ export async function installCharacterRotations(target, rotationUrls) {
 export function installRawPng(relPath, buf) {
   const out = projectPath(relPath);
   const norm = relPath.replace(/\\/g, '/');
-  // tiles / obstacles / vehicles / mobs / objects keep native PixelLab size (no 256 square pad)
-  const keepRaw = /\/(tiles|obstacles|vehicles|mobs|objects)\//.test(norm);
+  // tiles / obstacles / vehicles / planes / projectiles / items / mobs / objects / fx keep native size
+  const keepRaw = /\/(tiles|obstacles|vehicles|planes|projectiles|items|mobs|objects|fx)\//.test(norm);
   fs.mkdirSync(path.dirname(out), {recursive: true});
   if (keepRaw) {
     fs.writeFileSync(out, buf);

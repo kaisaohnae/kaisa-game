@@ -69,10 +69,11 @@ export function vehicleImageUrls(def: VehicleDef) {
   return def.kind === 'animated' ? def.frames ?? [] : def.src ? [def.src] : [];
 }
 
-/** 로드된 차량만 풀에 넣고, 포크레인·탱크 가중치↑ */
+/** 로드된 차량만 풀에 넣고, heavyBias로 포크레인·탱크 비중 조절 */
 export function pickObstacleVehicleId(
   excludeId: string,
   loadedIds?: Iterable<string>,
+  heavyBias = 1,
 ): string {
   const loaded = loadedIds ? new Set(loadedIds) : null;
   let pool = CAR_RUN_OBSTACLE_VEHICLES.filter((v) => v.id !== excludeId);
@@ -83,7 +84,8 @@ export function pickObstacleVehicleId(
   if (!pool.length) return 'truck';
   const weighted: string[] = [];
   for (const v of pool) {
-    const w = v.id === 'excavator' || v.id === 'tank' ? 3 : 1;
+    const base = v.id === 'excavator' || v.id === 'tank' ? 3 : 1;
+    const w = Math.max(1, Math.round(base * (v.id === 'excavator' || v.id === 'tank' ? heavyBias : 1)));
     for (let i = 0; i < w; i += 1) weighted.push(v.id);
   }
   return weighted[Math.floor(Math.random() * weighted.length)] ?? pool[0]!.id;

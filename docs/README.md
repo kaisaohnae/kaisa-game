@@ -117,3 +117,8 @@ git remote add origin "https://github.com/kaisaohnae/kaisa-fo.git"
 git branch -m main master
 git push -u --force origin master
 ```
+
+```
+npm run studio
+npm run dev
+```

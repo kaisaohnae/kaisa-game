@@ -21,6 +21,8 @@
     "todie:mobs": "node src/games/todie/scripts/gen-mobs.mjs",
     "todie:big-boss": "node src/games/todie/scripts/gen-big-boss.mjs",
     "car-run:sprites": "node scripts/install-car-sprites.mjs",
+    "plane-shoot:sprites": "node scripts/gen-plane-sprites.mjs",
+    "plane-shoot:fx": "node scripts/gen-plane-fx.mjs",
     "studio": "node scripts/pixellab-studio/server.mjs"
   },
   "dependencies": {

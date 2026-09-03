@@ -13,7 +13,27 @@ export type MobSpriteId =
   | 'bat_elite'
   | 'block_elite'
   | 'wolf_elite'
-  | 'spider_elite';
+  | 'spider_elite'
+  | 'ghoul'
+  | 'ghoul_elite'
+  | 'wraith'
+  | 'wraith_elite'
+  | 'skeleton'
+  | 'skeleton_elite'
+  | 'banshee'
+  | 'banshee_elite'
+  | 'direwolf'
+  | 'direwolf_elite'
+  | 'reaper'
+  | 'reaper_elite'
+  | 'lich'
+  | 'lich_elite'
+  | 'deathknight'
+  | 'deathknight_elite'
+  | 'nightmare'
+  | 'nightmare_elite'
+  | 'wight'
+  | 'wight_elite';
 
 const MOB_IDS: MobSpriteId[] = [
   'slime',
@@ -29,6 +49,26 @@ const MOB_IDS: MobSpriteId[] = [
   'block_elite',
   'wolf_elite',
   'spider_elite',
+  'ghoul',
+  'ghoul_elite',
+  'wraith',
+  'wraith_elite',
+  'skeleton',
+  'skeleton_elite',
+  'banshee',
+  'banshee_elite',
+  'direwolf',
+  'direwolf_elite',
+  'reaper',
+  'reaper_elite',
+  'lich',
+  'lich_elite',
+  'deathknight',
+  'deathknight_elite',
+  'nightmare',
+  'nightmare_elite',
+  'wight',
+  'wight_elite',
 ];
 
 export function mobPublicBase(): string {
