@@ -37,3 +37,7 @@ next-env.d.ts
 
 .idea
 .next
+
+# PixelLab characters (large; sync via studio)
+/public/pixellab-characters/
+/public/pixellab-library/

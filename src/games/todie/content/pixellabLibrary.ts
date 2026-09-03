@@ -1,4 +1,4 @@
-/** Shared PixelLab library — game-wide objects / tiles / characters */
+/** Shared PixelLab libraries — common objects/tiles + characters */
 
 export type LibObjectEntry = {
   name: string;
@@ -31,7 +31,8 @@ export type PixellabLibraryCatalog = {
   characters: LibCharacterEntry[];
 };
 
-export const PIXELLAB_LIBRARY_CATALOG_URL = '/pixellab-library/catalog.json';
+export const PIXELLAB_COMMON_CATALOG_URL = '/common/catalog.json';
+export const PIXELLAB_CHARACTERS_CATALOG_URL = '/pixellab-characters/catalog.json';
 
 export function emptyPixellabCatalog(): PixellabLibraryCatalog {
   return {version: 1, objects: [], tiles: [], characters: []};
@@ -39,16 +40,21 @@ export function emptyPixellabCatalog(): PixellabLibraryCatalog {
 
 export async function fetchPixellabCatalog(): Promise<PixellabLibraryCatalog> {
   try {
-    const res = await fetch(`${PIXELLAB_LIBRARY_CATALOG_URL}?t=${Date.now()}`, {
-      cache: 'no-store',
-    });
-    if (!res.ok) return emptyPixellabCatalog();
-    const raw = await res.json();
+    const [commonRes, charsRes] = await Promise.all([
+      fetch(`${PIXELLAB_COMMON_CATALOG_URL}?t=${Date.now()}`, {cache: 'no-store'}),
+      fetch(`${PIXELLAB_CHARACTERS_CATALOG_URL}?t=${Date.now()}`, {cache: 'no-store'}),
+    ]);
+    const common = commonRes.ok ? await commonRes.json() : {};
+    const chars = charsRes.ok ? await charsRes.json() : {};
     return {
       version: 1,
-      objects: Array.isArray(raw.objects) ? raw.objects : [],
-      tiles: Array.isArray(raw.tiles) ? raw.tiles : [],
-      characters: Array.isArray(raw.characters) ? raw.characters : [],
+      objects: Array.isArray(common.objects) ? common.objects : [],
+      tiles: Array.isArray(common.tiles) ? common.tiles : [],
+      characters: Array.isArray(chars.characters)
+        ? chars.characters
+        : Array.isArray(common.characters)
+          ? common.characters
+          : [],
     };
   } catch {
     return emptyPixellabCatalog();
@@ -79,15 +85,15 @@ export function isLibraryCharacterName(kind: string): boolean {
 }
 
 export function libraryObjectUrl(name: string, frame: string): string {
-  return `/pixellab-library/objects/${name}/${frame}.png`;
+  return `/common/objects/${name}/${frame}.png`;
 }
 
 export function libraryTileUrl(name: string, wang: string): string {
-  return `/pixellab-library/tiles/${name}/${wang}.png`;
+  return `/common/tiles/${name}/${wang}.png`;
 }
 
 export function libraryCharacterUrl(name: string, frame: string): string {
-  return `/pixellab-library/characters/${name}/${frame}.png`;
+  return `/pixellab-characters/${name}/${frame}.png`;
 }
 
 export function libraryPropUrl(kind: string, frame?: string): string | null {

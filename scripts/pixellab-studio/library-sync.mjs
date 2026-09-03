@@ -1,12 +1,12 @@
 /**
- * PixelLab → shared game library (objects / tilesets / characters).
- * Imports only new remoteIds unless force resync.
+ * PixelLab → local asset libraries.
  *
  * Layout:
- *   public/pixellab-library/catalog.json
- *   public/pixellab-library/objects/object-N/frame_K.png
- *   public/pixellab-library/tiles/tile-N/wang_K.png
- *   public/pixellab-library/characters/character-N/{rotation}.png
+ *   public/common/catalog.json
+ *   public/common/objects/object-N/frame_K.png
+ *   public/common/tiles/tile-N/wang_K.png
+ *   public/pixellab-characters/catalog.json
+ *   public/pixellab-characters/character-N/{rotation}.png
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -16,8 +16,10 @@ import {loadImageSource} from './pixellab.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..', '..');
-export const LIBRARY_ROOT = path.join(ROOT, 'public', 'pixellab-library');
+export const LIBRARY_ROOT = path.join(ROOT, 'public', 'common');
+export const CHARACTERS_ROOT = path.join(ROOT, 'public', 'pixellab-characters');
 export const CATALOG_PATH = path.join(LIBRARY_ROOT, 'catalog.json');
+export const CHARACTERS_CATALOG_PATH = path.join(CHARACTERS_ROOT, 'catalog.json');
 
 /** @typedef {{ name: string, desc: string, remoteId: string, frames: string[], syncedAt: string }} LibObject */
 /** @typedef {{ name: string, desc: string, remoteId: string, tiles: string[], syncedAt: string }} LibTile */
@@ -31,30 +33,61 @@ export function emptyCatalog() {
 
 /** @returns {LibraryCatalog} */
 export function loadCatalog() {
+  /** @type {LibObject[]} */
+  let objects = [];
+  /** @type {LibTile[]} */
+  let tiles = [];
+  /** @type {LibCharacter[]} */
+  let characters = [];
   try {
-    if (!fs.existsSync(CATALOG_PATH)) return emptyCatalog();
-    const raw = JSON.parse(fs.readFileSync(CATALOG_PATH, 'utf8'));
-    return {
-      version: 1,
-      objects: Array.isArray(raw.objects) ? raw.objects : [],
-      tiles: Array.isArray(raw.tiles) ? raw.tiles : [],
-      characters: Array.isArray(raw.characters) ? raw.characters : [],
-    };
+    if (fs.existsSync(CATALOG_PATH)) {
+      const raw = JSON.parse(fs.readFileSync(CATALOG_PATH, 'utf8'));
+      objects = Array.isArray(raw.objects) ? raw.objects : [];
+      tiles = Array.isArray(raw.tiles) ? raw.tiles : [];
+    }
   } catch {
-    return emptyCatalog();
+    /* ignore */
   }
+  try {
+    if (fs.existsSync(CHARACTERS_CATALOG_PATH)) {
+      const raw = JSON.parse(fs.readFileSync(CHARACTERS_CATALOG_PATH, 'utf8'));
+      characters = Array.isArray(raw.characters) ? raw.characters : [];
+    }
+  } catch {
+    /* ignore */
+  }
+  return {version: 1, objects, tiles, characters};
 }
 
 /** @param {LibraryCatalog} catalog */
 export function saveCatalog(catalog) {
   fs.mkdirSync(LIBRARY_ROOT, {recursive: true});
-  const out = {
-    version: 1,
-    objects: catalog.objects,
-    tiles: catalog.tiles,
-    characters: catalog.characters,
-  };
-  fs.writeFileSync(CATALOG_PATH, `${JSON.stringify(out, null, 2)}\n`, 'utf8');
+  fs.mkdirSync(CHARACTERS_ROOT, {recursive: true});
+  fs.writeFileSync(
+    CATALOG_PATH,
+    `${JSON.stringify(
+      {
+        version: 1,
+        objects: catalog.objects,
+        tiles: catalog.tiles,
+      },
+      null,
+      2,
+    )}\n`,
+    'utf8',
+  );
+  fs.writeFileSync(
+    CHARACTERS_CATALOG_PATH,
+    `${JSON.stringify(
+      {
+        version: 1,
+        characters: catalog.characters,
+      },
+      null,
+      2,
+    )}\n`,
+    'utf8',
+  );
 }
 
 /**
@@ -71,14 +104,14 @@ function nextName(prefix, entries) {
   return `${prefix}-${max + 1}`;
 }
 
-/** @param {string} rel under public/pixellab-library */
-function libAbs(rel) {
-  return path.join(LIBRARY_ROOT, rel.replace(/\//g, path.sep));
+/** @param {string} absRoot @param {string} rel */
+function absUnder(absRoot, rel) {
+  return path.join(absRoot, rel.replace(/\//g, path.sep));
 }
 
-/** @param {string} rel @param {Buffer} buf */
-function writePng(rel, buf) {
-  const abs = libAbs(rel);
+/** @param {string} absRoot @param {string} rel @param {Buffer} buf */
+function writePngUnder(absRoot, rel, buf) {
+  const abs = absUnder(absRoot, rel);
   fs.mkdirSync(path.dirname(abs), {recursive: true});
   fs.writeFileSync(abs, buf);
   return abs;
@@ -139,7 +172,7 @@ async function downloadObjectFrames(client, detail, objectName) {
     });
   for (const key of keys) {
     const buf = await fetchBuffer(storage[key]);
-    writePng(`objects/${objectName}/${key}.png`, buf);
+    writePngUnder(LIBRARY_ROOT, `objects/${objectName}/${key}.png`, buf);
     frames.push(key);
   }
   if (!frames.length) {
@@ -147,7 +180,7 @@ async function downloadObjectFrames(client, detail, objectName) {
     for (const [key, url] of Object.entries(rotations)) {
       if (typeof url !== 'string' || !url) continue;
       const buf = await fetchBuffer(url);
-      writePng(`objects/${objectName}/${key}.png`, buf);
+      writePngUnder(LIBRARY_ROOT, `objects/${objectName}/${key}.png`, buf);
       frames.push(key);
     }
   }
@@ -171,7 +204,7 @@ async function downloadTilesetTiles(client, tilesetId, tileName) {
       : tile.image?.url ?? null;
     if (!src) continue;
     const buf = await loadImageSource(src);
-    writePng(`tiles/${tileName}/${key}.png`, buf);
+    writePngUnder(LIBRARY_ROOT, `tiles/${tileName}/${key}.png`, buf);
     names.push(key);
   }
   names.sort((a, b) => {
@@ -193,7 +226,7 @@ async function downloadCharacterFrames(detail, characterName) {
   for (const [key, url] of Object.entries(rotations)) {
     if (typeof url !== 'string' || !url) continue;
     const buf = await fetchBuffer(url);
-    writePng(`characters/${characterName}/${key}.png`, buf);
+    writePngUnder(CHARACTERS_ROOT, `${characterName}/${key}.png`, buf);
     frames.push(key);
   }
   return frames;
@@ -211,7 +244,7 @@ function tilesetDesc(t) {
 }
 
 function characterDesc(c) {
-  const parts = [c.name || c.prompt, c.state_name].filter(Boolean);
+  const parts = [c.name || c.prompt, c.style_name].filter(Boolean);
   return parts.join(' · ').trim() || String(c.id);
 }
 
@@ -423,11 +456,11 @@ export async function syncLibrary(client, opts = {}) {
 
 /** Public URL helpers for catalog entries */
 export function objectFrameUrl(name, frame) {
-  return `/pixellab-library/objects/${name}/${frame}.png`;
+  return `/common/objects/${name}/${frame}.png`;
 }
 export function tilePartUrl(name, tile) {
-  return `/pixellab-library/tiles/${name}/${tile}.png`;
+  return `/common/tiles/${name}/${tile}.png`;
 }
 export function characterFrameUrl(name, frame) {
-  return `/pixellab-library/characters/${name}/${frame}.png`;
+  return `/pixellab-characters/${name}/${frame}.png`;
 }
