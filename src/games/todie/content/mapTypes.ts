@@ -49,15 +49,15 @@ export const MAP_WORLD_SIZE = 10_000;
 export const MAP_TILE_SIZE = 100;
 export const MAP_COLS = MAP_WORLD_SIZE / MAP_TILE_SIZE; // 100
 export const MAP_ROWS = MAP_WORLD_SIZE / MAP_TILE_SIZE; // 100
-export const MAP_URL = '/todie/map/world.json';
+export const MAP_URL = '/todie/map/stage1.json';
 
 /**
  * 스테이지별 맵 파일 경로. `/studio/map/`에서 'stage2'·'stage3' 이름으로 맵을
- * 만들어 저장하면 자동으로 사용된다 — 없으면 기본 맵(world.json)으로 폴백.
+ * 만들어 저장하면 자동으로 사용된다 — 없으면 기본 맵(stage1.json)으로 폴백.
  */
 export function mapUrlForStage(stage: number): string {
-  if (stage >= 2) return `/todie/map/stage${stage}.json`;
-  return MAP_URL;
+  const n = Math.max(1, Math.floor(stage));
+  return `/todie/map/stage${n}.json`;
 }
 
 export type TodieMapJson = {
@@ -87,7 +87,7 @@ export function tileDef(id: TileId): TileDef {
 export function emptyMap(fill: TileId = DEFAULT_MAP_TILE): TodieMapJson {
   return {
     version: 1,
-    name: 'todie-world',
+    name: 'stage1',
     worldSize: MAP_WORLD_SIZE,
     tileSize: MAP_TILE_SIZE,
     cols: MAP_COLS,
@@ -215,7 +215,7 @@ export function parseMapJson(data: unknown): TodieMapJson {
   });
   return {
     version: 1,
-    name: typeof raw.name === 'string' ? raw.name : 'todie-world',
+    name: typeof raw.name === 'string' ? raw.name : 'stage1',
     worldSize: Number(raw.worldSize) || MAP_WORLD_SIZE,
     tileSize: Number(raw.tileSize) || MAP_TILE_SIZE,
     cols,

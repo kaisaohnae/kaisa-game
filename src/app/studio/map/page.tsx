@@ -44,12 +44,11 @@ function cloneMap(map: TodieMapJson): TodieMapJson {
 }
 
 function publicMapUrl(id: string): string {
-  return id === 'world' ? '/todie/map/world.json' : `/todie/map/${id}.json`;
+  return `/todie/map/${id}.json`;
 }
 
-/** UI 표시명 — 파일 id `world` 는 스테이지1 */
 function mapDisplayName(id: string) {
-  return id === 'world' ? 'stage1' : id;
+  return id;
 }
 
 export default function TodieMapStudioPage() {
@@ -75,7 +74,7 @@ export default function TodieMapStudioPage() {
   const [dirty, setDirty] = useState(false);
   const [secret] = useState(STUDIO_SECRET);
   const [cursorTile, setCursorTile] = useState({tx: 0, ty: 0});
-  const [mapId, setMapId] = useState('world');
+  const [mapId, setMapId] = useState('stage1');
   const [mapList, setMapList] = useState<MapListEntry[]>([]);
   const [library, setLibrary] = useState<PixellabLibraryCatalog>(emptyPixellabCatalog());
   const [libOpen, setLibOpen] = useState<string | null>(null);
@@ -368,7 +367,7 @@ export default function TodieMapStudioPage() {
       tileImgsRef.current = tileImgs;
       objImgsRef.current = objImgs;
 
-      await loadMap('world');
+      await loadMap('stage1');
       void refreshMapList();
     })();
     return () => {
@@ -595,7 +594,7 @@ export default function TodieMapStudioPage() {
   };
 
   const deleteCurrentMap = async () => {
-    if (!localOnly || mapId === 'world') return;
+    if (!localOnly || mapId === 'stage1') return;
     if (!window.confirm(`"${mapId}" 맵을 삭제할까요? 되돌릴 수 없어요.`)) return;
     try {
       const res = await fetch(`${STUDIO_URL}/api/todie-map?id=${encodeURIComponent(mapId)}`, {
@@ -605,7 +604,7 @@ export default function TodieMapStudioPage() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error ?? `delete ${res.status}`);
       void refreshMapList();
-      void loadMap('world');
+      void loadMap('stage1');
     } catch (err) {
       window.alert(err instanceof Error ? err.message : String(err));
     }
@@ -691,7 +690,7 @@ export default function TodieMapStudioPage() {
             >
               되돌리기
             </button>
-            {mapId !== 'world' && (
+            {mapId !== 'stage1' && (
               <button
                 type="button"
                 className="map-studio__btn map-studio__btn--danger"

@@ -137,8 +137,8 @@ export async function loadMapObjectImages(
 }
 
 export async function loadTodieMap(stage = 1): Promise<TodieMapJson> {
-  const urls = stage >= 2 ? [mapUrlForStage(stage), MAP_URL] : [MAP_URL];
-  for (const url of urls) {
+  const urls = [mapUrlForStage(stage), MAP_URL];
+  for (const url of [...new Set(urls)]) {
     try {
       const res = await fetch(url, {cache: 'no-store'});
       if (!res.ok) continue;

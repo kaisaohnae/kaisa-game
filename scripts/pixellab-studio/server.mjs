@@ -223,7 +223,7 @@ const server = http.createServer(async (req, res) => {
         return {id, name, cols, rows, updatedAt};
       });
       maps.sort((a, b) => {
-        const rank = (id) => (id === 'world' || id === 'stage1' ? 0 : id === 'stage2' ? 1 : id === 'stage3' ? 2 : 10);
+        const rank = (id) => (id === 'stage1' ? 0 : id === 'stage2' ? 1 : id === 'stage3' ? 2 : 10);
         const d = rank(a.id) - rank(b.id);
         return d !== 0 ? d : a.id.localeCompare(b.id);
       });
@@ -246,7 +246,7 @@ const server = http.createServer(async (req, res) => {
       if (!body || body.version !== 1 || !Array.isArray(body.cells) || !Array.isArray(body.palette)) {
         return json(res, {error: 'invalid map payload'}, 400);
       }
-      const id = sanitizeMapId(body.id ?? url.searchParams.get('id') ?? 'world');
+      const id = sanitizeMapId(body.id ?? url.searchParams.get('id') ?? 'stage1');
       if (!id) return json(res, {error: 'invalid map id'}, 400);
       const cols = Number(body.cols) || 100;
       const rows = Number(body.rows) || 100;
@@ -282,7 +282,7 @@ const server = http.createServer(async (req, res) => {
 
     if (url.pathname === '/api/todie-map' && req.method === 'DELETE') {
       const id = sanitizeMapId(url.searchParams.get('id'));
-      if (!id || id === 'world') return json(res, {error: 'cannot delete this map'}, 400);
+      if (!id || id === 'stage1') return json(res, {error: 'cannot delete this map'}, 400);
       const mapPath = path.join(ROOT, 'public', 'todie', 'map', `${id}.json`);
       if (fs.existsSync(mapPath)) fs.unlinkSync(mapPath);
       return json(res, {ok: true, id});
