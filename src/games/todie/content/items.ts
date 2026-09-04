@@ -16,6 +16,9 @@ import {
   MAX_ENHANCE_LEVEL,
   BASE_ENHANCE_MAX,
   STAGE4_ENHANCE_MAX,
+  AURA_ENHANCE_LEVEL,
+  hasMaxWeaponEnhance,
+  maxEnhanceAuraSettings,
 } from './equip';
 
 export const itemSettings = itemsJson;
@@ -166,17 +169,21 @@ export function buildItemHelp(item: Item, playerJob: JobId): ItemHelpInfo | null
     const enhanceLine =
       enhanceLevel >= MAX_ENHANCE_LEVEL
         ? `강화 · 최대 (+${MAX_ENHANCE_LEVEL}) · ${enhanceGain}`
-        : enhanceLevel >= STAGE4_ENHANCE_MAX
+        : enhanceLevel >= AURA_ENHANCE_LEVEL
           ? `강화 · +${enhanceLevel} → +${enhanceLevel + 1} 확률 ${Math.round(
               enhanceSuccessChance(enhanceLevel + 1) * 100,
-            )}% · 스테이지 5 · ${enhanceGain}`
-          : enhanceLevel >= BASE_ENHANCE_MAX
+            )}% · 스테이지 5 초월 · ${enhanceGain}`
+          : enhanceLevel >= STAGE4_ENHANCE_MAX
             ? `강화 · +${enhanceLevel} → +${enhanceLevel + 1} 확률 ${Math.round(
                 enhanceSuccessChance(enhanceLevel + 1) * 100,
-              )}% · 스테이지 4 · ${enhanceGain}`
-            : `강화 · +${enhanceLevel} → +${enhanceLevel + 1} 확률 ${Math.round(
-                enhanceSuccessChance(enhanceLevel + 1) * 100,
-              )}% · ${enhanceGain} (강화석 클릭 후 장착 장비 클릭)`;
+              )}% · 스테이지 5 · ${enhanceGain}`
+            : enhanceLevel >= BASE_ENHANCE_MAX
+              ? `강화 · +${enhanceLevel} → +${enhanceLevel + 1} 확률 ${Math.round(
+                  enhanceSuccessChance(enhanceLevel + 1) * 100,
+                )}% · 스테이지 4 · ${enhanceGain}`
+              : `강화 · +${enhanceLevel} → +${enhanceLevel + 1} 확률 ${Math.round(
+                  enhanceSuccessChance(enhanceLevel + 1) * 100,
+                )}% · ${enhanceGain} (강화석 클릭 후 장착 장비 클릭)`;
     const gradeLine = meta ? `등급 · ${meta.label}${enhanceLevel > 0 ? ` +${enhanceLevel}` : ''}` : null;
     const lines = [
       `슬롯 · ${slotLabel}`,
@@ -265,6 +272,11 @@ export function sumEquippedStats(equipped: import('./equip').Equipment): GearSta
     atk += st.atk + bonus.atk;
     def += st.def + bonus.def;
     hp += st.hp + bonus.hp;
+  }
+  if (hasMaxWeaponEnhance(equipped)) {
+    const aura = maxEnhanceAuraSettings();
+    def += aura.defBonus;
+    hp += aura.hpBonus;
   }
   return {atk, def, hp};
 }
@@ -461,6 +473,32 @@ export function starterGearItem(job: JobId): LootItemDraft {
     gearSlot: s.slot as GearSlot,
     tier: (s.tier as GearTier) ?? 'basic',
   };
+}
+
+/** 디버그/치트: 직업별 신화 풀세트를 장착하고 전부 +maxEnhance */
+export function equipFullMythicMaxEnhance(
+  equipped: Equipment,
+  job: JobId,
+  maxEnhance: number = MAX_ENHANCE_LEVEL,
+): void {
+  const mythics = allGearDefs().filter((g) => g.job === job && g.tier === 'mythic');
+  const level = Math.max(0, Math.floor(maxEnhance));
+  for (const slot of EQUIP_SLOTS) {
+    const def = mythics.find((g) => g.slot === slot.id);
+    if (!def) continue;
+    equipped[slot.id] = {
+      id: `mythic-${slot.id}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      kind: 'gear',
+      name: formatGearName(job, def.name),
+      qty: 1,
+      color: def.color,
+      job,
+      gearId: def.id,
+      gearSlot: slot.id,
+      tier: 'mythic',
+      enhance: level,
+    };
+  }
 }
 
 export function draftToItem(draft: LootItemDraft): Item {

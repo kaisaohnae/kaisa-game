@@ -404,30 +404,90 @@ type EnhanceConfig = {
   lowChance: number;
   ultraChance: number;
   mythicChance: number;
+  /** +21~+25 등 초월 구간 시작 레벨 */
+  legendFromLevel?: number;
+  /** 초월 구간 성공 확률 (기본 1%) */
+  legendChance?: number;
   weaponAtkPerLevel: number;
   otherDefPerLevel: number;
+  maxAura?: {
+    minEnhance?: number;
+    intervalSec?: number;
+    radius?: number;
+    hpBonus?: number;
+    defBonus?: number;
+    fxSizeMult?: number;
+    fxAlphaMin?: number;
+    fxAlphaMax?: number;
+    /** FX가 주인공 중심에서 이 거리 안으로는 안 떨어짐 */
+    fxClearRadius?: number;
+    /** +minEnhance 이상 기본스킬(베기/장풍) 3갈래 발사 각도(rad) */
+    tripleShotSpreadRad?: number;
+    /** 검사 베기 3갈래 각도 (더 넓게) */
+    tripleShotSpreadRadWarrior?: number;
+  };
 };
 
 const ENHANCE_CFG: EnhanceConfig = (equipJson as {enhance?: EnhanceConfig}).enhance ?? {
-  maxLevel: 20,
+  maxLevel: 25,
   baseMaxLevel: 10,
   stage4MaxLevel: 15,
-  stage5MaxLevel: 20,
+  stage5MaxLevel: 25,
   highTierUpTo: 5,
   highChance: 0.5,
   lowChance: 0.2,
   ultraChance: 0.05,
   mythicChance: 0.01,
+  legendFromLevel: 21,
+  legendChance: 0.01,
   weaponAtkPerLevel: 1,
   otherDefPerLevel: 1,
 };
 
-/** 절대 최대 강화 (+20, 스테이지 5) */
+/** 절대 최대 강화 (+25, 스테이지 5) */
 export const MAX_ENHANCE_LEVEL = ENHANCE_CFG.maxLevel;
 /** 스테이지 1~3 최대 / 스테이지 4 진입 기준 (+10) */
 export const BASE_ENHANCE_MAX = ENHANCE_CFG.baseMaxLevel;
 /** 스테이지 4 최대 / 스테이지 5 진입 기준 (+15) */
 export const STAGE4_ENHANCE_MAX = ENHANCE_CFG.stage4MaxLevel;
+/** 오라·상시 효과 시작 강화 (+20) */
+export const AURA_ENHANCE_LEVEL = ENHANCE_CFG.maxAura?.minEnhance ?? 20;
+
+export type MaxEnhanceAura = {
+  intervalSec: number;
+  radius: number;
+  hpBonus: number;
+  defBonus: number;
+  minEnhance: number;
+  fxSizeMult: number;
+  fxAlphaMin: number;
+  fxAlphaMax: number;
+  fxClearRadius: number;
+  tripleShotSpreadRad: number;
+  tripleShotSpreadRadWarrior: number;
+};
+
+export function maxEnhanceAuraSettings(): MaxEnhanceAura {
+  const a = ENHANCE_CFG.maxAura;
+  return {
+    intervalSec: a?.intervalSec ?? 2,
+    radius: a?.radius ?? 300,
+    hpBonus: a?.hpBonus ?? 1000,
+    defBonus: a?.defBonus ?? 1000,
+    minEnhance: a?.minEnhance ?? 20,
+    fxSizeMult: a?.fxSizeMult ?? 0.55,
+    fxAlphaMin: a?.fxAlphaMin ?? 0.72,
+    fxAlphaMax: a?.fxAlphaMax ?? 0.88,
+    fxClearRadius: a?.fxClearRadius ?? 90,
+    tripleShotSpreadRad: a?.tripleShotSpreadRad ?? 0.52,
+    tripleShotSpreadRadWarrior: a?.tripleShotSpreadRadWarrior ?? 0.95,
+  };
+}
+
+/** 장착 무기가 오라 발동 강화(+20) 이상인지 */
+export function hasMaxWeaponEnhance(equipped: Equipment): boolean {
+  return (equipped.weapon?.enhance ?? 0) >= AURA_ENHANCE_LEVEL;
+}
 
 /** 현재 스테이지에서 허용되는 최대 강화 */
 export function maxEnhanceForStage(stage: number): number {
@@ -438,9 +498,11 @@ export function maxEnhanceForStage(stage: number): number {
 
 /**
  * 다음 강화 단계 성공 확률
- * 1~5: 50% / 6~10: 20% / 11~15: 5% / 16~20: 1%
+ * 1~5: high / 6~10: low / 11~15: ultra / 16~20: mythic / 21~25: legend(1%)
  */
 export function enhanceSuccessChance(nextLevel: number): number {
+  const legendFrom = ENHANCE_CFG.legendFromLevel ?? 21;
+  if (nextLevel >= legendFrom) return ENHANCE_CFG.legendChance ?? 0.01;
   if (nextLevel > ENHANCE_CFG.stage4MaxLevel) return ENHANCE_CFG.mythicChance;
   if (nextLevel > ENHANCE_CFG.baseMaxLevel) return ENHANCE_CFG.ultraChance;
   return nextLevel <= ENHANCE_CFG.highTierUpTo ? ENHANCE_CFG.highChance : ENHANCE_CFG.lowChance;
@@ -473,7 +535,7 @@ export type EnhanceOutcome = {
 /**
  * 가방의 강화석 1개를 소모해 target 장비를 강화 시도.
  * target은 bag/equipped 어디에 있든 참조로 전달 — 성공 시 그 자리에서 enhance += 1.
- * @param maxLevel 현재 허용 최대 강화 (스테이지별 +10 / +15 / +20)
+ * @param maxLevel 현재 허용 최대 강화 (스테이지별 +10 / +15 / +25)
  */
 export function applyEnhanceStone(
   bag: Item[],

@@ -143,5 +143,8 @@ C:\workspace-kaisa\kaisa-game\public\common\monsters
 주인공 케릭터 리소스는 
 C:\workspace-kaisa\kaisa-game\public\common\characters
 이곳으로 옮긴다. 
+--------------
 
-진행해줘 
+무기 +20이면 검사/법사 공통으로 적용됩니다.
+2초마다 법사 마법폭발(nova)과 같은 범위·피해·펑펑펑 FX
+방어 +1000, 체력 +1000 (장비 합산에 포함)

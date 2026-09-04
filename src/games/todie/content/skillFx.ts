@@ -43,6 +43,8 @@ export type SkillFxBehavior = {
   staggerDelay?: number;
   /** 스캐터 각 폭발 지속시간 */
   fxLife?: number;
+  /** 주인공 중심에서 이 거리 안으로는 FX 미배치 */
+  clearRadius?: number;
 };
 
 export function skillFxBehavior(skillId: string): SkillFxBehavior {

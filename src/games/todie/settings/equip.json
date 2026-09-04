@@ -55,16 +55,32 @@
     "successChance": 0.5
   },
   "enhance": {
-    "maxLevel": 20,
+    "maxLevel": 25,
     "baseMaxLevel": 10,
     "stage4MaxLevel": 15,
-    "stage5MaxLevel": 20,
+    "stage5MaxLevel": 25,
     "highTierUpTo": 5,
     "highChance": 0.5,
     "lowChance": 0.3,
     "ultraChance": 0.1,
     "mythicChance": 0.05,
+    "legendFromLevel": 21,
+    "legendChance": 0.01,
     "weaponAtkPerLevel": 1,
-    "otherDefPerLevel": 1
+    "otherDefPerLevel": 1,
+    "maxAura": {
+      "note": "무기 +minEnhance 이상 시 상시 보너스. 법사 마법폭발(nova)을 intervalSec마다 발동",
+      "minEnhance": 20,
+      "intervalSec": 2,
+      "radius": 300,
+      "hpBonus": 1000,
+      "defBonus": 1000,
+      "fxSizeMult": 0.55,
+      "fxAlphaMin": 0.72,
+      "fxAlphaMax": 0.88,
+      "fxClearRadius": 90,
+      "tripleShotSpreadRad": 0.52,
+      "tripleShotSpreadRadWarrior": 0.95
+    }
   }
 }

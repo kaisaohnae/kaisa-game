@@ -31,6 +31,7 @@ export {
   enhanceStoneValueFor,
   isExtractableGear,
   extractGearToEnhanceStone,
+  equipFullMythicMaxEnhance,
 } from './items';
 export {spawnSettings, pickSpawnKind, spawnPlanForStage} from './spawn';
 export type {SpawnMobKind} from './spawn';
@@ -90,14 +91,18 @@ export {
   MAX_ENHANCE_LEVEL,
   BASE_ENHANCE_MAX,
   STAGE4_ENHANCE_MAX,
+  AURA_ENHANCE_LEVEL,
   enhanceSuccessChance,
   enhanceStatBonus,
   enhanceStatMultiplier,
   applyEnhanceStone,
   maxEnhanceForStage,
+  hasMaxWeaponEnhance,
+  maxEnhanceAuraSettings,
   sortBag,
   stageForEquipped,
 } from './equip';
+export type {MaxEnhanceAura} from './equip';
 export {
   skillFxSettings,
   skillFxSizeForEnhance,

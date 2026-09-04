@@ -13,9 +13,14 @@ import {
   emptyEquipment,
   ensureHotbarConsumableSlots,
   EQUIP_SLOTS,
+  equipFullMythicMaxEnhance,
   extractGearToEnhanceStone,
   applyEnhanceStone,
   maxEnhanceForStage,
+  MAX_ENHANCE_LEVEL,
+  AURA_ENHANCE_LEVEL,
+  hasMaxWeaponEnhance,
+  maxEnhanceAuraSettings,
   isExtractableGear,
   stageForEquipped,
   facingToCardinal,
@@ -170,6 +175,8 @@ type Fx = {
   color: string;
   r?: number;
   skillId?: string;
+  /** FX 스프라이트 직업 (미지정 시 플레이어 직업) */
+  fxJob?: JobId;
   facing?: number;
   fxSize?: number;
   fxAlpha?: number;
@@ -640,13 +647,17 @@ function biomeWasteland(tx: number, ty: number): number {
 function VirtualJoystick({
   joystickRef,
   knobElRef,
+  onCenterClickBurst,
 }: {
   joystickRef: React.RefObject<{dx: number; dy: number; active: boolean}>;
   knobElRef: React.RefObject<HTMLDivElement | null>;
+  /** 정중앙 좌클릭 20회 / 10초 */
+  onCenterClickBurst?: () => void;
 }) {
   const baseRef = useRef<HTMLDivElement>(null);
   const ptrId = useRef<number | null>(null);
   const baseRect = useRef({cx: 0, cy: 0, r: 0});
+  const centerClicks = useRef<number[]>([]);
 
   const moveKnob = (dx: number, dy: number) => {
     const el = knobElRef.current;
@@ -666,20 +677,41 @@ function VirtualJoystick({
     let dx = (clientX - cx) / r;
     let dy = (clientY - cy) / r;
     const len = Math.hypot(dx, dy);
-    if (len > 1) { dx /= len; dy /= len; }
+    if (len > 1) {
+      dx /= len;
+      dy /= len;
+    }
     joystickRef.current.dx = dx;
     joystickRef.current.dy = dy;
     joystickRef.current.active = true;
     moveKnob(dx, dy);
   };
 
+  const noteCenterClick = (clientX: number, clientY: number, cx: number, cy: number, size: number) => {
+    if (!onCenterClickBurst) return;
+    const centerHit = Math.max(14, size * 0.16);
+    if (Math.hypot(clientX - cx, clientY - cy) > centerHit) return;
+    const now = performance.now();
+    const windowMs = 10_000;
+    centerClicks.current = centerClicks.current.filter((t) => now - t <= windowMs);
+    centerClicks.current.push(now);
+    if (centerClicks.current.length >= 20) {
+      centerClicks.current = [];
+      onCenterClickBurst();
+    }
+  };
+
   const onDown = (e: React.PointerEvent) => {
+    if (e.button !== 0) return;
     if (ptrId.current != null) return;
     ptrId.current = e.pointerId;
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
     const el = baseRef.current!;
     const rect = el.getBoundingClientRect();
-    baseRect.current = {cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2, r: rect.width / 2};
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    baseRect.current = {cx, cy, r: rect.width / 2};
+    noteCenterClick(e.clientX, e.clientY, cx, cy, rect.width);
     update(e.clientX, e.clientY);
   };
 
@@ -705,6 +737,7 @@ function VirtualJoystick({
       onPointerMove={onMove}
       onPointerUp={onUp}
       onPointerCancel={onUp}
+      onContextMenu={(e) => e.preventDefault()}
     >
       <div className="todie__joystick-base" />
       <div
@@ -1629,9 +1662,11 @@ export default function TodieGame() {
         const flySpd = flyDist > 0 ? flyDist / Math.max(0.05, flyLife) : 0;
         const fxLife = behavior.fxLife ?? (flyDist > 0 ? flyLife : life);
         const stagger = behavior.staggerDelay ?? 0;
+        const clearR = Math.min(behavior.clearRadius ?? 0, radius * 0.85);
+        const outerSpan = Math.max(8, radius - clearR);
         for (let i = 0; i < count; i += 1) {
           const ang = Math.random() * Math.PI * 2;
-          const dist = Math.random() * radius;
+          const dist = clearR > 0 ? clearR + Math.random() * outerSpan : Math.random() * radius;
           const sx = player.x + Math.cos(ang) * dist;
           const sy = player.y + Math.sin(ang) * dist;
           const sz = behavior.randomSize ? fxSize * rand(s0, s1) : fxSize;
@@ -1648,18 +1683,37 @@ export default function TodieGame() {
         }
       };
 
-      const pushFlyingFx = (startOffset = 18, opts?: {sizePulse?: boolean}) => {
+      const pushFlyingFx = (
+        startOffset = 18,
+        opts?: {sizePulse?: boolean; dirX?: number; dirY?: number; facing?: number},
+      ) => {
         const flyDist = behavior.flyDistance ?? 50;
         const flyLife = behavior.flyLife ?? 0.3;
         const flySpd = flyDist / Math.max(0.05, flyLife);
         const size = fxSize * (behavior.sizeMult ?? 1);
-        pushSkillFx(player.x + aimX * startOffset, player.y + aimY * startOffset, flyLife, {
+        const dx = opts?.dirX ?? aimX;
+        const dy = opts?.dirY ?? aimY;
+        pushSkillFx(player.x + dx * startOffset, player.y + dy * startOffset, flyLife, {
           size,
-          vx: aimX * flySpd,
-          vy: aimY * flySpd,
+          facing: opts?.facing ?? aim,
+          vx: dx * flySpd,
+          vy: dy * flySpd,
           sizePulse: opts?.sizePulse ?? behavior.sizePulse,
         });
       };
+
+      /** +20 이상: 전방 + 대각 상하 3갈래 (검사는 더 넓게) */
+      const shotAngles =
+        weaponEnhance >= AURA_ENHANCE_LEVEL
+          ? (() => {
+              const aura = maxEnhanceAuraSettings();
+              const spread =
+                sk.id === 'slash'
+                  ? aura.tripleShotSpreadRadWarrior
+                  : aura.tripleShotSpreadRad;
+              return [aim - spread, aim, aim + spread];
+            })()
+          : [aim];
 
       const swingDur =
         (displaySettings as {attackSwing?: Record<string, number>}).attackSwing?.[sk.id] ?? 0.28;
@@ -1670,11 +1724,12 @@ export default function TodieGame() {
       if (sk.id === 'slash') {
         const offset = sk.offset ?? 36;
         const radius = sk.radius ?? 48;
-        const ax = player.x + aimX * offset;
-        const ay = player.y + aimY * offset;
-        damageMobsInCircle(ax, ay, radius, hit);
-        // 전방 ~50 비행 후 소멸
-        pushFlyingFx(12);
+        for (const ang of shotAngles) {
+          const dx = Math.cos(ang);
+          const dy = Math.sin(ang);
+          damageMobsInCircle(player.x + dx * offset, player.y + dy * offset, radius, hit);
+          pushFlyingFx(12, {dirX: dx, dirY: dy, facing: ang});
+        }
       } else if (sk.id === 'spin') {
         const radius = Math.max(sk.radius ?? 78, behavior.scatterRadius ?? 200);
         damageMobsInCircle(player.x, player.y, radius, hit);
@@ -1691,28 +1746,33 @@ export default function TodieGame() {
         damageMobsInCircle(ax, ay, radius, hit);
         pushFlyingFx(20);
       } else if (sk.id === 'bolt') {
-        // 장풍 — 전방 500 단일 파동
+        // 장풍 — 전방 500 ( +20이면 대각 상하 포함 3갈래 )
         const range = sk.projectileRange ?? behavior.flyDistance ?? 500;
         const spd = sk.projectileSpeed ?? 700;
         const life = range / Math.max(1, spd);
         const hitR = sk.projectileHitRadius ?? 64;
-        projectiles.push({
-          x: player.x + aimX * 28,
-          y: player.y + aimY * 28,
-          vx: aimX * spd,
-          vy: aimY * spd,
-          life,
-          dmg: hit,
-          color: sk.fxColor,
-          hitR,
-          hideDraw: true,
-        });
-        pushSkillFx(player.x + aimX * 24, player.y + aimY * 24, life, {
-          size: fxSize * (behavior.sizeMult ?? 1),
-          vx: aimX * spd,
-          vy: aimY * spd,
-          sizePulse: true,
-        });
+        for (const ang of shotAngles) {
+          const dx = Math.cos(ang);
+          const dy = Math.sin(ang);
+          projectiles.push({
+            x: player.x + dx * 28,
+            y: player.y + dy * 28,
+            vx: dx * spd,
+            vy: dy * spd,
+            life,
+            dmg: hit,
+            color: sk.fxColor,
+            hitR,
+            hideDraw: true,
+          });
+          pushSkillFx(player.x + dx * 24, player.y + dy * 24, life, {
+            size: fxSize * (behavior.sizeMult ?? 1),
+            facing: ang,
+            vx: dx * spd,
+            vy: dy * spd,
+            sizePulse: true,
+          });
+        }
       } else if (sk.id === 'nova') {
         const r = Math.max(sk.radius ?? 190, behavior.scatterRadius ?? 200);
         damageMobsInCircle(player.x, player.y, r, hit);
@@ -1727,6 +1787,51 @@ export default function TodieGame() {
           facing: null,
           sizeExpand: true,
           r,
+        });
+      }
+    };
+
+    /** 무기 +20 상시 오라: 법사 마법폭발(nova) — 크기·알파 축소 */
+    let maxEnhanceNovaCd = 0;
+    const triggerMaxEnhanceNova = () => {
+      const novaBal = (
+        bal.skills as Record<string, Record<string, {damage?: number; radius?: number; fxColor?: string; fxRadius?: number}>>
+      ).mage?.nova;
+      const behavior = skillFxBehavior('nova');
+      const aura = maxEnhanceAuraSettings();
+      const weaponEnhance = equippedRef.current.weapon?.enhance ?? 0;
+      const fxSize = skillFxSizeForEnhance(weaponEnhance) * aura.fxSizeMult;
+      const hit = (novaBal?.damage ?? 95) + gearPower().atk;
+      const radius = aura.radius;
+      damageMobsInCircle(player.x, player.y, radius, hit);
+
+      const count = behavior.scatterCount ?? 5;
+      const a0 = aura.fxAlphaMin;
+      const a1 = aura.fxAlphaMax;
+      const s0 = (behavior.sizeMin ?? 0.95) * 0.85;
+      const s1 = (behavior.sizeMax ?? 1.4) * 0.85;
+      const fxLife = behavior.fxLife ?? 0.7;
+      const stagger = behavior.staggerDelay ?? 0.22;
+      const color = novaBal?.fxColor ?? '#ce93d8';
+      const clearR = Math.min(aura.fxClearRadius, radius * 0.85);
+      const outerSpan = Math.max(8, radius - clearR);
+      for (let i = 0; i < count; i += 1) {
+        const ang = Math.random() * Math.PI * 2;
+        // 주인공 근처(clearR)에는 FX가 떨어지지 않음
+        const dist = clearR + Math.random() * outerSpan;
+        fx.push({
+          x: player.x + Math.cos(ang) * dist,
+          y: player.y + Math.sin(ang) * dist,
+          life: fxLife,
+          max: fxLife,
+          color,
+          r: radius,
+          skillId: 'nova',
+          fxJob: 'mage',
+          facing: undefined,
+          fxSize: fxSize * rand(s0, s1),
+          fxAlpha: rand(a0, a1),
+          delay: stagger > 0 ? i * stagger : undefined,
         });
       }
     };
@@ -2456,9 +2561,6 @@ export default function TodieGame() {
         ctx.setLineDash([]);
       }
 
-      if (player.invuln > 0 && player.shieldHp <= 0) {
-        ctx.globalAlpha = 0.55 + 0.45 * Math.sin(performance.now() / 40);
-      }
       const moving =
         Math.hypot(player.vx, player.vy) > 35 ||
         keys.has('KeyW') ||
@@ -2652,7 +2754,7 @@ export default function TodieGame() {
       for (const f of fx) {
         if (!f.skillId) continue;
         if (f.delay != null && f.delay > 0) continue;
-        const sprite = pickSkillFxImage(skillFxImages, job, f.skillId);
+        const sprite = pickSkillFxImage(skillFxImages, f.fxJob ?? job, f.skillId);
         if (!sprite) continue;
         const lifeA = f.life / f.max;
         const age = 1 - lifeA;
@@ -3022,6 +3124,17 @@ export default function TodieGame() {
         player.mp = Math.min(player.maxMp, player.mp + bal.player.mpRegenPerSec * dt);
         applyGearVitals();
         player.hp = Math.min(player.maxHp, player.hp + bal.player.hpRegenPerSec * dt);
+
+        // 무기 +20: 2초마다 마법폭발 오라
+        if (hasMaxWeaponEnhance(equippedRef.current)) {
+          maxEnhanceNovaCd -= dt;
+          if (maxEnhanceNovaCd <= 0) {
+            triggerMaxEnhanceNova();
+            maxEnhanceNovaCd = maxEnhanceAuraSettings().intervalSec;
+          }
+        } else {
+          maxEnhanceNovaCd = 0;
+        }
 
         player.rolling = Math.max(0, player.rolling - dt);
         player.invuln = Math.max(0, player.invuln - dt);
@@ -3512,7 +3625,19 @@ export default function TodieGame() {
           </div>
         </div>
       )}
-      <VirtualJoystick joystickRef={joystickRef} knobElRef={knobElRef} />
+      <VirtualJoystick
+        joystickRef={joystickRef}
+        knobElRef={knobElRef}
+        onCenterClickBurst={() => {
+          if (!started) return;
+          equipFullMythicMaxEnhance(equippedRef.current, startJob, MAX_ENHANCE_LEVEL);
+          for (const it of bagRef.current) {
+            if (it.kind === 'gear') it.enhance = MAX_ENHANCE_LEVEL;
+          }
+          toastFnRef.current('치트: 신화 풀세트 +20 적용');
+          syncBag();
+        }}
+      />
       <InventoryDock
         bag={bagRef.current}
         equipped={equippedRef.current}
