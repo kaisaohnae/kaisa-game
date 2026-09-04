@@ -264,6 +264,30 @@
         "frame_15"
       ],
       "syncedAt": "2026-09-03T06:56:55.939Z"
+    },
+    {
+      "name": "object-12",
+      "desc": "우주공간의 느낌",
+      "remoteId": "df4cc7ff-3431-497a-8ba5-107551c6c580",
+      "frames": [
+        "frame_0",
+        "frame_1",
+        "frame_2",
+        "frame_3",
+        "frame_4",
+        "frame_5",
+        "frame_6",
+        "frame_7",
+        "frame_8",
+        "frame_9",
+        "frame_10",
+        "frame_11",
+        "frame_12",
+        "frame_13",
+        "frame_14",
+        "frame_15"
+      ],
+      "syncedAt": "2026-09-04T02:18:55.890Z"
     }
   ],
   "tiles": [
@@ -386,6 +410,54 @@
         "wang_15"
       ],
       "syncedAt": "2026-09-03T06:56:55.939Z"
+    },
+    {
+      "name": "tile-6",
+      "desc": "회색 돌바닥 느낌으로 ↗ 회색 돌바닥 느낌으로",
+      "remoteId": "3fa0b272-eb5c-45bb-929c-564095040604",
+      "tiles": [
+        "wang_0",
+        "wang_1",
+        "wang_2",
+        "wang_3",
+        "wang_4",
+        "wang_5",
+        "wang_6",
+        "wang_7",
+        "wang_8",
+        "wang_9",
+        "wang_10",
+        "wang_11",
+        "wang_12",
+        "wang_13",
+        "wang_14",
+        "wang_15"
+      ],
+      "syncedAt": "2026-09-04T04:13:17.288Z"
+    },
+    {
+      "name": "tile-7",
+      "desc": "우주공간의 느낌으로 ↗ 우주공간의 느낌으로",
+      "remoteId": "5519ebae-79db-4467-a2a7-cbe95592fef3",
+      "tiles": [
+        "wang_0",
+        "wang_1",
+        "wang_2",
+        "wang_3",
+        "wang_4",
+        "wang_5",
+        "wang_6",
+        "wang_7",
+        "wang_8",
+        "wang_9",
+        "wang_10",
+        "wang_11",
+        "wang_12",
+        "wang_13",
+        "wang_14",
+        "wang_15"
+      ],
+      "syncedAt": "2026-09-04T04:13:17.288Z"
     }
   ]
 }

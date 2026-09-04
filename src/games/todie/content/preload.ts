@@ -1,6 +1,8 @@
 import {loadConsumableImages, loadGearImages} from './items';
 import {loadMonsterImages} from './monsters';
 import {JOB_ART, loadJobImages, type LoadedImages} from './jobAssets';
+import {loadSkillFxImages, type SkillFxImages} from './skillFx';
+import {loadHitFxImages, type HitFxImages} from './hitFx';
 import {isLibraryTileId} from './pixellabLibrary';
 import {isBuiltinMapObject} from './mapObjects';
 import {
@@ -19,6 +21,8 @@ export type TodieAssetBundle = {
   gear: Record<string, HTMLImageElement>;
   consumables: Record<string, HTMLImageElement>;
   mobs: MonsterImages;
+  skillFx: SkillFxImages;
+  hitFx: HitFxImages;
   tiles: PreparedTiles;
   objects: Partial<Record<string, HTMLImageElement>>;
   map: TodieMapJson;
@@ -32,12 +36,14 @@ export async function preloadAllTodieAssets(stage = 1): Promise<TodieAssetBundle
     .filter((o) => !isBuiltinMapObject(o.kind))
     .map((o) => ({kind: o.kind, frame: o.frame}));
 
-  const [warrior, mage, gear, consumables, mobs, tileImgs, objects] = await Promise.all([
+  const [warrior, mage, gear, consumables, mobs, skillFx, hitFx, tileImgs, objects] = await Promise.all([
     loadJobImages('warrior'),
     loadJobImages('mage'),
     loadGearImages(),
     loadConsumableImages(),
     loadMonsterImages(),
+    loadSkillFxImages(),
+    loadHitFxImages(),
     loadTileImages(libTiles),
     loadMapObjectImages(libProps),
   ]);
@@ -51,6 +57,8 @@ export async function preloadAllTodieAssets(stage = 1): Promise<TodieAssetBundle
     gear,
     consumables,
     mobs,
+    skillFx,
+    hitFx,
     tiles,
     objects,
     map,

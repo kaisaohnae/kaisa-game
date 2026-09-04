@@ -14,6 +14,8 @@ import {
   enhanceStatBonus,
   enhanceSuccessChance,
   MAX_ENHANCE_LEVEL,
+  BASE_ENHANCE_MAX,
+  STAGE4_ENHANCE_MAX,
 } from './equip';
 
 export const itemSettings = itemsJson;
@@ -163,10 +165,18 @@ export function buildItemHelp(item: Item, playerJob: JobId): ItemHelpInfo | null
       item.gearSlot === 'weapon' ? '강화당 공격 +1' : '강화당 방어 +1';
     const enhanceLine =
       enhanceLevel >= MAX_ENHANCE_LEVEL
-        ? `강화 · 최대 (+10) · ${enhanceGain}`
-        : `강화 · +${enhanceLevel} → +${enhanceLevel + 1} 확률 ${Math.round(
-            enhanceSuccessChance(enhanceLevel + 1) * 100,
-          )}% · ${enhanceGain} (강화석 우클릭 후 클릭)`;
+        ? `강화 · 최대 (+${MAX_ENHANCE_LEVEL}) · ${enhanceGain}`
+        : enhanceLevel >= STAGE4_ENHANCE_MAX
+          ? `강화 · +${enhanceLevel} → +${enhanceLevel + 1} 확률 ${Math.round(
+              enhanceSuccessChance(enhanceLevel + 1) * 100,
+            )}% · 스테이지 5 · ${enhanceGain}`
+          : enhanceLevel >= BASE_ENHANCE_MAX
+            ? `강화 · +${enhanceLevel} → +${enhanceLevel + 1} 확률 ${Math.round(
+                enhanceSuccessChance(enhanceLevel + 1) * 100,
+              )}% · 스테이지 4 · ${enhanceGain}`
+            : `강화 · +${enhanceLevel} → +${enhanceLevel + 1} 확률 ${Math.round(
+                enhanceSuccessChance(enhanceLevel + 1) * 100,
+              )}% · ${enhanceGain} (강화석 우클릭 후 클릭)`;
     const gradeLine = meta ? `등급 · ${meta.label}${enhanceLevel > 0 ? ` +${enhanceLevel}` : ''}` : null;
     const lines = [
       `슬롯 · ${slotLabel}`,

@@ -1,0 +1,5 @@
+{
+  "note": "히트/스플래시 임팩트 FX. npm run studio → category hit-fx",
+  "publicBase": "/common/fx",
+  "files": ["hit.png", "hit-splash.png"]
+}

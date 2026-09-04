@@ -16,14 +16,15 @@
       "ranged": { "forward": 300 }
     },
     "stageTouchDamage": {
-      "base": 0.6,
+      "base": 0.5,
       "perStage": 0.3,
-      "note": "stage1=0.6, stage2=0.9, stage3=1.1 … stage마다 +0.3"
+      "note": "stage1=0.5, stage2=0.8, stage3=1.1 … stage마다 +0.3"
     }
   },
   "paths": {
     "monstersPublic": "/common/monsters",
     "charactersPublic": "/common/characters",
+    "skillsPublic": "/common/skills",
     "pixellabCatalog": "public/pixellab-characters/catalog.json"
   },
   "states": {
@@ -41,7 +42,7 @@
       "hp": 500,
       "speed": 90,
       "touchDamage": 40,
-      "count": 50,
+      "count": 30,
       "dropCount": [1, 1],
       "respawnSec": 30,
       "size": 96,
@@ -77,7 +78,7 @@
       "hp": 2000,
       "speed": 110,
       "touchDamage": 160,
-      "count": 20,
+      "count": 15,
       "dropCount": [4, 6],
       "respawnSec": 60,
       "size": 144,
@@ -189,6 +190,23 @@
         { "title": "몬스터: 보스 전쟁의 왕", "en_title": "boss-war-king" },
         { "title": "몬스터: 최종 관문의 수호자", "en_title": "final-gate-guardian" },
         { "title": "몬스터: 최종 죽음의 왕", "en_title": "final-death-king" },
+        { "title": "몬스터: 최종 죽음의 왕", "en_title": "final-death-king" }
+      ]
+    },
+    "5": {
+      "monsters": [
+        { "title": "몬스터: 피의 마법사", "en_title": "blood-mage", "ranged": true },
+        { "title": "몬스터: 정예 늑대인간", "en_title": "elite-werewolf" },
+        { "title": "몬스터: 정예 사자 인간", "en_title": "elite-lion-human" },
+        { "title": "몬스터: 정예 피의 골렘", "en_title": "elite-blood-golem" },
+        { "title": "몬스터: 정예 물의 골렘", "en_title": "elite-water-golem" },
+        { "title": "몬스터: 정예 어둠의 악마", "en_title": "elite-dark-demon" },
+        { "title": "몬스터: 정예 사자", "en_title": "elite-lion" },
+        { "title": "몬스터: 보스 죽음의 파괴자", "en_title": "boss-death-destroyer" },
+        { "title": "몬스터: 보스 전쟁의 왕", "en_title": "boss-war-king" },
+        { "title": "몬스터: 최종 관문의 수호자", "en_title": "final-gate-guardian" },
+        { "title": "몬스터: 최종 죽음의 왕", "en_title": "final-death-king" },
+        { "title": "몬스터: 최종 관문의 수호자", "en_title": "final-gate-guardian" },
         { "title": "몬스터: 최종 죽음의 왕", "en_title": "final-death-king" }
       ]
     }

@@ -88,13 +88,30 @@ export {
   HOTBAR_MANA_BAG,
   sameGear,
   MAX_ENHANCE_LEVEL,
+  BASE_ENHANCE_MAX,
+  STAGE4_ENHANCE_MAX,
   enhanceSuccessChance,
   enhanceStatBonus,
   enhanceStatMultiplier,
   applyEnhanceStone,
+  maxEnhanceForStage,
   sortBag,
   stageForEquipped,
 } from './equip';
+export {
+  skillFxSettings,
+  skillFxSizeForEnhance,
+  skillFxSizeMult,
+  skillFxBehavior,
+  skillFxAssetUrl,
+  loadSkillFxImages,
+  pickSkillFxImage,
+  facingSnapAngle,
+  skillFxSpriteRotation,
+} from './skillFx';
+export type {SkillFxImages, SkillFxBehavior} from './skillFx';
+export {loadHitFxImages, pickHitFxImage, hitFxPublicPaths} from './hitFx';
+export type {HitFxImages, HitFxKind} from './hitFx';
 export type {GearSlot, Item, Equipment, ItemKind, EnhanceOutcome} from './equip';
 export {preloadAllTodieAssets} from './preload';
 export type {JobId, ActionId, CardinalDir, RuntimeSkill, SkillBalance} from './types';

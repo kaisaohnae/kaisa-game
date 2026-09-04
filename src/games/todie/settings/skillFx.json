@@ -1,0 +1,78 @@
+{
+  "note": "직업별 스킬 1·2·3 각각 단일 에셋. 크기=baseSize*(1+sizeStep*floor(무기강화/enhanceStep)). 경로: /common/skills/{job}/{skill}.png",
+  "publicBase": "/common/skills",
+  "baseSize": 100,
+  "sizeStep": 0.1,
+  "enhanceStep": 5,
+  "artForwardRad": {
+    "note": "에셋 전방 (atan2, +Y=아래). null=회전 없음. 12시 기준은 -π/2.",
+    "default": -1.5707963267948966,
+    "slash": -1.5707963267948966,
+    "bolt": -1.5707963267948966,
+    "bash": -1.5707963267948966,
+    "spin": null,
+    "nova": null,
+    "shield": null
+  },
+  "behaviors": {
+    "slash": { "face": true, "flyDistance": 50, "flyLife": 0.28 },
+    "bolt": {
+      "face": true,
+      "flyDistance": 500,
+      "flyLife": 0.72,
+      "sizePulse": true,
+      "sizeMult": 1.15
+    },
+    "spin": {
+      "face": false,
+      "scatterCount": 5,
+      "scatterRadius": 200,
+      "randomAlpha": true,
+      "randomSize": true,
+      "alphaMin": 0.85,
+      "alphaMax": 1,
+      "sizeMin": 0.95,
+      "sizeMax": 1.4,
+      "staggerDelay": 0.22,
+      "fxLife": 0.7
+    },
+    "nova": {
+      "face": false,
+      "scatterCount": 5,
+      "scatterRadius": 200,
+      "randomAlpha": true,
+      "randomSize": true,
+      "alphaMin": 0.85,
+      "alphaMax": 1,
+      "sizeMin": 0.95,
+      "sizeMax": 1.4,
+      "staggerDelay": 0.22,
+      "fxLife": 0.7
+    },
+    "bash": { "face": true, "flyDistance": 200, "flyLife": 0.45, "sizeMult": 1.35 },
+    "shield": {
+      "face": false,
+      "fxLife": 0.7,
+      "sizeMult": 2.6,
+      "sizeExpand": true
+    }
+  },
+  "jobs": {
+    "warrior": {
+      "label": "검사",
+      "skills": ["slash", "spin", "bash"]
+    },
+    "mage": {
+      "label": "법사",
+      "skills": ["bolt", "nova", "shield"]
+    }
+  },
+  "skillMeta": {
+    "slash": { "name": "베기", "slot": 1 },
+    "spin": { "name": "회전베기", "slot": 2 },
+    "bash": { "name": "돌진", "slot": 3 },
+    "bolt": { "name": "장풍", "slot": 1 },
+    "nova": { "name": "폭발", "slot": 2 },
+    "shield": { "name": "광역폭발", "slot": 3 }
+  }
+}

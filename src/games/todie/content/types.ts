@@ -25,6 +25,8 @@ export type SkillBalance = {
   shieldHp?: number;
   projectileSpeed?: number;
   projectileLife?: number;
+  /** Bolt/장풍: travel distance (world px). life = range/speed when set */
+  projectileRange?: number;
   /** Bolt: number of projectiles fired forward */
   projectileCount?: number;
   /** Bolt: lateral spacing between parallel shots (world px) */

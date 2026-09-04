@@ -15,6 +15,7 @@ import {
   EQUIP_SLOTS,
   extractGearToEnhanceStone,
   applyEnhanceStone,
+  maxEnhanceForStage,
   isExtractableGear,
   stageForEquipped,
   facingToCardinal,
@@ -61,8 +62,18 @@ import {
   type RuntimeSkill,
   type TodieAssetBundle,
 } from './content';
-import {drawJobCharacter, drawSkillSprite, walkSheetFrameCount} from './render/drawCharacter';
-import {drawDashTrail, drawSkillWorldFx} from './render/skillFx';
+import {drawJobCharacter, walkSheetFrameCount} from './render/drawCharacter';
+import {
+  facingSnapAngle,
+  pickSkillFxImage,
+  skillFxBehavior,
+  skillFxSizeForEnhance,
+  skillFxSizeMult,
+  skillFxSpriteRotation,
+  type SkillFxImages,
+} from './content/skillFx';
+import {pickHitFxImage, type HitFxImages, type HitFxKind} from './content/hitFx';
+import hitFxJson from './settings/hitFx.json';
 
 import {InventoryDock} from './ui/InventoryDock';
 import {createTodieBgm, readBgmMuted, type TodieBgm} from './audio/proceduralBgm';
@@ -160,8 +171,17 @@ type Fx = {
   r?: number;
   skillId?: string;
   facing?: number;
-  /** procedural world VFX (warrior slash/spin/bash) */
-  worldFx?: boolean;
+  fxSize?: number;
+  fxAlpha?: number;
+  vx?: number;
+  vy?: number;
+  sizePulse?: boolean;
+  /** 중심에서 커지며 퍼짐 (광역폭발) */
+  sizeExpand?: boolean;
+  /** hit / splash impact sprite */
+  hitFx?: HitFxKind;
+  /** >0 이면 아직 대기 (시간차 폭발) */
+  delay?: number;
 };
 
 type Player = {
@@ -237,6 +257,7 @@ const STAGE_DEFS: StageDef[] = [
   {id: 2, name: '죽음의 문', label: '스테이지 2 · 죽음의 문'},
   {id: 3, name: '죽음', label: '스테이지 3 · 죽음'},
   {id: 4, name: '영원한 죽음', label: '스테이지 4 · 영원한 죽음'},
+  {id: 5, name: '끝없는 죽음', label: '스테이지 5 · 끝없는 죽음'},
 ];
 
 function stageDef(id: number): StageDef {
@@ -519,12 +540,14 @@ function bagItemFromSaved(raw: SavedBagItem, i: number): Item {
   };
 }
 
-/** Overlays saved bag contents onto a freshly-built bag (in place) — restores potions, mana, stones, wrong-job/duplicate gear, etc. */
+/** Applies saved bag onto a freshly-built bag (in place). Null/empty slots clear — death reset must stick. */
 function applyBagSave(save: BagSave, bag: Item[]) {
   for (let i = 0; i < bag.length; i += 1) {
     const raw = save.items[i];
     if (raw && raw.kind !== 'empty' && raw.qty > 0) {
       bag[i] = bagItemFromSaved(raw, i);
+    } else {
+      clearItem(bag[i]);
     }
   }
 }
@@ -992,6 +1015,8 @@ export default function TodieGame() {
     const consumableImages: Record<string, HTMLImageElement> =
       assetsRef.current?.consumables ?? {};
     const mobImages: MonsterImages = assetsRef.current?.mobs ?? {};
+    const skillFxImages: SkillFxImages = assetsRef.current?.skillFx ?? {};
+    const hitFxImages: HitFxImages = assetsRef.current?.hitFx ?? {};
     const tileImages = assetsRef.current?.tiles ?? {};
     const objectImages = assetsRef.current?.objects ?? {};
     let worldMap = assetsRef.current?.map ?? null;
@@ -1011,6 +1036,8 @@ export default function TodieGame() {
       dmg: number;
       color: string;
       hitR: number;
+      /** true면 구형 탄환 스프라이트 숨김 (장풍 등 스킬 FX 사용) */
+      hideDraw?: boolean;
     }[] = [];
     let camX = player.x;
     let camY = player.y;
@@ -1077,11 +1104,13 @@ export default function TodieGame() {
       const def = stageDef(stage);
       setStageLabel(def.label);
       const req =
-        stage >= 4
-          ? '신화템 +10'
-          : stage === 3
-            ? '신화템'
-            : '영웅템';
+        stage >= 5
+          ? '신화템 +15'
+          : stage >= 4
+            ? '신화템 +10'
+            : stage === 3
+              ? '신화템'
+              : '영웅템';
       showToast(`🎉 ${def.label} 진입! 전 슬롯 ${req} 이상 달성`);
       toastT = 4.5;
       void reloadStageMap(stage);
@@ -1229,45 +1258,55 @@ export default function TodieGame() {
       });
     };
 
-    /** 가방·장착 아이템의 약 50%를 랜덤으로 바닥에 드랍 */
-    const dropHalfItemsOnDeath = () => {
-      type Entry =
-        | {source: 'bag'; index: number}
-        | {source: 'equip'; slot: GearSlot};
-      const entries: Entry[] = [];
+    /** 사망: 가방·장착 전부 바닥에 떨군 뒤 스타터 물약·무기로 초기화하고 저장 */
+    const resetLoadoutOnDeath = () => {
+      let dropped = 0;
       for (let i = 0; i < inventory.length; i += 1) {
-        if (inventory[i].kind !== 'empty') entries.push({source: 'bag', index: i});
+        const it = inventory[i];
+        if (it.kind === 'empty') continue;
+        spawnGroundDrop(player.x, player.y, {...it}, 90);
+        dropped += 1;
       }
       for (const s of EQUIP_SLOTS) {
-        if (equippedRef.current[s.id]) entries.push({source: 'equip', slot: s.id});
-      }
-      if (entries.length === 0) return 0;
-
-      for (let i = entries.length - 1; i > 0; i -= 1) {
-        const j = Math.floor(Math.random() * (i + 1));
-        const tmp = entries[i];
-        entries[i] = entries[j];
-        entries[j] = tmp;
+        const it = equippedRef.current[s.id];
+        if (!it) continue;
+        spawnGroundDrop(player.x, player.y, {...it}, 90);
+        dropped += 1;
       }
 
-      const dropCount = Math.round(entries.length * 0.5);
-      let dropped = 0;
-      for (let i = 0; i < dropCount; i += 1) {
-        const e = entries[i];
-        if (e.source === 'bag') {
-          const it = inventory[e.index];
-          if (it.kind === 'empty') continue;
-          spawnGroundDrop(player.x, player.y, {...it}, 90);
-          clearItem(it);
-          dropped += 1;
-        } else {
-          const it = equippedRef.current[e.slot];
-          if (!it) continue;
-          spawnGroundDrop(player.x, player.y, {...it}, 90);
-          equippedRef.current[e.slot] = null;
-          dropped += 1;
-        }
-      }
+      for (const it of inventory) clearItem(it);
+      inventory[0] = {
+        id: 'start-p',
+        kind: 'potion',
+        name: '체력포션',
+        qty: 3,
+        color: '#ef5350',
+        job: null,
+        gearId: null,
+        gearSlot: null,
+        tier: null,
+        enhance: 0,
+      };
+      inventory[1] = {
+        id: 'start-m',
+        kind: 'mana',
+        name: '마나포션',
+        qty: 3,
+        color: '#42a5f5',
+        job: null,
+        gearId: null,
+        gearSlot: null,
+        tier: null,
+        enhance: 0,
+      };
+
+      for (const s of EQUIP_SLOTS) equippedRef.current[s.id] = null;
+      const stick = draftToItem(starterGearItem(job));
+      stick.id = 'start-stick';
+      equippedRef.current.weapon = {...stick, qty: 1};
+
+      writeGearCookie(gearSaveFromEquipment(charName, startJob, equippedRef.current));
+      writeBagCookie(bagSaveFromBag(startJob, bagRef.current));
       syncBag();
       return dropped;
     };
@@ -1293,16 +1332,6 @@ export default function TodieGame() {
           player.shieldHp = 0;
           player.shieldMax = 0;
           showToast('보호막 파괴!');
-          fx.push({
-            x: player.x,
-            y: player.y,
-            life: 0.35,
-            max: 0.35,
-            color: '#4dd0e1',
-            r: 64,
-            skillId: 'shield-break',
-            worldFx: true,
-          });
         }
         if (remaining <= 0) {
           player.invuln = Math.max(player.invuln, 0.15);
@@ -1324,13 +1353,12 @@ export default function TodieGame() {
       });
       if (player.hp <= 0) {
         alive = false;
-        const n = dropHalfItemsOnDeath();
-        clearGearCookie();
+        const n = resetLoadoutOnDeath();
         setShowRestartRef.current(true);
         showToast(
           n > 0
-            ? `쓰러졌다… 아이템 ${n}개 떨어짐 · R로 재시작`
-            : '쓰러졌다… R로 재시작',
+            ? `쓰러졌다… 가방·장비 초기화 · 아이템 ${n}개 떨어짐 · R로 재시작`
+            : '쓰러졌다… 가방·장비 초기화 · R로 재시작',
         );
       }
     };
@@ -1451,7 +1479,63 @@ export default function TodieGame() {
       groundDrops = keep;
     };
 
+    const splashCfg = (bal as {splash?: {radius?: number; ratio?: number}}).splash ?? {
+      radius: 100,
+      ratio: 0.5,
+    };
+    const splashRadius = splashCfg.radius ?? 100;
+    const splashRatio = splashCfg.ratio ?? 0.5;
+
+    const hitFxSize = Number((hitFxJson as {size?: number}).size) || 48;
+    const hitFxLife = Number((hitFxJson as {life?: number}).life) || 0.32;
+    const hitSplashLife = Number((hitFxJson as {splashLife?: number}).splashLife) || 0.28;
+
+    const pushHitFx = (x: number, y: number, kind: HitFxKind = 'hit') => {
+      const life = kind === 'splash' ? hitSplashLife : hitFxLife;
+      fx.push({
+        x: x + rand(-4, 4),
+        y: y + rand(-6, 2),
+        life,
+        max: life,
+        color: kind === 'splash' ? '#ffab91' : '#ffe082',
+        hitFx: kind,
+        fxSize: hitFxSize * (kind === 'splash' ? 1.15 : 1),
+        sizeExpand: true,
+      });
+    };
+
+    /** 스킬에 맞은 몹들 주변으로 스플래시 (직접 맞은 몹 제외, 연쇄 없음) */
+    const applySplashAround = (primary: Mob[], baseDmg: number, color = '#ffab91') => {
+      if (primary.length === 0 || splashRatio <= 0 || splashRadius <= 0) return;
+      const splashDmg = Math.max(1, Math.round(baseDmg * splashRatio));
+      const primaryIds = new Set(primary.map((m) => m.id));
+      const splashed = new Set<number>();
+      for (const src of primary) {
+        for (const m of mobs) {
+          if (primaryIds.has(m.id) || splashed.has(m.id) || m.hp <= 0) continue;
+          const dx = m.x - src.x;
+          const dy = m.y - src.y;
+          if (dx * dx + dy * dy > splashRadius * splashRadius) continue;
+          splashed.add(m.id);
+          pullAggro(m);
+          m.hp -= splashDmg;
+          m.hurt = 0.18;
+          pushHitFx(m.x, m.y, 'splash');
+          fx.push({
+            x: m.x,
+            y: m.y - 16,
+            life: 0.45,
+            max: 0.45,
+            text: `-${splashDmg}`,
+            color,
+          });
+          if (m.hp <= 0) killMob(m);
+        }
+      }
+    };
+
     const damageMobsInCircle = (x: number, y: number, r: number, dmg: number) => {
+      const hitList: Mob[] = [];
       for (const m of mobs) {
         const dx = m.x - x;
         const dy = m.y - y;
@@ -1459,10 +1543,13 @@ export default function TodieGame() {
           pullAggro(m);
           m.hp -= dmg;
           m.hurt = 0.2;
+          pushHitFx(m.x, m.y, 'hit');
           fx.push({x: m.x, y: m.y - 20, life: 0.5, max: 0.5, text: `-${dmg}`, color: '#fff59d'});
+          hitList.push(m);
           if (m.hp <= 0) killMob(m);
         }
       }
+      applySplashAround(hitList, dmg);
     };
 
     const useSkill = (index: number) => {
@@ -1475,12 +1562,30 @@ export default function TodieGame() {
       player.mp -= sk.mp;
       sk.cdLeft = sk.cd;
       const hit = sk.damage + gearPower().atk;
+      const weaponEnhance = equippedRef.current.weapon?.enhance ?? 0;
+      const fxSize = skillFxSizeForEnhance(weaponEnhance);
+      const sizeMult = skillFxSizeMult(weaponEnhance);
+      const behavior = skillFxBehavior(sk.id);
+      // 캐릭터 8방향 스프라이트와 같은 전방
+      const aim = facingSnapAngle(player.facing);
+      const aimX = Math.cos(aim);
+      const aimY = Math.sin(aim);
 
       const pushSkillFx = (
         x: number,
         y: number,
         life = displaySettings.skillFx.life,
-        opts?: {worldFx?: boolean; r?: number},
+        opts?: {
+          r?: number;
+          size?: number;
+          alpha?: number;
+          facing?: number | null;
+          vx?: number;
+          vy?: number;
+          sizePulse?: boolean;
+          sizeExpand?: boolean;
+          delay?: number;
+        },
       ) => {
         fx.push({
           x,
@@ -1488,10 +1593,60 @@ export default function TodieGame() {
           life,
           max: life,
           color: sk.fxColor,
-          r: opts?.r ?? sk.fxRadius,
+          r: opts?.r ?? sk.fxRadius ?? 48,
           skillId: sk.id,
-          facing: player.facing,
-          worldFx: opts?.worldFx ?? true,
+          facing: opts?.facing === null ? undefined : (opts?.facing ?? aim),
+          fxSize: opts?.size ?? fxSize,
+          fxAlpha: opts?.alpha,
+          vx: opts?.vx,
+          vy: opts?.vy,
+          sizePulse: opts?.sizePulse ?? behavior.sizePulse,
+          sizeExpand: opts?.sizeExpand ?? behavior.sizeExpand,
+          delay: opts?.delay,
+        });
+      };
+
+      const pushScatterFx = (life: number) => {
+        const count = behavior.scatterCount ?? 5;
+        const radius = behavior.scatterRadius ?? 200;
+        const a0 = behavior.alphaMin ?? 0.35;
+        const a1 = behavior.alphaMax ?? 1;
+        const s0 = behavior.sizeMin ?? 0.55;
+        const s1 = behavior.sizeMax ?? 1.15;
+        const flyDist = behavior.flyDistance ?? 0;
+        const flyLife = behavior.flyLife ?? life;
+        const flySpd = flyDist > 0 ? flyDist / Math.max(0.05, flyLife) : 0;
+        const fxLife = behavior.fxLife ?? (flyDist > 0 ? flyLife : life);
+        const stagger = behavior.staggerDelay ?? 0;
+        for (let i = 0; i < count; i += 1) {
+          const ang = Math.random() * Math.PI * 2;
+          const dist = Math.random() * radius;
+          const sx = player.x + Math.cos(ang) * dist;
+          const sy = player.y + Math.sin(ang) * dist;
+          const sz = behavior.randomSize ? fxSize * rand(s0, s1) : fxSize;
+          const alpha = behavior.randomAlpha ? rand(a0, a1) : undefined;
+          pushSkillFx(sx, sy, fxLife, {
+            size: sz,
+            alpha,
+            facing: null,
+            r: radius,
+            vx: flySpd ? aimX * flySpd : undefined,
+            vy: flySpd ? aimY * flySpd : undefined,
+            delay: stagger > 0 ? i * stagger : undefined,
+          });
+        }
+      };
+
+      const pushFlyingFx = (startOffset = 18, opts?: {sizePulse?: boolean}) => {
+        const flyDist = behavior.flyDistance ?? 50;
+        const flyLife = behavior.flyLife ?? 0.3;
+        const flySpd = flyDist / Math.max(0.05, flyLife);
+        const size = fxSize * (behavior.sizeMult ?? 1);
+        pushSkillFx(player.x + aimX * startOffset, player.y + aimY * startOffset, flyLife, {
+          size,
+          vx: aimX * flySpd,
+          vy: aimY * flySpd,
+          sizePulse: opts?.sizePulse ?? behavior.sizePulse,
         });
       };
 
@@ -1503,78 +1658,65 @@ export default function TodieGame() {
 
       if (sk.id === 'slash') {
         const offset = sk.offset ?? 36;
-        const ax = player.x + Math.cos(player.facing) * offset;
-        const ay = player.y + Math.sin(player.facing) * offset;
-        damageMobsInCircle(ax, ay, sk.radius ?? 48, hit);
-        pushSkillFx(ax, ay, 0.32, {r: sk.radius ?? 48});
+        const radius = sk.radius ?? 48;
+        const ax = player.x + aimX * offset;
+        const ay = player.y + aimY * offset;
+        damageMobsInCircle(ax, ay, radius, hit);
+        // 전방 ~50 비행 후 소멸
+        pushFlyingFx(12);
       } else if (sk.id === 'spin') {
-        damageMobsInCircle(player.x, player.y, sk.radius ?? 78, hit);
-        pushSkillFx(player.x, player.y, 0.48, {r: sk.radius ?? 78});
+        const radius = Math.max(sk.radius ?? 78, behavior.scatterRadius ?? 200);
+        damageMobsInCircle(player.x, player.y, radius, hit);
+        pushScatterFx(0.55);
       } else if (sk.id === 'bash') {
         const dash = sk.dashSpeed ?? 520;
-        player.vx += Math.cos(player.facing) * dash;
-        player.vy += Math.sin(player.facing) * dash;
+        player.vx += aimX * dash;
+        player.vy += aimY * dash;
         player.invuln = Math.max(player.invuln, sk.invuln ?? 0.35);
         const offset = sk.offset ?? 40;
-        const ax = player.x + Math.cos(player.facing) * offset;
-        const ay = player.y + Math.sin(player.facing) * offset;
-        damageMobsInCircle(ax, ay, sk.radius ?? 55, hit);
-        // impact at tip + trail ghosts behind
-        pushSkillFx(ax, ay, 0.38, {r: sk.fxRadius ?? 50});
-        for (let i = 1; i <= 3; i += 1) {
-          const back = offset * 0.35 * i;
-          const life = Math.max(0.12, 0.26 - i * 0.04);
-          fx.push({
-            x: player.x - Math.cos(player.facing) * back,
-            y: player.y - Math.sin(player.facing) * back,
-            life,
-            max: life,
-            color: sk.fxColor,
-            skillId: 'bash-trail',
-            facing: player.facing,
-            worldFx: true,
-          });
-        }
+        const radius = sk.radius ?? 55;
+        const ax = player.x + aimX * offset;
+        const ay = player.y + aimY * offset;
+        damageMobsInCircle(ax, ay, radius, hit);
+        pushFlyingFx(20);
       } else if (sk.id === 'bolt') {
-        // Always fire 3 parallel-ish bolts (clearly separated)
-        const spd = sk.projectileSpeed ?? 520;
-        const count = 3;
-        const spacing = sk.projectileSpacing ?? 34;
-        const hitR = sk.projectileHitRadius ?? 48;
-        const life = sk.projectileLife ?? 1.6;
-        const dirX = Math.cos(player.facing);
-        const dirY = Math.sin(player.facing);
-        const sideX = -dirY;
-        const sideY = dirX;
-        const mid = (count - 1) / 2;
-        for (let i = 0; i < count; i += 1) {
-          const side = (i - mid) * spacing;
-          // tiny fan so outer shots are obvious, still all hit a mid-range target
-          const ang = player.facing + (i - mid) * 0.1;
-          const vx = Math.cos(ang);
-          const vy = Math.sin(ang);
-          projectiles.push({
-            x: player.x + dirX * 32 + sideX * side,
-            y: player.y + dirY * 32 + sideY * side,
-            vx: vx * spd,
-            vy: vy * spd,
-            life,
-            dmg: hit,
-            color: sk.fxColor,
-            hitR,
-          });
-        }
-        pushSkillFx(player.x + dirX * 24, player.y + dirY * 24, 0.18);
+        // 장풍 — 전방 500 단일 파동
+        const range = sk.projectileRange ?? behavior.flyDistance ?? 500;
+        const spd = sk.projectileSpeed ?? 700;
+        const life = range / Math.max(1, spd);
+        const hitR = sk.projectileHitRadius ?? 64;
+        projectiles.push({
+          x: player.x + aimX * 28,
+          y: player.y + aimY * 28,
+          vx: aimX * spd,
+          vy: aimY * spd,
+          life,
+          dmg: hit,
+          color: sk.fxColor,
+          hitR,
+          hideDraw: true,
+        });
+        pushSkillFx(player.x + aimX * 24, player.y + aimY * 24, life, {
+          size: fxSize * (behavior.sizeMult ?? 1),
+          vx: aimX * spd,
+          vy: aimY * spd,
+          sizePulse: true,
+        });
       } else if (sk.id === 'nova') {
-        const r = sk.radius ?? 190;
+        const r = Math.max(sk.radius ?? 190, behavior.scatterRadius ?? 200);
         damageMobsInCircle(player.x, player.y, r, hit);
-        pushSkillFx(player.x, player.y, 0.55, {r: sk.fxRadius ?? r, worldFx: true});
+        pushScatterFx(0.55);
       } else if (sk.id === 'shield') {
-        const absorb = sk.shieldHp ?? 100;
-        player.shieldHp = absorb;
-        player.shieldMax = absorb;
-        pushSkillFx(player.x, player.y, 0.45);
-        showToast(`보호막 +${absorb}`);
+        // 광역폭발 — 법사 중심에서 크게 퍼지며 터짐 + 주변 200 피해
+        const r = sk.radius ?? 200;
+        damageMobsInCircle(player.x, player.y, r, hit);
+        const life = behavior.fxLife ?? 0.7;
+        pushSkillFx(player.x, player.y, life, {
+          size: fxSize * (behavior.sizeMult ?? 2.6),
+          facing: null,
+          sizeExpand: true,
+          r,
+        });
       }
     };
 
@@ -2213,6 +2355,7 @@ export default function TodieGame() {
       }
 
       for (const p of projectiles) {
+        if (p.hideDraw) continue;
         const pr = 11;
         const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, pr * 2.2);
         g.addColorStop(0, '#ffffff');
@@ -2460,44 +2603,68 @@ export default function TodieGame() {
         ctx.restore();
       }
 
-      // Skill VFX above character (spin ring was hidden under the sprite)
+      // Hit / splash impact FX
+      for (const f of fx) {
+        if (!f.hitFx) continue;
+        const lifeA = f.life / f.max;
+        const age = 1 - lifeA;
+        let sz = f.fxSize ?? hitFxSize;
+        const ease = 1 - Math.pow(1 - Math.max(0, Math.min(1, age)), 1.6);
+        sz *= 0.55 + ease * 0.9;
+        const alpha = Math.max(0.08, lifeA);
+        const sprite = pickHitFxImage(hitFxImages, f.hitFx);
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.translate(f.x, f.y);
+        ctx.rotate(age * 1.2);
+        if (sprite) {
+          ctx.drawImage(sprite, -sz / 2, -sz / 2, sz, sz);
+        } else {
+          // 에셋 없을 때 간단 스파크
+          ctx.fillStyle = f.color;
+          for (let i = 0; i < 6; i += 1) {
+            const a = (i / 6) * Math.PI * 2 + age * 3;
+            const rr = sz * (0.15 + age * 0.35);
+            ctx.beginPath();
+            ctx.arc(Math.cos(a) * rr, Math.sin(a) * rr, 2.5 * lifeA + 1, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.beginPath();
+          ctx.arc(0, 0, 4 + age * 6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+        ctx.globalAlpha = 1;
+      }
+
+      // Skill VFX — /common/skills 에셋만
       for (const f of fx) {
         if (!f.skillId) continue;
-        const a = f.life / f.max;
-        ctx.globalAlpha = Math.max(0, a);
-        if (f.skillId === 'bash-trail') {
-          drawDashTrail(ctx, f.x, f.y, f.facing ?? 0, Math.max(0.15, a));
-        } else if (
-          f.worldFx &&
-          (f.skillId === 'slash' || f.skillId === 'spin' || f.skillId === 'bash' || f.skillId === 'nova')
-        ) {
-          drawSkillWorldFx(ctx, {
-            skillId: f.skillId,
-            x: f.x,
-            y: f.y,
-            progress: a,
-            facing: f.facing,
-            color: f.color,
-            radius: f.r ?? 48,
-          });
-        } else if (f.skillId === 'shield-break') {
-          ctx.strokeStyle = f.color;
-          ctx.lineWidth = 5;
-          ctx.beginPath();
-          ctx.arc(f.x, f.y, (f.r ?? 48) * (1.4 - a * 0.5), 0, Math.PI * 2);
-          ctx.stroke();
-        } else if (jobImages?.skills[f.skillId]) {
-          drawSkillSprite(
-            ctx,
-            jobImages,
-            f.skillId,
-            f.x,
-            f.y,
-            Math.max(0.2, a),
-            displaySettings.skillFx.size,
-            f.facing,
-          );
+        if (f.delay != null && f.delay > 0) continue;
+        const sprite = pickSkillFxImage(skillFxImages, job, f.skillId);
+        if (!sprite) continue;
+        const lifeA = f.life / f.max;
+        const age = 1 - lifeA;
+        let sz = f.fxSize ?? skillFxSizeForEnhance(0);
+        if (f.sizeExpand) {
+          // 중심에서 점점 커지며 퍼짐 → 끝에서 살짝 터지듯 페이드
+          const ease = 1 - Math.pow(1 - Math.max(0, Math.min(1, age)), 2);
+          sz *= 0.25 + ease * 1.1;
+        } else if (f.sizePulse) {
+          // 0→1→0 : 점점 커지다 점점 작아짐
+          const pulse = Math.sin(Math.max(0, Math.min(1, age)) * Math.PI);
+          sz *= 0.35 + pulse * 0.95;
         }
+        const alpha = f.sizeExpand
+          ? Math.max(0.1, (f.fxAlpha ?? 1) * (1 - age * 0.85))
+          : Math.max(0.12, (f.fxAlpha ?? 1) * (f.sizePulse ? Math.max(lifeA, 0.2) : lifeA));
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.translate(f.x, f.y);
+        const rot = skillFxSpriteRotation(f.facing ?? 0, f.skillId);
+        if (rot != null) ctx.rotate(rot);
+        ctx.drawImage(sprite, -sz / 2, -sz / 2, sz, sz);
+        ctx.restore();
         ctx.globalAlpha = 1;
       }
 
@@ -2743,7 +2910,7 @@ export default function TodieGame() {
         if (i < 3) {
           const sk = skills[i];
           if (sk) {
-            const simg = jobImages?.skills[sk.id];
+            const simg = pickSkillFxImage(skillFxImages, job, sk.id);
             if (simg && simg.complete && simg.naturalWidth > 0) {
               ctx.imageSmoothingEnabled = false;
               const ip = phone ? 8 : 10;
@@ -3103,6 +3270,7 @@ export default function TodieGame() {
               pullAggro(m);
               m.hp -= p.dmg;
               m.hurt = 0.2;
+              pushHitFx(m.x, m.y, 'hit');
               fx.push({
                 x: m.x,
                 y: m.y - 18,
@@ -3111,7 +3279,9 @@ export default function TodieGame() {
                 text: `-${p.dmg}`,
                 color: '#81d4fa',
               });
+              const hitMob = m;
               if (m.hp <= 0) killMob(m);
+              applySplashAround([hitMob], p.dmg, '#81d4fa');
               return false;
             }
           }
@@ -3119,6 +3289,14 @@ export default function TodieGame() {
         });
 
         fx = fx.filter((f) => {
+          if (f.delay != null && f.delay > 0) {
+            f.delay -= dt;
+            return true;
+          }
+          if (f.vx != null || f.vy != null) {
+            f.x += (f.vx ?? 0) * dt;
+            f.y += (f.vy ?? 0) * dt;
+          }
           f.life -= dt;
           return f.life > 0;
         });
@@ -3389,7 +3567,12 @@ export default function TodieGame() {
             toastFnRef.current('강화 대상이 아니에요');
             return null;
           }
-          const res = applyEnhanceStone(bagRef.current, stoneIndex, targetItem);
+          const res = applyEnhanceStone(
+            bagRef.current,
+            stoneIndex,
+            targetItem,
+            maxEnhanceForStage(stageRef.current),
+          );
           if (!res) {
             toastFnRef.current('강화석이 아니에요');
             return null;

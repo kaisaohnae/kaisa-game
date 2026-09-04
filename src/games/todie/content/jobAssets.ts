@@ -32,9 +32,6 @@ import warriorAttackUp from '../jobs/warrior/actions/attack_up.png';
 import warriorAttackUpLeft from '../jobs/warrior/actions/attack_upLeft.png';
 import warriorAttackLeft from '../jobs/warrior/actions/attack_left.png';
 import warriorAttackDownLeft from '../jobs/warrior/actions/attack_downLeft.png';
-import warriorSlash from '../jobs/warrior/skills/slash.png';
-import warriorSpin from '../jobs/warrior/skills/spin.png';
-import warriorBash from '../jobs/warrior/skills/bash.png';
 
 import mageIdleDown from '../jobs/mage/actions/idle_down.png';
 import mageIdleDownRight from '../jobs/mage/actions/idle_downRight.png';
@@ -68,9 +65,6 @@ import mageAttackUp from '../jobs/mage/actions/attack_up.png';
 import mageAttackUpLeft from '../jobs/mage/actions/attack_upLeft.png';
 import mageAttackLeft from '../jobs/mage/actions/attack_left.png';
 import mageAttackDownLeft from '../jobs/mage/actions/attack_downLeft.png';
-import mageBolt from '../jobs/mage/skills/bolt.png';
-import mageNova from '../jobs/mage/skills/nova.png';
-import mageShield from '../jobs/mage/skills/shield.png';
 
 type AssetImport = string | {src: string};
 
@@ -93,7 +87,6 @@ type DirActions = Partial<Record<ActionId, Record<CardinalDir, string>>>;
 
 type JobArt = {
   actions: DirActions;
-  skills: Record<string, string>;
 };
 
 function eight(
@@ -153,11 +146,6 @@ export const JOB_ART: Record<JobId, JobArt> = {
         assetUrl(warriorAttackDownLeft),
       ),
     },
-    skills: {
-      slash: assetUrl(warriorSlash),
-      spin: assetUrl(warriorSpin),
-      bash: assetUrl(warriorBash),
-    },
   },
   mage: {
     actions: {
@@ -202,17 +190,11 @@ export const JOB_ART: Record<JobId, JobArt> = {
         assetUrl(mageAttackDownLeft),
       ),
     },
-    skills: {
-      bolt: assetUrl(mageBolt),
-      nova: assetUrl(mageNova),
-      shield: assetUrl(mageShield),
-    },
   },
 };
 
 export type LoadedImages = {
   actions: Partial<Record<ActionId, Record<CardinalDir, HTMLImageElement>>>;
-  skills: Record<string, HTMLImageElement>;
 };
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -249,7 +231,6 @@ export function facingToCardinal(facing: number): CardinalDir {
 export async function loadJobImages(job: JobId): Promise<LoadedImages> {
   const art = JOB_ART[job];
   const actions: Partial<Record<ActionId, Record<CardinalDir, HTMLImageElement>>> = {};
-  const skills: Record<string, HTMLImageElement> = {};
 
   const pixDir: Record<CardinalDir, string> = {
     down: 'south',
@@ -282,13 +263,6 @@ export async function loadJobImages(job: JobId): Promise<LoadedImages> {
       );
     }
   }
-  for (const id of Object.keys(art.skills)) {
-    loads.push(
-      loadImage(art.skills[id]).then((img) => {
-        skills[id] = img;
-      }),
-    );
-  }
   await Promise.all(loads);
-  return {actions, skills};
+  return {actions};
 }

@@ -26,12 +26,7 @@ import {fileURLToPath} from 'node:url';
  * @property {FileInstall} [fileInstall]
  */
 
-export const PRECOMPLETED_IDS = new Set([
-  'mage-walk-sync',
-  'warrior-walk-sync',
-  'mage-attack-sync',
-  'warrior-attack-sync',
-]);
+export const PRECOMPLETED_IDS = new Set([]);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const itemsJson = JSON.parse(
@@ -75,47 +70,10 @@ const TIER_LABEL = {
 
 /** @type {ManifestItem[]} */
 export const MANIFEST = [
-  // ── Todie: 캐릭터 동기화 (완료) ──
-  ...todieCharacterSync(),
+  // ── Todie: 캐릭터·스킬FX·몬스터는 로컬 에셋 유지 (스튜디오 목록에서 제외) ──
 
-  // ── Todie: 몬스터 ──
-  ...todieMob('slime', 'cute green slime monster, top-down RPG field mob'),
-  ...todieMob('slime_elite', 'elite purple slime with golden crown, glowing aura'),
-  ...todieMob('bat', 'small pixel bat enemy, wings spread, top-down'),
-  ...todieMob('bat_elite', 'elite red bat with fangs and purple glow'),
-  ...todieMob('block', 'hostile living stone cube monster, cracked gray rock face'),
-  ...todieMob('block_elite', 'elite crystal rock golem cube, glowing blue cracks'),
-  ...todieMob('wolf', 'gray wolf enemy top-down, mid-run pose'),
-  ...todieMob('wolf_elite', 'elite black wolf with red eyes and scar'),
-  ...todieMob('spider', 'small brown spider enemy top-down, eight legs'),
-  ...todieMob('spider_elite', 'elite giant spider, green toxic markings'),
-  // -- stage 2 stronger mobs --
-  ...todieMob('ghoul', 'undead ghoul enemy top-down, rotting green flesh, clawed hands, glowing yellow eyes'),
-  ...todieMob('ghoul_elite', 'elite ghoul top-down, brighter toxic green aura, larger claws, crown spikes'),
-  ...todieMob('wraith', 'ghostly wraith enemy top-down, translucent pale blue robed spirit, glowing cyan eyes'),
-  ...todieMob('wraith_elite', 'elite wraith top-down, brighter cyan spectral glow, crown of light spikes'),
-  ...todieMob('skeleton', 'undead skeleton warrior enemy top-down, bone white, red glowing eyes'),
-  ...todieMob('skeleton_elite', 'elite skeleton warrior top-down, golden trim armor, brighter red eyes, crown spikes'),
-  ...todieMob('banshee', 'wailing banshee ghost enemy top-down, purple translucent robed spirit, glowing magenta eyes'),
-  ...todieMob('banshee_elite', 'elite banshee top-down, brighter magenta spectral glow, crown of light spikes'),
-  ...todieMob('direwolf', 'dark dire wolf enemy top-down, dark slate fur, glowing red eyes, running pose'),
-  ...todieMob('direwolf_elite', 'elite dire wolf top-down, brighter red glow, crown spikes, scarred fur'),
-  // -- stage 3 even stronger mobs --
-  ...todieMob('reaper', 'grim reaper enemy top-down, black hooded robe, glowing orange eyes, ominous aura'),
-  ...todieMob('reaper_elite', 'elite grim reaper top-down, brighter orange aura, crown spikes, scythe glow'),
-  ...todieMob('lich', 'undead lich sorcerer enemy top-down, purple robes, bone white skull face, glowing green eyes'),
-  ...todieMob('lich_elite', 'elite lich sorcerer top-down, brighter green arcane aura, crown spikes'),
-  ...todieMob('deathknight', 'death knight enemy top-down, dark red black armor, glowing red eyes, ominous presence'),
-  ...todieMob('deathknight_elite', 'elite death knight top-down, brighter red glow, crown spikes, cracked armor'),
-  ...todieMob('nightmare', 'nightmare horse enemy top-down, deep violet black fur, blazing orange mane, glowing eyes'),
-  ...todieMob('nightmare_elite', 'elite nightmare horse top-down, brighter fiery mane, crown spikes'),
-  ...todieMob('wight', 'undead wight enemy top-down, pale blue-gray skin, icy glowing eyes, tattered robes'),
-  ...todieMob('wight_elite', 'elite wight top-down, brighter icy glow, crown spikes, frost aura'),
-  ...todieMob('boss', 'mid boss orc warlord top-down, orange armor, big axe'),
-  ...todieMob('bigBoss', 'large demon knight boss top-down, red black armor, horns'),
-  ...todieMob('finalBoss', 'final boss void lich king top-down, pale violet robes, dark aura'),
-
-  // ── Todie: 타일/맵오브젝트는 PixelLab 공통 라이브러리 사용 (builtin 제거) ──
+  // ── Todie: 히트 임팩트 FX ──
+  ...todieHitFxAll(),
 
   // ── Todie: 소모품 ──
   ...todieConsumable('potion', '체력포션', 'red health potion bottle icon, heart label, glass shine, 48x48 inventory icon'),
@@ -214,63 +172,6 @@ export const MANIFEST = [
   ),
 ];
 
-function todieCharacterSync() {
-  return [
-    {
-      id: 'mage-walk-sync',
-      game: 'todie',
-      category: 'character',
-      label: '법사 걷기 8방향',
-      type: 'sync_character',
-      characterId: '0ad17b16-ffef-4435-a785-3ae6d9235ef6',
-      characterInstall: {job: 'mage', action: 'walk'},
-    },
-    {
-      id: 'warrior-walk-sync',
-      game: 'todie',
-      category: 'character',
-      label: '검사 걷기 8방향',
-      type: 'sync_character',
-      characterId: '16c3fd35-4d06-4fa3-881b-a0ec311917ee',
-      characterInstall: {job: 'warrior', action: 'walk'},
-    },
-    {
-      id: 'mage-attack-sync',
-      game: 'todie',
-      category: 'character',
-      label: '법사 공격 8방향',
-      type: 'sync_character',
-      characterId: 'bf21e19b-7d24-4ba3-870c-92b4f3cb8398',
-      characterInstall: {job: 'mage', action: 'attack'},
-    },
-    {
-      id: 'warrior-attack-sync',
-      game: 'todie',
-      category: 'character',
-      label: '검사 공격 8방향',
-      type: 'sync_character',
-      characterId: 'fbe9029c-7ec3-4558-8def-84162cdb5528',
-      characterInstall: {job: 'warrior', action: 'attack'},
-    },
-  ];
-}
-
-/** @param {string} id @param {string} desc */
-function todieMob(id, desc) {
-  return [
-    {
-      id: `mob-${id}`,
-      game: 'todie',
-      category: 'mob',
-      label: `몬스터: ${id}`,
-      type: 'pixflux',
-      description: `${desc}${STYLE_SUFFIX}`,
-      imageSize: {width: 64, height: 64},
-      fileInstall: {path: `public/todie/mobs/${id}.png`},
-    },
-  ];
-}
-
 /**
  * Shared description builder for one biome's A~F tile family — always emphasizes
  * seamless self-tiling AND natural blending with its sibling variants, so any mix
@@ -348,6 +249,33 @@ function todieConsumable(id, label, desc) {
       description: `${desc}${STYLE_SUFFIX}`,
       imageSize: {width: 48, height: 48},
       fileInstall: {path: `public/todie/items/${id}.png`},
+    },
+  ];
+}
+
+function todieHitFxAll() {
+  const style =
+    ', top-down RPG impact VFX only, no character no UI, centered, crisp pixels, transparent background, CraftPix style';
+  return [
+    {
+      id: 'fx-hit',
+      game: 'todie',
+      category: 'hit-fx',
+      label: '히트FX · 적중',
+      type: 'pixflux',
+      description: `top-down RPG hit impact spark burst, yellow-white star flash, short slash sparks${style}`,
+      imageSize: {width: 64, height: 64},
+      fileInstall: {path: 'public/common/fx/hit.png'},
+    },
+    {
+      id: 'fx-hit-splash',
+      game: 'todie',
+      category: 'hit-fx',
+      label: '히트FX · 스플래시',
+      type: 'pixflux',
+      description: `top-down RPG splash damage impact, soft orange ring burst with sparks${style}`,
+      imageSize: {width: 64, height: 64},
+      fileInstall: {path: 'public/common/fx/hit-splash.png'},
     },
   ];
 }

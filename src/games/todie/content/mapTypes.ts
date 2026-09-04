@@ -52,7 +52,7 @@ export const MAP_ROWS = MAP_WORLD_SIZE / MAP_TILE_SIZE; // 80
 export const MAP_URL = '/todie/map/stage1.json';
 
 /**
- * 스테이지별 맵 파일 경로. `/studio/map/`에서 'stage2'·'stage3'·'stage4' 이름으로 맵을
+ * 스테이지별 맵 파일 경로. `/studio/map/`에서 'stage2'~'stage5' 이름으로 맵을
  * 만들어 저장하면 자동으로 사용된다 — 없으면 기본 맵(stage1.json)으로 폴백.
  */
 export function mapUrlForStage(stage: number): string {

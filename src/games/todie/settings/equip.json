@@ -43,6 +43,10 @@
   ],
   "uniqueOwnGroups": [
     "armor",
+    "weapon"
+  ],
+  "groups": [
+    "armor",
     "weapon",
     "accessory"
   ],
@@ -51,10 +55,15 @@
     "successChance": 0.5
   },
   "enhance": {
-    "maxLevel": 10,
+    "maxLevel": 20,
+    "baseMaxLevel": 10,
+    "stage4MaxLevel": 15,
+    "stage5MaxLevel": 20,
     "highTierUpTo": 5,
     "highChance": 0.5,
     "lowChance": 0.2,
+    "ultraChance": 0.05,
+    "mythicChance": 0.01,
     "weaponAtkPerLevel": 1,
     "otherDefPerLevel": 1
   }

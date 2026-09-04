@@ -37,6 +37,7 @@ export function skillsFromBalance(job: JobId): RuntimeSkill[] {
       shieldHp: s.shieldHp,
       projectileSpeed: s.projectileSpeed,
       projectileLife: s.projectileLife,
+      projectileRange: s.projectileRange,
       projectileCount: s.projectileCount,
       projectileSpacing: s.projectileSpacing,
       projectileHitRadius: s.projectileHitRadius,

@@ -396,26 +396,53 @@ export function unequipSlot(
 
 type EnhanceConfig = {
   maxLevel: number;
+  baseMaxLevel: number;
+  stage4MaxLevel: number;
+  stage5MaxLevel: number;
   highTierUpTo: number;
   highChance: number;
   lowChance: number;
+  ultraChance: number;
+  mythicChance: number;
   weaponAtkPerLevel: number;
   otherDefPerLevel: number;
 };
 
 const ENHANCE_CFG: EnhanceConfig = (equipJson as {enhance?: EnhanceConfig}).enhance ?? {
-  maxLevel: 10,
+  maxLevel: 20,
+  baseMaxLevel: 10,
+  stage4MaxLevel: 15,
+  stage5MaxLevel: 20,
   highTierUpTo: 5,
   highChance: 0.5,
   lowChance: 0.2,
+  ultraChance: 0.05,
+  mythicChance: 0.01,
   weaponAtkPerLevel: 1,
   otherDefPerLevel: 1,
 };
 
+/** 절대 최대 강화 (+20, 스테이지 5) */
 export const MAX_ENHANCE_LEVEL = ENHANCE_CFG.maxLevel;
+/** 스테이지 1~3 최대 / 스테이지 4 진입 기준 (+10) */
+export const BASE_ENHANCE_MAX = ENHANCE_CFG.baseMaxLevel;
+/** 스테이지 4 최대 / 스테이지 5 진입 기준 (+15) */
+export const STAGE4_ENHANCE_MAX = ENHANCE_CFG.stage4MaxLevel;
 
-/** 다음 강화 단계(1~10)의 성공 확률 — 1~5강은 highChance, 6~10강은 lowChance */
+/** 현재 스테이지에서 허용되는 최대 강화 */
+export function maxEnhanceForStage(stage: number): number {
+  if (stage >= 5) return ENHANCE_CFG.stage5MaxLevel;
+  if (stage >= 4) return ENHANCE_CFG.stage4MaxLevel;
+  return ENHANCE_CFG.baseMaxLevel;
+}
+
+/**
+ * 다음 강화 단계 성공 확률
+ * 1~5: 50% / 6~10: 20% / 11~15: 5% / 16~20: 1%
+ */
 export function enhanceSuccessChance(nextLevel: number): number {
+  if (nextLevel > ENHANCE_CFG.stage4MaxLevel) return ENHANCE_CFG.mythicChance;
+  if (nextLevel > ENHANCE_CFG.baseMaxLevel) return ENHANCE_CFG.ultraChance;
   return nextLevel <= ENHANCE_CFG.highTierUpTo ? ENHANCE_CFG.highChance : ENHANCE_CFG.lowChance;
 }
 
@@ -446,22 +473,31 @@ export type EnhanceOutcome = {
 /**
  * 가방의 강화석 1개를 소모해 target 장비를 강화 시도.
  * target은 bag/equipped 어디에 있든 참조로 전달 — 성공 시 그 자리에서 enhance += 1.
+ * @param maxLevel 현재 허용 최대 강화 (스테이지별 +10 / +15 / +20)
  */
 export function applyEnhanceStone(
   bag: Item[],
   stoneIndex: number,
   target: Item,
+  maxLevel: number = MAX_ENHANCE_LEVEL,
 ): EnhanceOutcome | null {
   const stone = bag[stoneIndex];
   if (!stone || stone.kind !== 'enhanceStone' || stone.qty < 1) return null;
   if (target.kind !== 'gear') return null;
   const level = target.enhance ?? 0;
-  if (level >= MAX_ENHANCE_LEVEL) {
+  const cap = Math.min(MAX_ENHANCE_LEVEL, Math.max(0, Math.floor(maxLevel)));
+  if (level >= cap) {
+    let message = `이미 최대 강화(+${cap})예요`;
+    if (cap <= BASE_ENHANCE_MAX && level >= BASE_ENHANCE_MAX) {
+      message = `스테이지 4에서 +${STAGE4_ENHANCE_MAX}까지 강화할 수 있어요`;
+    } else if (cap <= STAGE4_ENHANCE_MAX && level >= STAGE4_ENHANCE_MAX) {
+      message = `스테이지 5에서 +${MAX_ENHANCE_LEVEL}까지 강화할 수 있어요`;
+    }
     return {
       applied: false,
       success: false,
       newLevel: level,
-      message: `이미 최대 강화(+${MAX_ENHANCE_LEVEL})예요`,
+      message,
     };
   }
   stone.qty -= 1;
@@ -500,22 +536,23 @@ function allEquippedAtLeast(equipped: Equipment, minTier: GearTier): boolean {
   });
 }
 
-/** 전 슬롯 신화 +MAX 강화인지 */
-function allEquippedMythicMaxEnhance(equipped: Equipment): boolean {
+/** 전 슬롯 신화 +minEnhance 이상인지 */
+function allEquippedMythicAtEnhance(equipped: Equipment, minEnhance: number): boolean {
   return EQUIP_SLOTS.every((s) => {
     const it = equipped[s.id];
     return (
       Boolean(it) &&
       it!.kind === 'gear' &&
       tierRank(it!.tier) >= tierRank('mythic') &&
-      (it!.enhance ?? 0) >= MAX_ENHANCE_LEVEL
+      (it!.enhance ?? 0) >= minEnhance
     );
   });
 }
 
-/** 장착 장비 등급·강화로 현재 도달 가능한 스테이지(1~4)를 판정 */
+/** 장착 장비 등급·강화로 현재 도달 가능한 스테이지(1~5)를 판정 */
 export function stageForEquipped(equipped: Equipment): number {
-  if (allEquippedMythicMaxEnhance(equipped)) return 4;
+  if (allEquippedMythicAtEnhance(equipped, STAGE4_ENHANCE_MAX)) return 5;
+  if (allEquippedMythicAtEnhance(equipped, BASE_ENHANCE_MAX)) return 4;
   if (allEquippedAtLeast(equipped, 'mythic')) return 3;
   if (allEquippedAtLeast(equipped, 'hero')) return 2;
   return 1;

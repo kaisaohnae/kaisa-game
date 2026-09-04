@@ -4,7 +4,6 @@ import {facingToCardinal, type LoadedImages} from '../content/jobAssets';
 import {EQUIP_SLOTS, type Equipment} from '../content/equip';
 
 const char = displaySettings.character;
-const skillFx = displaySettings.skillFx;
 
 export type AttackSwing = {
   /** 1 → 0 over the swing */
@@ -184,27 +183,4 @@ export function drawJobPreview(
     ctx.fillStyle = job === 'warrior' ? '#ff8a65' : '#7e57c2';
     ctx.fillRect(w / 2 - 20, h / 2 - 10, 40, 44);
   }
-}
-
-export function drawSkillSprite(
-  ctx: CanvasRenderingContext2D,
-  images: LoadedImages | null,
-  skillId: string,
-  x: number,
-  y: number,
-  alpha = 1,
-  size = skillFx.size,
-  facing?: number,
-) {
-  const img = images?.skills[skillId];
-  if (!img || !img.complete || img.naturalWidth <= 0) return;
-  ctx.save();
-  applyPixelScale(ctx);
-  ctx.globalAlpha = alpha;
-  ctx.translate(x, y);
-  if (facing != null && Number.isFinite(facing)) {
-    ctx.rotate(facing + Math.PI / 2);
-  }
-  ctx.drawImage(img, -size / 2, -size / 2, size, size);
-  ctx.restore();
 }

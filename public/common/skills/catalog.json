@@ -1,0 +1,13 @@
+{
+  "note": "직업별 스킬 1·2·3 단일 에셋. 크기=100*(1+0.1*floor(무기강화/5))",
+  "publicBase": "/common/skills",
+  "layout": "{job}/{skill}.png",
+  "baseSize": 100,
+  "sizeStep": 0.1,
+  "enhanceStep": 5,
+  "jobs": ["warrior", "mage"],
+  "skills": {
+    "warrior": ["slash", "spin", "bash"],
+    "mage": ["bolt", "nova", "shield"]
+  }
+}

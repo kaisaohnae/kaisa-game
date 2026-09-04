@@ -1,0 +1,8 @@
+{
+  "note": "스킬 히트/스플래시 임팩트 FX. 경로: /common/fx/{hit|hit-splash}.png",
+  "publicBase": "/common/fx",
+  "kinds": ["hit", "splash"],
+  "size": 48,
+  "life": 0.32,
+  "splashLife": 0.28
+}
