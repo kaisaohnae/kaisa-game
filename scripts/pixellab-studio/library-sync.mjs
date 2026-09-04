@@ -23,12 +23,42 @@ export const CHARACTERS_CATALOG_PATH = path.join(CHARACTERS_ROOT, 'catalog.json'
 
 /** @typedef {{ name: string, desc: string, remoteId: string, frames: string[], syncedAt: string }} LibObject */
 /** @typedef {{ name: string, desc: string, remoteId: string, tiles: string[], syncedAt: string }} LibTile */
-/** @typedef {{ name: string, desc: string, remoteId: string, frames: string[], syncedAt: string }} LibCharacter */
+/** @typedef {{ name: string, title: string, remoteId: string, frames: string[], syncedAt: string, stateName?: string, groupId?: string }} LibCharacter */
 /** @typedef {{ version: 1, objects: LibObject[], tiles: LibTile[], characters: LibCharacter[] }} LibraryCatalog */
 
 /** @returns {LibraryCatalog} */
 export function emptyCatalog() {
   return {version: 1, objects: [], tiles: [], characters: []};
+}
+
+/** @param {object} raw @returns {LibCharacter} */
+function normalizeCharacterEntry(raw) {
+  const stateName =
+    typeof raw.stateName === 'string' && raw.stateName.trim()
+      ? raw.stateName.trim()
+      : undefined;
+  let title =
+    typeof raw.title === 'string' && raw.title.trim() ? raw.title.trim() : '';
+  const legacyDesc = typeof raw.desc === 'string' ? raw.desc.trim() : '';
+  // 구버전: title 없이 desc만 있거나 "이름 · 스테이트" 형태
+  if (!title && legacyDesc) {
+    if (stateName && legacyDesc.endsWith(` · ${stateName}`)) {
+      title = legacyDesc.slice(0, -(stateName.length + 3)).trim();
+    } else {
+      const sep = legacyDesc.lastIndexOf(' · ');
+      title = sep > 0 ? legacyDesc.slice(0, sep).trim() : legacyDesc;
+    }
+  }
+  return {
+    name: String(raw.name || ''),
+    title: title || String(raw.name || ''),
+    remoteId: String(raw.remoteId || ''),
+    frames: Array.isArray(raw.frames) ? raw.frames : [],
+    syncedAt: String(raw.syncedAt || ''),
+    stateName,
+    groupId:
+      typeof raw.groupId === 'string' && raw.groupId ? raw.groupId : undefined,
+  };
 }
 
 /** @returns {LibraryCatalog} */
@@ -51,7 +81,9 @@ export function loadCatalog() {
   try {
     if (fs.existsSync(CHARACTERS_CATALOG_PATH)) {
       const raw = JSON.parse(fs.readFileSync(CHARACTERS_CATALOG_PATH, 'utf8'));
-      characters = Array.isArray(raw.characters) ? raw.characters : [];
+      characters = Array.isArray(raw.characters)
+        ? raw.characters.map(normalizeCharacterEntry)
+        : [];
     }
   } catch {
     /* ignore */
@@ -148,10 +180,25 @@ async function fetchAllPages(client, kind, opts = {}) {
   return all;
 }
 
-/** Characters list with higher limit via direct request */
+/** Characters list — max limit 100; paginate with offset when supported */
 async function fetchAllCharacters(client) {
-  const data = await client.listCharacters(100);
-  return data.characters ?? [];
+  /** @type {object[]} */
+  const all = [];
+  let offset = 0;
+  const limit = 100;
+  for (;;) {
+    const path =
+      offset === 0
+        ? `/characters?limit=${limit}`
+        : `/characters?limit=${limit}&offset=${offset}`;
+    const data = await client.request(path);
+    const rows = data.characters ?? [];
+    all.push(...rows);
+    if (rows.length < limit) break;
+    offset += limit;
+    if (offset > 5000) break;
+  }
+  return all;
 }
 
 /**
@@ -243,9 +290,97 @@ function tilesetDesc(t) {
   return String(t.name || joined || t.id || '').trim();
 }
 
-function characterDesc(c) {
-  const parts = [c.name || c.prompt, c.style_name].filter(Boolean);
-  return parts.join(' · ').trim() || String(c.id);
+/** PixelLab character title (`name`) */
+function characterTitle(c) {
+  return String(c.name || '').trim() || String(c.id);
+}
+
+/** PixelLab States 탭 명칭 */
+function characterStateName(c) {
+  const state = String(c.state_name || '').trim();
+  return state || undefined;
+}
+
+/**
+ * remoteId 키로 로컬 catalog의 title / stateName 만 갱신 (이미지 재다운로드 없음).
+ * @param {{
+ *   catalog?: LibraryCatalog,
+ *   remoteObjects?: object[],
+ *   remoteTilesets?: object[],
+ *   remoteChars?: object[],
+ * }} [opts]
+ * @returns {{ catalog: LibraryCatalog, metaUpdated: string[] }}
+ */
+function applyRemoteMeta(opts = {}) {
+  const catalog = opts.catalog ?? loadCatalog();
+  /** @type {string[]} */
+  const metaUpdated = [];
+
+  const knownObjects = new Map(catalog.objects.map((o) => [o.remoteId, o]));
+  const knownTiles = new Map(catalog.tiles.map((t) => [t.remoteId, t]));
+  const knownChars = new Map(catalog.characters.map((c) => [c.remoteId, c]));
+
+  for (const row of opts.remoteObjects ?? []) {
+    const existing = row.id ? knownObjects.get(row.id) : null;
+    if (!existing) continue;
+    const desc = objectDesc(row);
+    if (existing.desc !== desc) {
+      existing.desc = desc;
+      metaUpdated.push(existing.name);
+    }
+  }
+
+  for (const row of opts.remoteTilesets ?? []) {
+    const existing = row.id ? knownTiles.get(row.id) : null;
+    if (!existing) continue;
+    const desc = tilesetDesc(row);
+    if (existing.desc !== desc) {
+      existing.desc = desc;
+      metaUpdated.push(existing.name);
+    }
+  }
+
+  for (const row of opts.remoteChars ?? []) {
+    const existing = row.id ? knownChars.get(row.id) : null;
+    if (!existing) continue;
+    const title = characterTitle(row);
+    const stateName = characterStateName(row);
+    const groupId = row.group_id ? String(row.group_id) : undefined;
+    let changed = false;
+    if (existing.title !== title) {
+      existing.title = title;
+      changed = true;
+    }
+    if ((existing.stateName || undefined) !== stateName) {
+      existing.stateName = stateName;
+      changed = true;
+    }
+    if ((existing.groupId || undefined) !== groupId) {
+      existing.groupId = groupId;
+      changed = true;
+    }
+    // 구버전 desc 필드 제거
+    if ('desc' in existing) {
+      delete existing.desc;
+      changed = true;
+    }
+    if (changed) metaUpdated.push(existing.name);
+  }
+
+  return {catalog, metaUpdated};
+}
+
+/**
+ * @param {import('./pixellab.mjs').PixelLabClient} client
+ * @returns {Promise<{ catalog: LibraryCatalog, metaUpdated: string[] }>}
+ */
+export async function syncCatalogMeta(client) {
+  const remoteObjects = await fetchAllPages(client, 'objects');
+  const remoteTilesets = await fetchAllPages(client, 'tilesets');
+  const remoteChars = await fetchAllCharacters(client);
+  const result = applyRemoteMeta({remoteObjects, remoteTilesets, remoteChars});
+  if (result.metaUpdated.length) saveCatalog(result.catalog);
+  return result;
 }
 
 /**
@@ -253,14 +388,17 @@ function characterDesc(c) {
  * @param {import('./pixellab.mjs').PixelLabClient} client
  */
 export async function listPendingLibrary(client) {
-  const catalog = loadCatalog();
-  const knownObjects = new Set(catalog.objects.map((o) => o.remoteId));
-  const knownTiles = new Set(catalog.tiles.map((t) => t.remoteId));
-  const knownChars = new Set(catalog.characters.map((c) => c.remoteId));
-
   const remoteObjects = await fetchAllPages(client, 'objects');
   const remoteTilesets = await fetchAllPages(client, 'tilesets');
   const remoteChars = await fetchAllCharacters(client);
+
+  // 새로고침 시 remoteId 키로 title / stateName 동기화
+  const {catalog} = applyRemoteMeta({remoteObjects, remoteTilesets, remoteChars});
+  saveCatalog(catalog);
+
+  const knownObjects = new Set(catalog.objects.map((o) => o.remoteId));
+  const knownTiles = new Set(catalog.tiles.map((t) => t.remoteId));
+  const knownChars = new Set(catalog.characters.map((c) => c.remoteId));
 
   return {
     objects: remoteObjects
@@ -284,7 +422,8 @@ export async function listPendingLibrary(client) {
       .map((c) => ({
         remoteId: c.id,
         kind: 'character',
-        desc: characterDesc(c),
+        title: characterTitle(c),
+        stateName: characterStateName(c) ?? null,
         status: c.status ?? null,
       })),
   };
@@ -305,25 +444,38 @@ export async function syncLibrary(client, opts = {}) {
     ? new Set(opts.names.filter((n) => typeof n === 'string' && n))
     : null;
   const onProgress = opts.onProgress ?? (() => {});
-  const catalog = loadCatalog();
   const now = new Date().toISOString();
 
   if (mode === 'resync' && (!nameFilter || nameFilter.size === 0)) {
     throw new Error('재연동할 object/tile을 선택하세요');
   }
 
+  onProgress('Syncing names…');
+  const remoteObjects = await fetchAllPages(client, 'objects');
+  const remoteTilesets = await fetchAllPages(client, 'tilesets');
+  const remoteChars = await fetchAllCharacters(client);
+  const {catalog, metaUpdated} = applyRemoteMeta({
+    remoteObjects,
+    remoteTilesets,
+    remoteChars,
+  });
+
   const knownObjects = new Map(catalog.objects.map((o) => [o.remoteId, o]));
   const knownTiles = new Map(catalog.tiles.map((t) => [t.remoteId, t]));
   const knownChars = new Map(catalog.characters.map((c) => [c.remoteId, c]));
 
-  /** @type {{ added: string[], updated: string[], skipped: number }} */
-  const summary = {added: [], updated: [], skipped: 0};
+  /** @type {{ added: string[], updated: string[], metaUpdated: string[], skipped: number }} */
+  const summary = {
+    added: [],
+    updated: [],
+    metaUpdated: [...metaUpdated],
+    skipped: 0,
+  };
 
   const wantResync = (existing) =>
     mode === 'resync' && existing && nameFilter.has(existing.name);
 
   onProgress('Fetching objects…');
-  const remoteObjects = await fetchAllPages(client, 'objects');
   for (const row of remoteObjects) {
     const remoteId = row.id;
     if (!remoteId) continue;
@@ -363,7 +515,6 @@ export async function syncLibrary(client, opts = {}) {
   }
 
   onProgress('Fetching tilesets…');
-  const remoteTilesets = await fetchAllPages(client, 'tilesets');
   for (const row of remoteTilesets) {
     const remoteId = row.id;
     if (!remoteId) continue;
@@ -406,7 +557,6 @@ export async function syncLibrary(client, opts = {}) {
   }
 
   onProgress('Fetching characters…');
-  const remoteChars = await fetchAllCharacters(client);
   for (const row of remoteChars) {
     const remoteId = row.id;
     if (!remoteId) continue;
@@ -433,8 +583,10 @@ export async function syncLibrary(client, opts = {}) {
     }
     const entry = {
       name,
-      desc: characterDesc(detail),
+      title: characterTitle(detail),
       remoteId,
+      stateName: characterStateName(detail),
+      groupId: detail.group_id ? String(detail.group_id) : undefined,
       frames,
       syncedAt: now,
     };

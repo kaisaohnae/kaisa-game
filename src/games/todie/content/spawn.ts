@@ -1,39 +1,24 @@
-import spawnJson from '../settings/spawn.json';
+import {
+  buildStageSpawnPlan,
+  gameSettings,
+  monstersForStage,
+  type MonsterDef,
+  type MonsterTier,
+} from './monsters';
 
-export const spawnSettings = spawnJson;
+export const spawnSettings = {
+  worldSize: gameSettings.world.size,
+  worldMargin: gameSettings.world.margin,
+};
 
-export type SpawnMobKind =
-  | 'slime'
-  | 'bat'
-  | 'block'
-  | 'wolf'
-  | 'spider'
-  | 'ghoul'
-  | 'wraith'
-  | 'skeleton'
-  | 'banshee'
-  | 'direwolf'
-  | 'reaper'
-  | 'lich'
-  | 'deathknight'
-  | 'nightmare'
-  | 'wight';
+export type SpawnMobKind = string;
 
-function weightsForStage(stage: number): Record<string, number> {
-  if (stage >= 3 && spawnJson.kindWeightsStage3) return spawnJson.kindWeightsStage3;
-  if (stage >= 2 && spawnJson.kindWeightsStage2) return spawnJson.kindWeightsStage2;
-  return spawnJson.kindWeights;
+export function pickSpawnKind(stage = 1): SpawnMobKind {
+  const list = monstersForStage(stage);
+  if (!list.length) return 'skeleton-warrior';
+  return list[Math.floor(Math.random() * list.length)]!.id;
 }
 
-/** 스테이지(1~3)에 따라 다른 몹 구성비로 뽑음 — 스테이지2/3엔 더 강한 몹이 섞여 나온다. */
-export function pickSpawnKind(stage = 1): SpawnMobKind {
-  const table = weightsForStage(stage);
-  const entries = Object.entries(table) as [SpawnMobKind, number][];
-  const total = entries.reduce((s, [, w]) => s + w, 0);
-  let r = Math.random() * total;
-  for (const [k, w] of entries) {
-    r -= w;
-    if (r <= 0) return k;
-  }
-  return 'slime';
+export function spawnPlanForStage(stage: number): {def: MonsterDef; tier: MonsterTier}[] {
+  return buildStageSpawnPlan(stage);
 }

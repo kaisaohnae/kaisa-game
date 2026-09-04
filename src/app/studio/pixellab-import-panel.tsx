@@ -13,7 +13,9 @@ import {
 type PendingItem = {
   remoteId: string;
   kind: string;
-  desc: string;
+  title?: string;
+  desc?: string;
+  stateName?: string | null;
   status: string | null;
 };
 
@@ -71,6 +73,14 @@ export default function PixelLabImportPanel({headers, online, hasApiKey, onLog}:
       tiles: data.pending?.tiles ?? [],
       characters: data.pending?.characters ?? [],
     });
+    if (data.catalog) {
+      setCatalog({
+        version: 1,
+        objects: data.catalog.objects ?? [],
+        tiles: data.catalog.tiles ?? [],
+        characters: data.catalog.characters ?? [],
+      });
+    }
     setPendingLoaded(true);
   }, [headers, hasApiKey]);
 
@@ -120,6 +130,9 @@ export default function PixelLabImportPanel({headers, online, hasApiKey, onLog}:
       setSelected(new Set());
       const s = data.summary ?? {};
       onLog(`완료 · 추가 ${(s.added ?? []).length}`);
+      if ((s.metaUpdated ?? []).length) {
+        onLog(`명칭 동기화 ${(s.metaUpdated ?? []).length}개`);
+      }
       for (const name of s.added ?? []) onLog(`+ ${name}`);
       await loadPending();
     } catch (e) {
@@ -224,7 +237,8 @@ export default function PixelLabImportPanel({headers, online, hasApiKey, onLog}:
             ))}
             {pending.characters.map((p) => (
               <li key={p.remoteId}>
-                <span className="studio__tag">character</span> {p.desc || p.remoteId}
+                <span className="studio__tag">character</span>{' '}
+                {p.title || p.desc || p.remoteId}
                 {p.status ? ` · ${p.status}` : ''}
               </li>
             ))}
@@ -303,7 +317,7 @@ export default function PixelLabImportPanel({headers, online, hasApiKey, onLog}:
           <div key={c.name} className="studio__lib-entry">
             <div className="studio__lib-entry-meta">
               <strong>{c.name}</strong>
-              <span className="studio__hint">{c.desc}</span>
+              <span className="studio__hint">{c.title}</span>
             </div>
             <div className="studio__lib-thumbs">
               {c.frames.map((f) => (

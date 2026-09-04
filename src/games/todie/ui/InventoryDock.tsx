@@ -14,6 +14,7 @@ import {
   isHotbarConsumableBagIndex,
   HOTBAR_MANA_BAG,
   HOTBAR_POTION_BAG,
+  sortBag,
   type EnhanceOutcome,
 } from '../content/equip';
 import {jobLabel, type JobId, type LoadedImages} from '../content';
@@ -218,6 +219,10 @@ export function InventoryDock({
       if (fxTimerRef.current) clearTimeout(fxTimerRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (!expanded) setEnhanceFrom(null);
+  }, [expanded]);
 
   const tryEquipBag = (index: number, item: Item) => {
     if (isHotbarConsumableBagIndex(index)) {
@@ -464,9 +469,21 @@ export function InventoryDock({
       <div className="todie__inv-bag">
         <div className="todie__inv-bag-head">
           <span>가방 {bag.length}</span>
-          <span className="todie__inv-bag-sub">
-            드래그 이동 · 밖으로 떨구면 삭제 · 1·2칸=핫바 4·5(물약)
-          </span>
+          <button
+            type="button"
+            className="todie__inv-sort"
+            title="가방 자동정렬"
+            aria-label="가방 자동정렬"
+            onClick={() => {
+              setEnhanceFrom(null);
+              setDragFrom(null);
+              sortBag(bag);
+              onMutate();
+              onToast('가방을 정렬했어요');
+            }}
+          >
+            정렬
+          </button>
         </div>
         <div className="todie__inv-scroll">
           <div className="todie__inv-grid">

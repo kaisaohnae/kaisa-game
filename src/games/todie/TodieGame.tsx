@@ -5,6 +5,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import './todie.css';
 import {
   balanceSettings,
+  buildStageSpawnPlan,
   clearItem,
   displaySettings,
   draftToItem,
@@ -17,27 +18,31 @@ import {
   isExtractableGear,
   stageForEquipped,
   facingToCardinal,
+  gameSettings,
   gearImageKey,
+  inAttackRange,
   JOB_ART,
   jobLabel,
   jobSpeed,
-  mobDrawSize,
-  mobSpriteKey,
+  monsterAggro,
+  monsterDrawSize,
   ownsSameUniqueGear,
   alreadyOwnedToast,
-  pickSpawnKind,
+  pickMonsterSprite,
   getTileId,
   DEFAULT_MAP_TILE,
   tileDef,
   mapObjectDef,
   preloadAllTodieAssets,
   pickupOrAutoEquip,
+  randDropCount,
   rollLootDrop,
   showNameOnGround,
   skillsFromBalance,
-  spawnSettings,
   starterGearItem,
   sumEquippedStats,
+  stageTouchDamageMult,
+  tierConfig,
   tierMeta,
   toggleEquipFromBag,
   unequipSlot,
@@ -50,8 +55,10 @@ import {
   type Item,
   type JobId,
   type LoadedImages,
+  type MonsterDef,
+  type MonsterImages,
+  type MonsterTier,
   type RuntimeSkill,
-  type SpawnMobKind,
   type TodieAssetBundle,
 } from './content';
 import {drawJobCharacter, drawSkillSprite, walkSheetFrameCount} from './render/drawCharacter';
@@ -60,47 +67,14 @@ import {drawDashTrail, drawSkillWorldFx} from './render/skillFx';
 import {InventoryDock} from './ui/InventoryDock';
 import {createTodieBgm, readBgmMuted, type TodieBgm} from './audio/proceduralBgm';
 
-const WORLD = spawnSettings.worldSize ?? 10_000;
-const TILE = 100;
+const WORLD = gameSettings.world.size;
+const TILE = gameSettings.world.tileSize ?? 100;
 const PLAYER_R = 18;
 const HOTBAR = 5;
 const BAG_SIZE = 80;
 const TARGET_RANGE = 1000;
 const MOB_CLICK_R = 36;
-const CHASE_STOP = 42;
-const AGGRO_RANGE = spawnSettings.aggroRange ?? 2000;
-const DEAGGRO_RANGE = spawnSettings.deaggroRange ?? 2000;
-const RESPAWN_CD = spawnSettings.respawnCooldownSec ?? 10;
-const ELITE_RESPAWN_CD =
-  (spawnSettings as {eliteRespawnCooldownSec?: number}).eliteRespawnCooldownSec ??
-  20;
-const BOSS_COUNT = spawnSettings.bossCount ?? 5;
-const BOSS_RESPAWN_CD = spawnSettings.bossRespawnCooldownSec ?? 30;
-const BOSS_DROP_COUNT = spawnSettings.bossDropCount ?? 10;
-const BOSS_AGGRO = spawnSettings.bossAggroRange ?? 2800;
-const BOSS_DEAGGRO = spawnSettings.bossDeaggroRange ?? 3200;
-const BIG_BOSS_COUNT = (spawnSettings as {bigBossCount?: number}).bigBossCount ?? 6;
-const BIG_BOSS_RESPAWN_CD =
-  (spawnSettings as {bigBossRespawnCooldownSec?: number}).bigBossRespawnCooldownSec ?? 60;
-const BIG_BOSS_DROP_COUNT =
-  (spawnSettings as {bigBossDropCount?: number}).bigBossDropCount ?? 18;
-const BIG_BOSS_AGGRO =
-  (spawnSettings as {bigBossAggroRange?: number}).bigBossAggroRange ?? 3400;
-const BIG_BOSS_DEAGGRO =
-  (spawnSettings as {bigBossDeaggroRange?: number}).bigBossDeaggroRange ?? 3800;
-const FINAL_BOSS_COUNT =
-  (spawnSettings as {finalBossCount?: number}).finalBossCount ?? 1;
-const FINAL_BOSS_RESPAWN_CD =
-  (spawnSettings as {finalBossRespawnCooldownSec?: number}).finalBossRespawnCooldownSec ??
-  180;
-const FINAL_BOSS_DROP_COUNT =
-  (spawnSettings as {finalBossDropCount?: number}).finalBossDropCount ?? 40;
-const FINAL_BOSS_AGGRO =
-  (spawnSettings as {finalBossAggroRange?: number}).finalBossAggroRange ?? 4000;
-const FINAL_BOSS_DEAGGRO =
-  (spawnSettings as {finalBossDeaggroRange?: number}).finalBossDeaggroRange ?? 4500;
-const ELITE_CHANCE = spawnSettings.eliteChance ?? 0.12;
-const ELITE_DROP_COUNT = spawnSettings.eliteDropCount ?? 3;
+const CHASE_STOP = (gameSettings.combat?.player?.melee?.forward ?? 100) * 0.85;
 /** 몹 강화: 플레이 1분마다 레벨 +1, 20분(레벨 20)에서 최대치로 고정 */
 const MOB_SCALE_MAX_MINUTES = 20;
 /** 레벨 1당 체력·공격력 배율 증가폭(10%) / 이동속도는 더 완만하게(2%) */
@@ -127,7 +101,6 @@ const NAME_MAX = 10;
 
 const bal = balanceSettings;
 const drops = dropSettings;
-const spawn = spawnSettings;
 const ROLL_COST = bal.player.rollCost;
 const MAX_ROLLS_EQUIV = bal.player.staminaRegenRolls;
 const GROUND_TTL = drops.groundTtlSec;
@@ -145,13 +118,6 @@ type GroundDrop = {
   maxLife: number;
 };
 
-type MobKind = SpawnMobKind | 'boss' | 'bigBoss' | 'finalBoss';
-
-const isAnyBoss = (k: MobKind) =>
-  k === 'boss' || k === 'bigBoss' || k === 'finalBoss';
-const isBigBoss = (k: MobKind) => k === 'bigBoss';
-const isFinalBoss = (k: MobKind) => k === 'finalBoss';
-
 type Mob = {
   id: number;
   x: number;
@@ -161,12 +127,23 @@ type Mob = {
   hp: number;
   maxHp: number;
   speed: number;
-  kind: MobKind;
-  elite: boolean;
+  kind: string; // monster folder id e.g. 'skeleton-warrior'
+  title: string;
+  tier: MonsterTier;
+  ranged: boolean;
+  facing: number; // atan2
+  /** remaining attack-pose seconds (>0 → attack sprite) */
+  attackT: number;
+  /** cooldown until next swing may start (walk pose while waiting in range) */
+  attackCd: number;
   hurt: number;
-  /** Locked onto first aggroer until leash breaks */
   aggro: boolean;
 };
+
+const isElite = (m: Mob) => m.tier === 'elite';
+const isBoss = (m: Mob) => m.tier === 'boss';
+const isFinalBoss = (m: Mob) => m.tier === 'final';
+const isAnyBoss = (m: Mob) => m.tier === 'boss' || m.tier === 'final';
 
 type Fx = {
   x: number;
@@ -254,6 +231,7 @@ const STAGE_DEFS: StageDef[] = [
   {id: 1, name: '죽음의 황무지', label: '스테이지 1 · 죽음의 황무지'},
   {id: 2, name: '죽음의 문', label: '스테이지 2 · 죽음의 문'},
   {id: 3, name: '죽음', label: '스테이지 3 · 죽음'},
+  {id: 4, name: '영원한 죽음', label: '스테이지 4 · 영원한 죽음'},
 ];
 
 function stageDef(id: number): StageDef {
@@ -1008,7 +986,7 @@ export default function TodieGame() {
     const gearImages: Record<string, HTMLImageElement> = assetsRef.current?.gear ?? {};
     const consumableImages: Record<string, HTMLImageElement> =
       assetsRef.current?.consumables ?? {};
-    const mobImages: Record<string, HTMLImageElement> = assetsRef.current?.mobs ?? {};
+    const mobImages: MonsterImages = assetsRef.current?.mobs ?? {};
     const tileImages = assetsRef.current?.tiles ?? {};
     const objectImages = assetsRef.current?.objects ?? {};
     let worldMap = assetsRef.current?.map ?? null;
@@ -1039,10 +1017,7 @@ export default function TodieGame() {
     let alive = true;
     let gameTime = 0;
     /** Absolute gameTime when a world respawn should fire */
-    let pendingRespawns: number[] = [];
-    let pendingBossRespawns: number[] = [];
-    let pendingBigBossRespawns: number[] = [];
-    let pendingFinalBossRespawns: number[] = [];
+    let pendingRespawns: {at: number; tier: MonsterTier}[] = [];
     let moveTarget: {x: number; y: number} | null = null;
     let targetMobId: number | null = null;
     let chaseTarget = false;
@@ -1096,7 +1071,13 @@ export default function TodieGame() {
     stageTransitionRef.current = (stage: number) => {
       const def = stageDef(stage);
       setStageLabel(def.label);
-      showToast(`🎉 ${def.label} 진입! 전 슬롯 ${stage === 3 ? '신화템' : '영웅템'} 이상 달성`);
+      const req =
+        stage >= 4
+          ? '신화템 +10'
+          : stage === 3
+            ? '신화템'
+            : '영웅템';
+      showToast(`🎉 ${def.label} 진입! 전 슬롯 ${req} 이상 달성`);
       toastT = 4.5;
       void reloadStageMap(stage);
     };
@@ -1137,20 +1118,19 @@ export default function TodieGame() {
     const ro = new ResizeObserver(resize);
     ro.observe(wrap);
 
-    const margin = spawn.worldMargin ?? 80;
+    const margin = gameSettings.world.margin ?? 80;
 
-    const makeMobAt = (x: number, y: number, kind?: MobKind): Mob => {
-      const k = kind ?? pickSpawnKind(stageRef.current);
-      const mb = bal.mobs[k] as {hp: number; speed: number; touchDamage: number};
-      const eliteCfg = (bal.mobs as {elite?: {hpMult?: number; speedMult?: number}})
-        .elite;
-      const elite = !isAnyBoss(k) && Math.random() < ELITE_CHANCE;
-      const hpMult = elite ? (eliteCfg?.hpMult ?? 2.4) : 1;
-      const spdMult = elite ? (eliteCfg?.speedMult ?? 1.15) : 1;
+    const makeMobFromDef = (
+      x: number,
+      y: number,
+      def: MonsterDef,
+      tier: MonsterTier,
+    ): Mob => {
+      const cfg = tierConfig(tier);
       const mobLevel = mobLevelAt(gameTime);
       const scaleHpDmg = 1 + mobLevel * MOB_SCALE_HP_DMG_PER_LEVEL;
       const scaleSpeed = 1 + mobLevel * MOB_SCALE_SPEED_PER_LEVEL;
-      const maxHp = Math.round(mb.hp * hpMult * scaleHpDmg);
+      const maxHp = Math.round(cfg.hp * scaleHpDmg);
       return {
         id: nextMobId++,
         x,
@@ -1159,64 +1139,45 @@ export default function TodieGame() {
         homeY: y,
         hp: maxHp,
         maxHp,
-        speed: mb.speed * spdMult * scaleSpeed,
-        kind: k,
-        elite,
+        speed: cfg.speed * scaleSpeed,
+        kind: def.id,
+        title: def.title,
+        tier,
+        ranged: def.ranged,
+        facing: Math.random() * Math.PI * 2,
+        attackT: 0,
+        attackCd: 0,
         hurt: 0,
         aggro: false,
       };
     };
 
-    /** Scatter mobs across the full world map. */
-    const spawnMobsWorld = (count: number) => {
-      for (let i = 0; i < count; i += 1) {
+    const spawnAllForStage = () => {
+      const plan = buildStageSpawnPlan(stageRef.current);
+      for (const row of plan) {
         const x = rand(margin, WORLD - margin);
         const y = rand(margin, WORLD - margin);
-        mobs.push(makeMobAt(x, y));
+        mobs.push(makeMobFromDef(x, y, row.def, row.tier));
       }
     };
 
-    const spawnBossesWorld = (count: number) => {
-      for (let i = 0; i < count; i += 1) {
-        const x = rand(margin, WORLD - margin);
-        const y = rand(margin, WORLD - margin);
-        mobs.push(makeMobAt(x, y, 'boss'));
-      }
-    };
-
-    const spawnBigBossesWorld = (count: number) => {
-      for (let i = 0; i < count; i += 1) {
-        const x = rand(margin, WORLD - margin);
-        const y = rand(margin, WORLD - margin);
-        mobs.push(makeMobAt(x, y, 'bigBoss'));
-      }
-    };
-
-    const spawnFinalBossesWorld = (count: number) => {
-      for (let i = 0; i < count; i += 1) {
-        const x = rand(margin, WORLD - margin);
-        const y = rand(margin, WORLD - margin);
-        mobs.push(makeMobAt(x, y, 'finalBoss'));
-      }
-    };
-
-    const scheduleRespawn = (elite = false) => {
-      pendingRespawns.push(
-        gameTime + (elite ? ELITE_RESPAWN_CD : RESPAWN_CD),
+    const spawnOneOfTier = (tier: MonsterTier) => {
+      const candidates = buildStageSpawnPlan(stageRef.current).filter(
+        (row) => row.tier === tier,
       );
-      pendingRespawns.sort((a, b) => a - b);
+      if (candidates.length === 0) return;
+      const row = candidates[Math.floor(Math.random() * candidates.length)]!;
+      const x = rand(margin, WORLD - margin);
+      const y = rand(margin, WORLD - margin);
+      mobs.push(makeMobFromDef(x, y, row.def, tier));
     };
 
-    const scheduleBossRespawn = () => {
-      pendingBossRespawns.push(gameTime + BOSS_RESPAWN_CD);
-    };
-
-    const scheduleBigBossRespawn = () => {
-      pendingBigBossRespawns.push(gameTime + BIG_BOSS_RESPAWN_CD);
-    };
-
-    const scheduleFinalBossRespawn = () => {
-      pendingFinalBossRespawns.push(gameTime + FINAL_BOSS_RESPAWN_CD);
+    const scheduleRespawn = (tier: MonsterTier) => {
+      pendingRespawns.push({
+        at: gameTime + tierConfig(tier).respawnSec,
+        tier,
+      });
+      pendingRespawns.sort((a, b) => a.at - b.at);
     };
 
     const pullAggro = (m: Mob) => {
@@ -1224,10 +1185,7 @@ export default function TodieGame() {
       if (!m.aggro) m.aggro = true;
     };
 
-    spawnMobsWorld(spawn.initialCount);
-    spawnBossesWorld(BOSS_COUNT);
-    spawnBigBossesWorld(BIG_BOSS_COUNT);
-    spawnFinalBossesWorld(FINAL_BOSS_COUNT);
+    spawnAllForStage();
 
     const gearPower = () => sumEquippedStats(equippedRef.current);
 
@@ -1363,15 +1321,8 @@ export default function TodieGame() {
     };
 
     const killMob = (m: Mob) => {
-      const dropN = isFinalBoss(m.kind)
-        ? FINAL_BOSS_DROP_COUNT
-        : isBigBoss(m.kind)
-          ? BIG_BOSS_DROP_COUNT
-          : m.kind === 'boss'
-            ? BOSS_DROP_COUNT
-            : m.elite
-              ? ELITE_DROP_COUNT
-              : 1;
+      const cfg = tierConfig(m.tier);
+      const dropN = randDropCount(m.tier);
       let lastName = '';
       for (let i = 0; i < dropN; i += 1) {
         const loot = draftToItem(
@@ -1379,54 +1330,37 @@ export default function TodieGame() {
             job: player.job,
             bag: inventory,
             equipped: equippedRef.current,
+            potionChance: cfg.potionChance,
+            tierWeights: cfg.tierWeights,
           }),
         );
         lastName = loot.name;
         spawnGroundDrop(m.x, m.y, loot);
       }
       killCount += 1;
-      const bossLabel = isFinalBoss(m.kind)
-        ? (((bal.mobs as {finalBoss?: {label?: string}}).finalBoss?.label) ??
-          '최종 보스')
-        : m.kind === 'boss'
-          ? ((bal.mobs.boss as {label?: string}).label ?? '보스')
-          : isBigBoss(m.kind)
-            ? (((bal.mobs as {bigBoss?: {label?: string}}).bigBoss?.label) ?? '빅 보스')
-            : '';
-      const eliteLabel =
-        ((bal.mobs as {elite?: {label?: string}}).elite?.label ?? '정예');
+      const tierLabel = cfg.label;
+      const special = isElite(m) || isAnyBoss(m);
       fx.push({
         x: m.x,
         y: m.y,
         life: 1.1,
         max: 1.1,
-        text: isAnyBoss(m.kind)
-          ? `${bossLabel} 처치! x${dropN}`
-          : m.elite
-            ? `${eliteLabel} 처치! x${dropN}`
-            : `+${lastName}`,
-        color: isFinalBoss(m.kind)
+        text: special ? `${m.title} 처치! x${dropN}` : `+${lastName}`,
+        color: isFinalBoss(m)
           ? '#e1bee7'
-          : isBigBoss(m.kind)
-            ? '#ff1744'
-            : m.kind === 'boss'
-              ? '#ff6d00'
-              : m.elite
-                ? '#ce93d8'
-                : '#fff59d',
+          : isBoss(m)
+            ? '#ff6d00'
+            : isElite(m)
+              ? '#ce93d8'
+              : '#fff59d',
       });
       showToast(
-        isAnyBoss(m.kind)
-          ? `${bossLabel} 처치 · 아이템 ${dropN}개!`
-          : m.elite
-            ? `${eliteLabel} 처치 · 아이템 ${dropN}개!`
-            : `${lastName} 드랍!`,
+        special
+          ? `${tierLabel} 처치 · 아이템 ${dropN}개!`
+          : `${lastName} 드랍!`,
       );
       mobs = mobs.filter((x) => x.id !== m.id);
-      if (isFinalBoss(m.kind)) scheduleFinalBossRespawn();
-      else if (isBigBoss(m.kind)) scheduleBigBossRespawn();
-      else if (m.kind === 'boss') scheduleBossRespawn();
-      else scheduleRespawn(m.elite);
+      scheduleRespawn(m.tier);
       if (targetMobId === m.id) {
         targetMobId = null;
         chaseTarget = false;
@@ -1691,15 +1625,13 @@ export default function TodieGame() {
       let best: Mob | null = null;
       let bestD = Infinity;
       for (const m of mobs) {
-        const limit = isFinalBoss(m.kind)
+        const limit = isFinalBoss(m)
           ? MOB_CLICK_R * 2.8
-          : isBigBoss(m.kind)
-            ? MOB_CLICK_R * 2.4
-            : m.kind === 'boss'
-              ? MOB_CLICK_R * 1.8
-              : m.elite
-                ? MOB_CLICK_R * 1.25
-                : MOB_CLICK_R;
+          : isBoss(m)
+            ? MOB_CLICK_R * 2.0
+            : isElite(m)
+              ? MOB_CLICK_R * 1.25
+              : MOB_CLICK_R;
         const d = Math.hypot(m.x - wx, m.y - wy);
         if (d <= limit && d < bestD) {
           bestD = d;
@@ -1978,17 +1910,28 @@ export default function TodieGame() {
       c.translate(m.x, m.y);
       if (m.hurt > 0) c.translate(rand(-2, 2), rand(-2, 2));
 
-      const size = mobDrawSize(m.kind, m.elite);
-      const key = mobSpriteKey(m.kind, m.elite);
-      const img = mobImages[key];
-      const bob =
-        m.kind === 'bat' || m.kind === 'spider'
-          ? Math.sin(performance.now() / 180 + m.id) * 3
-          : 0;
-      const pulse = isAnyBoss(m.kind)
+      const size = monsterDrawSize(m.tier);
+      const attacking = m.attackT > 0;
+      const chasing =
+        m.aggro && !attacking;
+      const returningHome =
+        !m.aggro && !attacking && Math.hypot(m.x - m.homeX, m.y - m.homeY) > 8;
+      const moving = chasing || returningHome;
+      // 이동: walk/idle 교차, 공격: attack, 정지: idle
+      const walkTick = Math.floor(performance.now() / (1000 / 8) + m.id);
+      const pose = attacking
+        ? 'attack'
+        : moving
+          ? walkTick % 2 === 0
+            ? 'walk'
+            : 'idle'
+          : 'idle';
+      const img = pickMonsterSprite(mobImages, m.kind, pose, m.facing);
+      const bob = moving ? Math.abs(Math.sin(performance.now() / 90 + m.id)) * 3 : 0;
+      const pulse = isAnyBoss(m)
         ? 1 +
           Math.sin(performance.now() / 180) *
-            (isFinalBoss(m.kind) ? 0.065 : isBigBoss(m.kind) ? 0.05 : 0.035)
+            (isFinalBoss(m) ? 0.065 : 0.035)
         : 1;
 
       // soft ground shadow
@@ -1997,15 +1940,15 @@ export default function TodieGame() {
       c.ellipse(0, size * 0.38, size * 0.32, size * 0.1, 0, 0, Math.PI * 2);
       c.fill();
 
-      if (m.elite) {
+      if (isElite(m)) {
         const aura = c.createRadialGradient(0, 0, size * 0.15, 0, 0, size * 0.55);
         aura.addColorStop(0, 'rgba(206, 147, 216, 0.35)');
         aura.addColorStop(1, 'rgba(206, 147, 216, 0)');
         c.fillStyle = aura;
         c.beginPath();
-        c.arc(0, bob * 0.2, size * 0.55, 0, Math.PI * 2);
+        c.arc(0, 0, size * 0.55, 0, Math.PI * 2);
         c.fill();
-      } else if (isFinalBoss(m.kind)) {
+      } else if (isFinalBoss(m)) {
         const aura = c.createRadialGradient(0, 0, size * 0.2, 0, 0, size * 0.68);
         aura.addColorStop(0, 'rgba(225, 190, 231, 0.34)');
         aura.addColorStop(1, 'rgba(123, 31, 162, 0)');
@@ -2013,10 +1956,10 @@ export default function TodieGame() {
         c.beginPath();
         c.arc(0, 0, size * 0.66, 0, Math.PI * 2);
         c.fill();
-      } else if (isBigBoss(m.kind)) {
+      } else if (isBoss(m)) {
         const aura = c.createRadialGradient(0, 0, size * 0.2, 0, 0, size * 0.62);
-        aura.addColorStop(0, 'rgba(255, 23, 68, 0.28)');
-        aura.addColorStop(1, 'rgba(255, 23, 68, 0)');
+        aura.addColorStop(0, 'rgba(255, 109, 0, 0.28)');
+        aura.addColorStop(1, 'rgba(255, 109, 0, 0)');
         c.fillStyle = aura;
         c.beginPath();
         c.arc(0, 0, size * 0.6, 0, Math.PI * 2);
@@ -2024,88 +1967,48 @@ export default function TodieGame() {
       }
 
       c.save();
-      c.translate(0, bob);
+      c.translate(0, -bob);
       c.scale(pulse, pulse);
       c.imageSmoothingEnabled = true;
 
       if (img && img.complete && img.naturalWidth > 0) {
         c.drawImage(img, -size / 2, -size / 2, size, size);
       } else {
-        // procedural fallback
-        c.fillStyle = isFinalBoss(m.kind)
+        // procedural fallback by tier
+        c.fillStyle = isFinalBoss(m)
           ? '#4a148c'
-          : isBigBoss(m.kind)
-            ? '#b71c1c'
-            : m.kind === 'boss'
-              ? '#e65100'
-              : m.kind === 'slime'
-                ? '#2e7d32'
-                : m.kind === 'bat'
-                  ? '#4a148c'
-                  : m.kind === 'wolf'
-                    ? '#6d4c41'
-                    : m.kind === 'spider'
-                      ? '#37474f'
-                      : m.kind === 'ghoul'
-                        ? '#556b2f'
-                        : m.kind === 'wraith'
-                          ? '#78909c'
-                          : m.kind === 'skeleton'
-                            ? '#d7ccc8'
-                            : m.kind === 'banshee'
-                              ? '#ce93d8'
-                              : m.kind === 'direwolf'
-                                ? '#37474f'
-                                : m.kind === 'reaper'
-                                  ? '#212121'
-                                  : m.kind === 'lich'
-                                    ? '#6a1b9a'
-                                    : m.kind === 'deathknight'
-                                      ? '#4a0e0e'
-                                      : m.kind === 'nightmare'
-                                        ? '#1a0033'
-                                        : m.kind === 'wight'
-                                          ? '#5c6bc0'
-                                          : '#5d4037';
+          : isBoss(m)
+            ? '#e65100'
+            : isElite(m)
+              ? '#8e24aa'
+              : '#5d4037';
         c.beginPath();
         c.ellipse(0, 0, size * 0.35, size * 0.32, 0, 0, Math.PI * 2);
         c.fill();
       }
       c.restore();
 
-      const barW = isFinalBoss(m.kind)
-        ? 110
-        : isBigBoss(m.kind)
-          ? 90
-          : m.kind === 'boss'
-            ? 56
-            : m.elite
-              ? 40
-              : 34;
+      const barW =
+        m.tier === 'final' ? 90 : m.tier === 'boss' ? 56 : m.tier === 'elite' ? 40 : 34;
       const barY = -(size * 0.52);
       const labelY = barY - 5;
-
-      if (isFinalBoss(m.kind)) {
-        c.fillStyle = 'rgba(245, 245, 255, 0.98)';
-        c.font = 'bold 12px "Fredoka", "Nunito", sans-serif';
-        c.textAlign = 'center';
-        c.fillText('보스정예', 0, labelY);
-      } else if (isBigBoss(m.kind)) {
-        c.fillStyle = 'rgba(255, 205, 210, 0.98)';
-        c.font = 'bold 12px "Fredoka", "Nunito", sans-serif';
-        c.textAlign = 'center';
-        c.fillText('빅정예', 0, labelY);
-      } else if (m.kind === 'boss') {
-        c.fillStyle = 'rgba(255, 224, 130, 0.95)';
-        c.font = 'bold 11px "Fredoka", "Nunito", sans-serif';
-        c.textAlign = 'center';
-        c.fillText('정예', 0, labelY);
-      } else if (m.elite) {
-        c.fillStyle = 'rgba(224, 170, 255, 0.95)';
-        c.font = 'bold 10px "Fredoka", "Nunito", sans-serif';
-        c.textAlign = 'center';
-        c.fillText('정예', 0, labelY);
-      }
+      const name = m.title.replace(/^몬스터:\s*/, '');
+      c.fillStyle =
+        m.tier === 'final'
+          ? 'rgba(186, 104, 255, 0.98)'
+          : m.tier === 'boss'
+            ? 'rgba(66, 165, 245, 0.98)'
+            : m.tier === 'elite'
+              ? 'rgba(255, 235, 59, 0.98)'
+              : 'rgba(255, 255, 255, 0.95)';
+      c.font = `bold ${isAnyBoss(m) ? 11 : 10}px "Fredoka", "Nunito", sans-serif`;
+      c.textAlign = 'center';
+      c.textBaseline = 'bottom';
+      c.strokeStyle = 'rgba(0,0,0,0.65)';
+      c.lineWidth = 2.5;
+      c.strokeText(name, 0, labelY);
+      c.fillText(name, 0, labelY);
+      c.textBaseline = 'alphabetic';
 
       c.fillStyle = 'rgba(0,0,0,0.55)';
       roundRect(c, -barW / 2 - 1, barY - 1, barW + 2, 7, 3);
@@ -2113,16 +2016,13 @@ export default function TodieGame() {
       c.fillStyle = '#2a2a2a';
       c.fillRect(-barW / 2, barY, barW, 5);
       const hpG = c.createLinearGradient(-barW / 2, 0, barW / 2, 0);
-      if (isFinalBoss(m.kind)) {
+      if (isFinalBoss(m)) {
         hpG.addColorStop(0, '#4a148c');
         hpG.addColorStop(1, '#e1bee7');
-      } else if (isBigBoss(m.kind)) {
-        hpG.addColorStop(0, '#c62828');
-        hpG.addColorStop(1, '#ff5252');
-      } else if (m.kind === 'boss') {
+      } else if (isBoss(m)) {
         hpG.addColorStop(0, '#ff6d00');
         hpG.addColorStop(1, '#ffab40');
-      } else if (m.elite) {
+      } else if (isElite(m)) {
         hpG.addColorStop(0, '#8e24aa');
         hpG.addColorStop(1, '#ce93d8');
       } else {
@@ -2401,7 +2301,10 @@ export default function TodieGame() {
           }
         }
       } else if (moving) {
-        const tick = Math.floor(performance.now() / (1000 / displaySettings.actions.walk.fps));
+        // 기존 방식: walk/idle 교차로 1장짜리 걷기도 발이 움직이는 느낌
+        const tick = Math.floor(
+          performance.now() / (1000 / displaySettings.actions.walk.fps),
+        );
         const walkImg = jobImages?.actions.walk?.[dir] ?? null;
         const frameCount =
           walkImg && walkImg.complete && walkImg.naturalWidth > 0
@@ -2604,11 +2507,11 @@ export default function TodieGame() {
       for (const m of mobs) {
         const u = (m.x / WORLD) * miniBox.w;
         const v = (m.y / WORLD) * miniBox.h;
-        if (isFinalBoss(m.kind)) {
-          // White skull mark (~12px, same footprint as big-boss mark)
+        if (isFinalBoss(m)) {
+          // Purple skull mark for final boss
           mctx.save();
           mctx.translate(u, v);
-          mctx.fillStyle = '#ffffff';
+          mctx.fillStyle = '#9c27b0';
           mctx.beginPath();
           mctx.ellipse(0, -1.2, 5.5, 5.2, 0, 0, Math.PI * 2);
           mctx.fill();
@@ -2634,18 +2537,12 @@ export default function TodieGame() {
           mctx.closePath();
           mctx.fill();
           mctx.restore();
-        } else if (isBigBoss(m.kind)) {
-          mctx.fillStyle = '#ff1744';
-          mctx.fillRect(u - 6, v - 6, 12, 12);
-          mctx.strokeStyle = '#ffcdd2';
-          mctx.lineWidth = 1.5;
-          mctx.strokeRect(u - 6.5, v - 6.5, 13, 13);
-        } else if (m.kind === 'boss') {
+        } else if (isBoss(m)) {
           mctx.fillStyle = '#ff6d00';
           mctx.fillRect(u - 4, v - 4, 8, 8);
           mctx.strokeStyle = '#ffe082';
           mctx.strokeRect(u - 4.5, v - 4.5, 9, 9);
-        } else if (m.elite) {
+        } else if (isElite(m)) {
           mctx.fillStyle = '#ce93d8';
           mctx.fillRect(u - 3.5, v - 3.5, 7, 7);
           mctx.strokeStyle = '#e1bee7';
@@ -3078,59 +2975,66 @@ export default function TodieGame() {
         }
         clampCam();
 
-        // mob AI — aggro within range, chase first puller, deaggro past leash
+        // mob AI — aggro, chase with walk, swing: attack pose → walk gap → attack…
+        const mobCombat = gameSettings.combat.monster;
+        const ATTACK_ANIM = mobCombat.attackAnimSec ?? 0.55;
+        const ATTACK_GAP = mobCombat.attackGapSec ?? 0.4;
         for (const m of mobs) {
           m.hurt = Math.max(0, m.hurt - dt);
+          m.attackT = Math.max(0, m.attackT - dt);
+          m.attackCd = Math.max(0, m.attackCd - dt);
           const dx = player.x - m.x;
           const dy = player.y - m.y;
           const d = Math.hypot(dx, dy) || 1;
-          const aggroR = isFinalBoss(m.kind)
-            ? FINAL_BOSS_AGGRO
-            : isBigBoss(m.kind)
-              ? BIG_BOSS_AGGRO
-              : m.kind === 'boss'
-                ? BOSS_AGGRO
-                : AGGRO_RANGE;
-          const deaggroR = isFinalBoss(m.kind)
-            ? FINAL_BOSS_DEAGGRO
-            : isBigBoss(m.kind)
-              ? BIG_BOSS_DEAGGRO
-              : m.kind === 'boss'
-                ? BOSS_DEAGGRO
-                : DEAGGRO_RANGE;
-          const hitR = isFinalBoss(m.kind)
-            ? 84
-            : isBigBoss(m.kind)
-              ? 72
-              : m.kind === 'boss'
-                ? 50
-                : m.elite
-                  ? 34
-                  : 28;
+          const ag = monsterAggro(m.tier);
+          const aggroR = ag.aggro;
+          const deaggroR = ag.deaggro;
 
           if (!m.aggro && d <= aggroR) {
             pullAggro(m);
           } else if (m.aggro && d > deaggroR) {
             m.aggro = false;
+            m.attackT = 0;
           }
 
           if (m.aggro) {
-            m.x += (dx / d) * m.speed * dt;
-            m.y += (dy / d) * m.speed * dt;
-            if (d < hitR) {
-              const base = bal.mobs[m.kind].touchDamage;
-              const dmgMult = m.elite
-                ? ((bal.mobs as {elite?: {damageMult?: number}}).elite?.damageMult ?? 1.7)
-                : 1;
-              const scaleDmg = 1 + mobLevelAt(gameTime) * MOB_SCALE_HP_DMG_PER_LEVEL;
-              hurtPlayer(Math.round(base * dmgMult * scaleDmg));
+            m.facing = Math.atan2(dy, dx);
+            const inRange = inAttackRange(
+              m.x,
+              m.y,
+              m.facing,
+              player.x,
+              player.y,
+              m.ranged,
+              'monster',
+            );
+
+            if (m.attackT > 0) {
+              // attack pose — hold still
+            } else if (inRange) {
+              if (m.attackCd <= 0) {
+                // start swing: attack sprite + damage, then walk gap via attackCd
+                m.attackT = ATTACK_ANIM;
+                m.attackCd = ATTACK_ANIM + ATTACK_GAP;
+                const scaleDmg = 1 + mobLevelAt(gameTime) * MOB_SCALE_HP_DMG_PER_LEVEL;
+                const stageMult = stageTouchDamageMult(stageRef.current);
+                hurtPlayer(
+                  Math.round(tierConfig(m.tier).touchDamage * scaleDmg * stageMult),
+                );
+              }
+              // else recovery gap: attackT==0 → walk sprite while waiting
+            } else {
+              // chase with walk pose
+              m.x += (dx / d) * m.speed * dt;
+              m.y += (dy / d) * m.speed * dt;
             }
           } else {
-            // idle: slowly return toward spawn home
+            // idle: slowly return toward spawn home (walk)
             const hx = m.homeX - m.x;
             const hy = m.homeY - m.y;
             const hd = Math.hypot(hx, hy);
             if (hd > 8) {
+              m.facing = Math.atan2(hy, hx);
               m.x += (hx / hd) * m.speed * 0.45 * dt;
               m.y += (hy / hd) * m.speed * 0.45 * dt;
             }
@@ -3142,41 +3046,18 @@ export default function TodieGame() {
 
         // world respawns after cooldown
         gameTime += dt;
-        while (pendingRespawns.length > 0 && pendingRespawns[0] <= gameTime) {
-          pendingRespawns.shift();
-          spawnMobsWorld(1);
+        while (pendingRespawns.length > 0 && pendingRespawns[0]!.at <= gameTime) {
+          const row = pendingRespawns.shift()!;
+          spawnOneOfTier(row.tier);
         }
-        while (pendingBossRespawns.length > 0 && pendingBossRespawns[0] <= gameTime) {
-          pendingBossRespawns.shift();
-          spawnBossesWorld(1);
+        // safety: if underpopulated and nothing queued, schedule catch-up by tier
+        for (const tier of ['normal', 'elite', 'boss', 'final'] as MonsterTier[]) {
+          const want = tierConfig(tier).count;
+          const aliveCount = mobs.filter((m) => m.tier === tier).length;
+          const pending = pendingRespawns.filter((p) => p.tier === tier).length;
+          const need = want - aliveCount - pending;
+          for (let i = 0; i < need; i += 1) scheduleRespawn(tier);
         }
-        while (pendingBigBossRespawns.length > 0 && pendingBigBossRespawns[0] <= gameTime) {
-          pendingBigBossRespawns.shift();
-          spawnBigBossesWorld(1);
-        }
-        while (
-          pendingFinalBossRespawns.length > 0 &&
-          pendingFinalBossRespawns[0] <= gameTime
-        ) {
-          pendingFinalBossRespawns.shift();
-          spawnFinalBossesWorld(1);
-        }
-        // safety: if underpopulated and nothing queued, schedule catch-up (normal only)
-        const normalAlive = mobs.filter((m) => !isAnyBoss(m.kind)).length;
-        const need =
-          (spawn.minAlive ?? 0) - normalAlive - pendingRespawns.length;
-        for (let i = 0; i < need; i += 1) scheduleRespawn();
-        const bossesAlive = mobs.filter((m) => m.kind === 'boss').length;
-        const bossNeed = BOSS_COUNT - bossesAlive - pendingBossRespawns.length;
-        for (let i = 0; i < bossNeed; i += 1) scheduleBossRespawn();
-        const bigBossesAlive = mobs.filter((m) => m.kind === 'bigBoss').length;
-        const bigBossNeed =
-          BIG_BOSS_COUNT - bigBossesAlive - pendingBigBossRespawns.length;
-        for (let i = 0; i < bigBossNeed; i += 1) scheduleBigBossRespawn();
-        const finalBossesAlive = mobs.filter((m) => m.kind === 'finalBoss').length;
-        const finalBossNeed =
-          FINAL_BOSS_COUNT - finalBossesAlive - pendingFinalBossRespawns.length;
-        for (let i = 0; i < finalBossNeed; i += 1) scheduleFinalBossRespawn();
 
         projectiles = projectiles.filter((p) => {
           const ox = p.x;
@@ -3184,18 +3065,10 @@ export default function TodieGame() {
           p.x += p.vx * dt;
           p.y += p.vy * dt;
           p.life -= dt;
-          // mob body ~28–50 + bolt hitR; swept segment prevents tunneling at high speed
+          // mob body ~ half draw size + bolt hitR; swept segment prevents tunneling
           const hitR = p.hitR ?? 48;
           for (const m of mobs) {
-            const body = isFinalBoss(m.kind)
-              ? 72
-              : isBigBoss(m.kind)
-                ? 60
-                : m.kind === 'boss'
-                  ? 42
-                  : m.elite
-                    ? 30
-                    : 26;
+            const body = monsterDrawSize(m.tier) * 0.45;
             const need = hitR + body;
             if (distPointToSeg(m.x, m.y, ox, oy, p.x, p.y) < need) {
               pullAggro(m);

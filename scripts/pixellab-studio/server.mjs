@@ -156,7 +156,7 @@ const server = http.createServer(async (req, res) => {
         (pending.objects?.length ?? 0) +
         (pending.tiles?.length ?? 0) +
         (pending.characters?.length ?? 0);
-      return json(res, {pending, total});
+      return json(res, {pending, total, catalog: loadCatalog()});
     }
 
     if (url.pathname === '/api/pixellab/library/sync' && req.method === 'POST') {

@@ -251,16 +251,34 @@ export async function loadJobImages(job: JobId): Promise<LoadedImages> {
   const actions: Partial<Record<ActionId, Record<CardinalDir, HTMLImageElement>>> = {};
   const skills: Record<string, HTMLImageElement> = {};
 
+  const pixDir: Record<CardinalDir, string> = {
+    down: 'south',
+    downRight: 'south-east',
+    right: 'east',
+    upRight: 'north-east',
+    up: 'north',
+    upLeft: 'north-west',
+    left: 'west',
+    downLeft: 'south-west',
+  };
+
   const loads: Promise<void>[] = [];
   for (const action of Object.keys(art.actions) as ActionId[]) {
     actions[action] = {} as Record<CardinalDir, HTMLImageElement>;
     for (const dir of CARDINAL_DIRS) {
-      const src = art.actions[action]?.[dir];
-      if (!src) continue;
+      const bundled = art.actions[action]?.[dir];
+      // Prefer copied jobs assets under /common/characters
+      const commonSrc = `/common/characters/${job}/${action}/${pixDir[dir]}.png`;
+      const src = commonSrc;
       loads.push(
-        loadImage(src).then((img) => {
-          actions[action]![dir] = img;
-        }),
+        loadImage(src)
+          .catch(() => (bundled ? loadImage(bundled) : Promise.reject()))
+          .then((img) => {
+            actions[action]![dir] = img;
+          })
+          .catch(() => {
+            /* missing frame */
+          }),
       );
     }
   }

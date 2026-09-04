@@ -32,10 +32,25 @@ export {
   isExtractableGear,
   extractGearToEnhanceStone,
 } from './items';
-export {spawnSettings, pickSpawnKind} from './spawn';
+export {spawnSettings, pickSpawnKind, spawnPlanForStage} from './spawn';
 export type {SpawnMobKind} from './spawn';
 export {loadMobImages, mobSpriteKey, mobDrawSize} from './mobs';
-export type {MobSpriteId} from './mobs';
+export {
+  gameSettings,
+  loadMonsterImages,
+  monsterDrawSize,
+  monsterAggro,
+  inAttackRange,
+  randDropCount,
+  pickMonsterSprite,
+  buildStageSpawnPlan,
+  tierConfig,
+  stageTouchDamageMult,
+  combatRange,
+  type MonsterTier,
+  type MonsterDef,
+  type MonsterImages,
+} from './monsters';
 export {
   loadTileImages,
   loadMapObjectImages,
@@ -74,8 +89,10 @@ export {
   sameGear,
   MAX_ENHANCE_LEVEL,
   enhanceSuccessChance,
+  enhanceStatBonus,
   enhanceStatMultiplier,
   applyEnhanceStone,
+  sortBag,
   stageForEquipped,
 } from './equip';
 export type {GearSlot, Item, Equipment, ItemKind, EnhanceOutcome} from './equip';

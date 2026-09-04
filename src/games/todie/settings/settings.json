@@ -1,0 +1,196 @@
+{
+  "world": {
+    "size": 8000,
+    "tileSize": 100,
+    "margin": 80
+  },
+  "combat": {
+    "monster": {
+      "melee": { "forward": 80, "side": 50 },
+      "ranged": { "forward": 280 },
+      "attackAnimSec": 0.55,
+      "attackGapSec": 0.4
+    },
+    "player": {
+      "melee": { "forward": 100, "side": 50 },
+      "ranged": { "forward": 300 }
+    },
+    "stageTouchDamage": {
+      "base": 0.6,
+      "perStage": 0.3,
+      "note": "stage1=0.6, stage2=0.9, stage3=1.1 … stage마다 +0.3"
+    }
+  },
+  "paths": {
+    "monstersPublic": "/common/monsters",
+    "charactersPublic": "/common/characters",
+    "pixellabCatalog": "public/pixellab-characters/catalog.json"
+  },
+  "states": {
+    "walk": ["걷기 모션", "달리기 모션"],
+    "attack": ["공격 모션"],
+    "idle": ["Idle"]
+  },
+  "titleAliases": {
+    "몬스터: 코뿔소": "몬스터: 코뿔소 인간",
+    "몬스터: 정예 사자 인간": "몬스터: 정예 사자"
+  },
+  "tiers": {
+    "normal": {
+      "label": "일반",
+      "hp": 500,
+      "speed": 90,
+      "touchDamage": 40,
+      "count": 50,
+      "dropCount": [1, 1],
+      "respawnSec": 30,
+      "size": 96,
+      "potionChance": 0.5,
+      "tierWeights": {
+        "basic": 50,
+        "ascend": 20,
+        "unique": 0,
+        "hero": 3,
+        "mythic": 0.5
+      }
+    },
+    "elite": {
+      "label": "정예",
+      "hp": 1000,
+      "speed": 100,
+      "touchDamage": 40,
+      "count": 50,
+      "dropCount": [2, 3],
+      "respawnSec": 90,
+      "size": 120,
+      "potionChance": 0.5,
+      "tierWeights": {
+        "basic": 10,
+        "ascend": 30,
+        "unique": 0,
+        "hero": 10,
+        "mythic": 3
+      }
+    },
+    "boss": {
+      "label": "보스",
+      "hp": 2000,
+      "speed": 110,
+      "touchDamage": 160,
+      "count": 20,
+      "dropCount": [4, 6],
+      "respawnSec": 60,
+      "size": 144,
+      "potionChance": 0.5,
+      "tierWeights": {
+        "basic": 10,
+        "ascend": 20,
+        "unique": 0,
+        "hero": 50,
+        "mythic": 10
+      }
+    },
+    "final": {
+      "label": "최종",
+      "hp": 5000,
+      "speed": 120,
+      "touchDamage": 320,
+      "count": 5,
+      "dropCount": [6, 9],
+      "respawnSec": 80,
+      "size": 192,
+      "potionChance": 0.5,
+      "tierWeights": {
+        "basic": 1,
+        "ascend": 5,
+        "unique": 0,
+        "hero": 50,
+        "mythic": 30
+      }
+    }
+  },
+  "aggro": {
+    "normal": { "aggro": 2000, "deaggro": 2200 },
+    "elite": { "aggro": 2400, "deaggro": 2700 },
+    "boss": { "aggro": 2800, "deaggro": 3200 },
+    "final": { "aggro": 3600, "deaggro": 4000 }
+  },
+  "characters": {
+    "warrior": {
+      "catalogTitle": "케릭터: 검사",
+      "walkState": "검사 걷기 모션",
+      "attackState": "검사 공격 모션"
+    },
+    "mage": {
+      "catalogTitle": "케릭터: 검사",
+      "walkState": "법사 걷기 모션",
+      "attackState": "법사 공격 모션"
+    }
+  },
+  "stages": {
+    "1": {
+      "monsters": [
+        { "title": "몬스터: 해골 전사", "en_title": "skeleton-warrior" },
+        { "title": "몬스터: 어둠의 마법사", "en_title": "dark-mage" },
+        { "title": "몬스터: 오크", "en_title": "orc" },
+        { "title": "몬스터: 코뿔소", "en_title": "rhino" },
+        { "title": "몬스터: 나무의 정령", "en_title": "tree-spirit" },
+        { "title": "몬스터: 정예 늑대인간", "en_title": "elite-werewolf" },
+        { "title": "몬스터: 정예 사자 인간", "en_title": "elite-lion-human" },
+        { "title": "몬스터: 정예 물의 골렘", "en_title": "elite-water-golem" },
+        { "title": "몬스터: 정예 어둠의 악마", "en_title": "elite-dark-demon" },
+        { "title": "몬스터: 정예 사자", "en_title": "elite-lion" },
+        { "title": "몬스터: 보스 죽음의 파괴자", "en_title": "boss-death-destroyer" },
+        { "title": "몬스터: 보스 전쟁의 왕", "en_title": "boss-war-king" },
+        { "title": "몬스터: 최종 관문의 수호자", "en_title": "final-gate-guardian" }
+      ]
+    },
+    "2": {
+      "monsters": [
+        { "title": "몬스터: 해골 궁수", "en_title": "skeleton-archer", "ranged": true },
+        { "title": "몬스터: 피의 마법사", "en_title": "blood-mage", "ranged": true },
+        { "title": "몬스터: 해골 궁수", "en_title": "skeleton-archer" },
+        { "title": "몬스터: 정예 늑대인간", "en_title": "elite-werewolf" },
+        { "title": "몬스터: 정예 사자 인간", "en_title": "elite-lion-human" },
+        { "title": "몬스터: 정예 피의 골렘", "en_title": "elite-blood-golem" },
+        { "title": "몬스터: 정예 물의 골렘", "en_title": "elite-water-golem" },
+        { "title": "몬스터: 정예 어둠의 악마", "en_title": "elite-dark-demon" },
+        { "title": "몬스터: 정예 사자", "en_title": "elite-lion" },
+        { "title": "몬스터: 보스 죽음의 파괴자", "en_title": "boss-death-destroyer" },
+        { "title": "몬스터: 보스 전쟁의 왕", "en_title": "boss-war-king" },
+        { "title": "몬스터: 최종 관문의 수호자", "en_title": "final-gate-guardian" }
+      ]
+    },
+    "3": {
+      "monsters": [
+        { "title": "몬스터: 피의 마법사", "en_title": "blood-mage", "ranged": true },
+        { "title": "몬스터: 정예 늑대인간", "en_title": "elite-werewolf" },
+        { "title": "몬스터: 정예 사자 인간", "en_title": "elite-lion-human" },
+        { "title": "몬스터: 정예 피의 골렘", "en_title": "elite-blood-golem" },
+        { "title": "몬스터: 정예 물의 골렘", "en_title": "elite-water-golem" },
+        { "title": "몬스터: 정예 어둠의 악마", "en_title": "elite-dark-demon" },
+        { "title": "몬스터: 정예 사자", "en_title": "elite-lion" },
+        { "title": "몬스터: 보스 죽음의 파괴자", "en_title": "boss-death-destroyer" },
+        { "title": "몬스터: 보스 전쟁의 왕", "en_title": "boss-war-king" },
+        { "title": "몬스터: 최종 관문의 수호자", "en_title": "final-gate-guardian" },
+        { "title": "몬스터: 최종 죽음의 왕", "en_title": "final-death-king" }
+      ]
+    },
+    "4": {
+      "monsters": [
+        { "title": "몬스터: 피의 마법사", "en_title": "blood-mage", "ranged": true },
+        { "title": "몬스터: 정예 늑대인간", "en_title": "elite-werewolf" },
+        { "title": "몬스터: 정예 사자 인간", "en_title": "elite-lion-human" },
+        { "title": "몬스터: 정예 피의 골렘", "en_title": "elite-blood-golem" },
+        { "title": "몬스터: 정예 물의 골렘", "en_title": "elite-water-golem" },
+        { "title": "몬스터: 정예 어둠의 악마", "en_title": "elite-dark-demon" },
+        { "title": "몬스터: 정예 사자", "en_title": "elite-lion" },
+        { "title": "몬스터: 보스 죽음의 파괴자", "en_title": "boss-death-destroyer" },
+        { "title": "몬스터: 보스 전쟁의 왕", "en_title": "boss-war-king" },
+        { "title": "몬스터: 최종 관문의 수호자", "en_title": "final-gate-guardian" },
+        { "title": "몬스터: 최종 죽음의 왕", "en_title": "final-death-king" },
+        { "title": "몬스터: 최종 죽음의 왕", "en_title": "final-death-king" }
+      ]
+    }
+  }
+}

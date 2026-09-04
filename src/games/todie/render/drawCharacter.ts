@@ -107,7 +107,9 @@ export function drawJobCharacter(
   const dir = facingToCardinal(facing);
   const img =
     images?.actions[action]?.[dir] ??
+    images?.actions.walk?.[dir] ??
     images?.actions.idle?.[dir] ??
+    images?.actions.walk?.down ??
     images?.actions.idle?.down;
   const ox = -size * char.anchorX;
   const oy = -size * char.anchorY;

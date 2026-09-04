@@ -724,18 +724,32 @@
 
 .todie__inv-bag-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
+  gap: 8px;
   margin-bottom: 8px;
   color: #fff;
   font-weight: 800;
   font-size: 13px;
 }
 
-.todie__inv-bag-sub {
+.todie__inv-sort {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding: 2px 7px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #cfd8dc;
   font-size: 10px;
-  font-weight: 600;
-  color: #90a4ae;
+  font-weight: 700;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.todie__inv-sort:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
 }
 
 .todie__inv-scroll {

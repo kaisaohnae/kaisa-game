@@ -5,13 +5,13 @@
     "note": "4-dir CraftPix-like pixel. npm run todie:sprites"
   },
   "character": {
-    "worldSize": 104,
+    "worldSize": 84,
     "previewSize": 168,
     "anchorX": 0.5,
     "anchorY": 0.55,
     "facingOffsetRad": 0,
     "imageSmoothing": false,
-    "note": "4 cardinal dirs (down/left/right/up), no continuous rotate"
+    "note": "common/characters from jobs/ (idle+walk+attack+roll)"
   },
   "attackSwing": {
     "slash": 0.32,
@@ -74,28 +74,9 @@
   "gearPublicBase": "/todie/gear",
   "consumablePublicBase": "/todie/items",
   "mobs": {
-    "publicBase": "/todie/mobs",
+    "publicBase": "/common/monsters",
     "eliteScale": 1.2,
-    "size": {
-      "slime": 70,
-      "bat": 78,
-      "block": 74,
-      "wolf": 76,
-      "spider": 72,
-      "boss": 122,
-      "bigBoss": 176,
-      "finalBoss": 240,
-      "ghoul": 82,
-      "wraith": 80,
-      "skeleton": 84,
-      "banshee": 80,
-      "direwolf": 86,
-      "reaper": 96,
-      "lich": 92,
-      "deathknight": 98,
-      "nightmare": 94,
-      "wight": 92
-    }
+    "size": {}
   },
   "tiles": {
     "publicBase": "/todie/tiles",

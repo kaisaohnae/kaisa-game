@@ -10,7 +10,7 @@ import {
   clearItem,
   putItemInBag,
   sameGear,
-  enhanceStatMultiplier,
+  enhanceStatBonus,
   enhanceSuccessChance,
   MAX_ENHANCE_LEVEL,
 } from './equip';
@@ -144,11 +144,11 @@ export function buildItemHelp(item: Item, playerJob: JobId): ItemHelpInfo | null
     const meta = tierMeta(tier);
     const baseStats = gearStatsFor(tier, item.gearSlot);
     const enhanceLevel = item.enhance ?? 0;
-    const mult = enhanceStatMultiplier(enhanceLevel);
+    const bonus = enhanceStatBonus(enhanceLevel, item.gearSlot);
     const stats = {
-      atk: Math.round(baseStats.atk * mult),
-      def: Math.round(baseStats.def * mult),
-      hp: Math.round(baseStats.hp * mult),
+      atk: baseStats.atk + bonus.atk,
+      def: baseStats.def + bonus.def,
+      hp: baseStats.hp + bonus.hp,
     };
     const usable = !item.job || item.job === playerJob;
     const share = tierDropSharePct(tier);
@@ -158,12 +158,14 @@ export function buildItemHelp(item: Item, playerJob: JobId): ItemHelpInfo | null
     const help =
       (meta as {help?: string} | null)?.help ??
       '장비 아이템입니다. 우클릭으로 장착할 수 있어요.';
+    const enhanceGain =
+      item.gearSlot === 'weapon' ? '강화당 공격 +1' : '강화당 방어 +1';
     const enhanceLine =
       enhanceLevel >= MAX_ENHANCE_LEVEL
-        ? '강화 · 최대 (+10)'
+        ? `강화 · 최대 (+10) · ${enhanceGain}`
         : `강화 · +${enhanceLevel} → +${enhanceLevel + 1} 확률 ${Math.round(
             enhanceSuccessChance(enhanceLevel + 1) * 100,
-          )}% (강화석 우클릭 후 클릭)`;
+          )}% · ${enhanceGain} (강화석 우클릭 후 클릭)`;
     const gradeLine = meta ? `등급 · ${meta.label}${enhanceLevel > 0 ? ` +${enhanceLevel}` : ''}` : null;
     const lines = [
       `슬롯 · ${slotLabel}`,
@@ -248,10 +250,10 @@ export function sumEquippedStats(equipped: import('./equip').Equipment): GearSta
     const it = equipped[s.id];
     if (!it || it.kind !== 'gear') continue;
     const st = gearStatsFor(it.tier, it.gearSlot);
-    const mult = enhanceStatMultiplier(it.enhance ?? 0);
-    atk += Math.round(st.atk * mult);
-    def += Math.round(st.def * mult);
-    hp += Math.round(st.hp * mult);
+    const bonus = enhanceStatBonus(it.enhance ?? 0, it.gearSlot);
+    atk += st.atk + bonus.atk;
+    def += st.def + bonus.def;
+    hp += st.hp + bonus.hp;
   }
   return {atk, def, hp};
 }
@@ -297,6 +299,10 @@ export type LootDropContext = {
   job: JobId;
   bag: Item[];
   equipped: Equipment;
+  /** 물약 드랍 확률 (없으면 drops.json consumableChance) */
+  potionChance?: number;
+  /** 장비 등급 가중치 (몬스터 티어 테이블) */
+  tierWeights?: Partial<Record<GearTier, number>>;
 };
 
 function draftMatchesEquipped(draft: LootItemDraft, equipped: Equipment): boolean {
@@ -338,10 +344,12 @@ export function rollLootDrop(ctx?: LootDropContext): LootItemDraft {
   const {rolls, consumableWeights, slotWeights, jobWeights} = dropsJson;
   const {consumables, gear} = itemsJson;
   const maxTries = 14;
+  const potionChance = ctx?.potionChance ?? rolls.consumableChance;
+  const gearChance = Math.max(0, Math.min(1, 1 - potionChance));
 
   for (let attempt = 0; attempt < maxTries; attempt += 1) {
     let draft: LootItemDraft;
-    if (Math.random() < rolls.gearChance) {
+    if (Math.random() < gearChance) {
       draft = rollGear();
     } else {
       draft = rollConsumable();
@@ -358,7 +366,12 @@ export function rollLootDrop(ctx?: LootDropContext): LootItemDraft {
         ([k, weight]) => ({k, weight}),
       ),
     ).k;
-    const tier = pickWeighted(tierWeightsFromSettings()).k;
+    const customTier = ctx?.tierWeights
+      ? (Object.entries(ctx.tierWeights) as [GearTier, number][])
+          .filter(([, w]) => (w ?? 0) > 0)
+          .map(([k, weight]) => ({k, weight}))
+      : null;
+    const tier = pickWeighted(customTier?.length ? customTier : tierWeightsFromSettings()).k;
     const slot = pickWeighted(
       (Object.entries(slotWeights) as [GearSlot, number][]).map(([k, weight]) => ({
         k,

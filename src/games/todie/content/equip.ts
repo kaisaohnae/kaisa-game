@@ -134,6 +134,44 @@ export function isHotbarConsumableBagIndex(index: number): boolean {
   return index === HOTBAR_POTION_BAG || index === HOTBAR_MANA_BAG;
 }
 
+const KIND_SORT: Record<ItemKind, number> = {
+  enhanceStone: 0,
+  potion: 1,
+  mana: 2,
+  gear: 3,
+  empty: 9,
+};
+
+/** 가방 자동정렬 — 핫바 물약/마나(0·1)는 유지, 나머지 칸만 압축·정렬 */
+export function sortBag(bag: Item[]) {
+  if (bag.length <= BAG_FREE_START) return;
+  const free = bag.slice(BAG_FREE_START).map(copyItem);
+  free.sort((a, b) => {
+    if (a.kind === 'empty' && b.kind !== 'empty') return 1;
+    if (b.kind === 'empty' && a.kind !== 'empty') return -1;
+    if (a.kind === 'empty' && b.kind === 'empty') return 0;
+    const ko = (KIND_SORT[a.kind] ?? 5) - (KIND_SORT[b.kind] ?? 5);
+    if (ko !== 0) return ko;
+    if (a.kind === 'gear' && b.kind === 'gear') {
+      const tr = tierRank(b.tier) - tierRank(a.tier);
+      if (tr !== 0) return tr;
+      const en = (b.enhance ?? 0) - (a.enhance ?? 0);
+      if (en !== 0) return en;
+      const slotCmp = String(a.gearSlot ?? '').localeCompare(String(b.gearSlot ?? ''));
+      if (slotCmp !== 0) return slotCmp;
+      const nameCmp = a.name.localeCompare(b.name, 'ko');
+      if (nameCmp !== 0) return nameCmp;
+      return String(a.job ?? '').localeCompare(String(b.job ?? ''));
+    }
+    const nameCmp = a.name.localeCompare(b.name, 'ko');
+    if (nameCmp !== 0) return nameCmp;
+    return b.qty - a.qty;
+  });
+  for (let i = 0; i < free.length; i += 1) {
+    writeItemInto(bag[BAG_FREE_START + i]!, free[i]!);
+  }
+}
+
 function writeItemInto(slot: Item, item: Item) {
   slot.kind = item.kind;
   slot.name = item.name;
@@ -361,7 +399,8 @@ type EnhanceConfig = {
   highTierUpTo: number;
   highChance: number;
   lowChance: number;
-  statPctPerLevel: number;
+  weaponAtkPerLevel: number;
+  otherDefPerLevel: number;
 };
 
 const ENHANCE_CFG: EnhanceConfig = (equipJson as {enhance?: EnhanceConfig}).enhance ?? {
@@ -369,7 +408,8 @@ const ENHANCE_CFG: EnhanceConfig = (equipJson as {enhance?: EnhanceConfig}).enha
   highTierUpTo: 5,
   highChance: 0.5,
   lowChance: 0.2,
-  statPctPerLevel: 0.05,
+  weaponAtkPerLevel: 1,
+  otherDefPerLevel: 1,
 };
 
 export const MAX_ENHANCE_LEVEL = ENHANCE_CFG.maxLevel;
@@ -379,9 +419,21 @@ export function enhanceSuccessChance(nextLevel: number): number {
   return nextLevel <= ENHANCE_CFG.highTierUpTo ? ENHANCE_CFG.highChance : ENHANCE_CFG.lowChance;
 }
 
-/** 강화 단계에 따른 스탯 배율 (기본 1 + 강화단계 * statPctPerLevel) */
-export function enhanceStatMultiplier(level: number): number {
-  return 1 + Math.max(0, level) * ENHANCE_CFG.statPctPerLevel;
+/** 강화 단계 보너스 — 무기: 공격력, 그 외: 방어력 */
+export function enhanceStatBonus(
+  level: number,
+  slot: GearSlot | null | undefined,
+): {atk: number; def: number; hp: number} {
+  const lv = Math.max(0, level);
+  if (slot === 'weapon') {
+    return {atk: lv * ENHANCE_CFG.weaponAtkPerLevel, def: 0, hp: 0};
+  }
+  return {atk: 0, def: lv * ENHANCE_CFG.otherDefPerLevel, hp: 0};
+}
+
+/** @deprecated 평탄 보너스로 전환됨 — 호환용 (항상 1) */
+export function enhanceStatMultiplier(_level: number): number {
+  return 1;
 }
 
 export type EnhanceOutcome = {
@@ -448,8 +500,22 @@ function allEquippedAtLeast(equipped: Equipment, minTier: GearTier): boolean {
   });
 }
 
-/** 장착 장비 등급으로 현재 도달 가능한 스테이지(1~3)를 판정 */
+/** 전 슬롯 신화 +MAX 강화인지 */
+function allEquippedMythicMaxEnhance(equipped: Equipment): boolean {
+  return EQUIP_SLOTS.every((s) => {
+    const it = equipped[s.id];
+    return (
+      Boolean(it) &&
+      it!.kind === 'gear' &&
+      tierRank(it!.tier) >= tierRank('mythic') &&
+      (it!.enhance ?? 0) >= MAX_ENHANCE_LEVEL
+    );
+  });
+}
+
+/** 장착 장비 등급·강화로 현재 도달 가능한 스테이지(1~4)를 판정 */
 export function stageForEquipped(equipped: Equipment): number {
+  if (allEquippedMythicMaxEnhance(equipped)) return 4;
   if (allEquippedAtLeast(equipped, 'mythic')) return 3;
   if (allEquippedAtLeast(equipped, 'hero')) return 2;
   return 1;

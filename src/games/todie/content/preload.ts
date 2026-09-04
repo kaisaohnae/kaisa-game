@@ -1,5 +1,5 @@
 import {loadConsumableImages, loadGearImages} from './items';
-import {loadMobImages} from './mobs';
+import {loadMonsterImages} from './monsters';
 import {JOB_ART, loadJobImages, type LoadedImages} from './jobAssets';
 import {isLibraryTileId} from './pixellabLibrary';
 import {isBuiltinMapObject} from './mapObjects';
@@ -12,12 +12,13 @@ import {
   type TodieMapJson,
 } from './tiles';
 import type {JobId} from './types';
+import type {MonsterImages} from './monsters';
 
 export type TodieAssetBundle = {
   jobs: Record<JobId, LoadedImages>;
   gear: Record<string, HTMLImageElement>;
   consumables: Record<string, HTMLImageElement>;
-  mobs: Record<string, HTMLImageElement>;
+  mobs: MonsterImages;
   tiles: PreparedTiles;
   objects: Partial<Record<string, HTMLImageElement>>;
   map: TodieMapJson;
@@ -36,7 +37,7 @@ export async function preloadAllTodieAssets(stage = 1): Promise<TodieAssetBundle
     loadJobImages('mage'),
     loadGearImages(),
     loadConsumableImages(),
-    loadMobImages(),
+    loadMonsterImages(),
     loadTileImages(libTiles),
     loadMapObjectImages(libProps),
   ]);

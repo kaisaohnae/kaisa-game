@@ -23,6 +23,7 @@
     "car-run:sprites": "node scripts/install-car-sprites.mjs",
     "plane-shoot:sprites": "node scripts/gen-plane-sprites.mjs",
     "plane-shoot:fx": "node scripts/gen-plane-fx.mjs",
+    "todie:sync-assets": "node scripts/sync-pixellab-game-assets.mjs",
     "studio": "node scripts/pixellab-studio/server.mjs"
   },
   "dependencies": {

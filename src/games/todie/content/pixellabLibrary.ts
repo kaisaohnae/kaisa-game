@@ -18,10 +18,15 @@ export type LibTileEntry = {
 
 export type LibCharacterEntry = {
   name: string;
-  desc: string;
+  /** PixelLab character name */
+  title: string;
   remoteId: string;
   frames: string[];
   syncedAt: string;
+  /** PixelLab States tab name (e.g. Idle, 걷기 모션) */
+  stateName?: string;
+  /** PixelLab character group id (same character, different states) */
+  groupId?: string;
 };
 
 export type PixellabLibraryCatalog = {
@@ -46,15 +51,27 @@ export async function fetchPixellabCatalog(): Promise<PixellabLibraryCatalog> {
     ]);
     const common = commonRes.ok ? await commonRes.json() : {};
     const chars = charsRes.ok ? await charsRes.json() : {};
+    const rawChars: unknown[] = Array.isArray(chars.characters)
+      ? chars.characters
+      : Array.isArray(common.characters)
+        ? common.characters
+        : [];
     return {
       version: 1,
       objects: Array.isArray(common.objects) ? common.objects : [],
       tiles: Array.isArray(common.tiles) ? common.tiles : [],
-      characters: Array.isArray(chars.characters)
-        ? chars.characters
-        : Array.isArray(common.characters)
-          ? common.characters
-          : [],
+      characters: rawChars.map((raw) => {
+        const c = raw as Partial<LibCharacterEntry> & {desc?: string};
+        return {
+          name: String(c.name ?? ''),
+          title: String(c.title ?? c.desc ?? ''),
+          remoteId: String(c.remoteId ?? ''),
+          frames: Array.isArray(c.frames) ? c.frames : [],
+          syncedAt: String(c.syncedAt ?? ''),
+          stateName: c.stateName,
+          groupId: c.groupId,
+        };
+      }),
     };
   } catch {
     return emptyPixellabCatalog();
