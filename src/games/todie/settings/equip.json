@@ -61,9 +61,9 @@
     "stage5MaxLevel": 20,
     "highTierUpTo": 5,
     "highChance": 0.5,
-    "lowChance": 0.2,
-    "ultraChance": 0.05,
-    "mythicChance": 0.01,
+    "lowChance": 0.3,
+    "ultraChance": 0.1,
+    "mythicChance": 0.05,
     "weaponAtkPerLevel": 1,
     "otherDefPerLevel": 1
   }
