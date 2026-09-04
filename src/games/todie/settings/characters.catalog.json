@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "characters": [
+    {
+      "id": "warrior",
+      "job": "warrior",
+      "title": "주인공: 검사",
+      "idleFrom": "character-47",
+      "idleState": "Idle",
+      "walkFrom": "character-78",
+      "walkState": "걷기 모션",
+      "attackFrom": "character-77",
+      "attackState": "공격 모션",
+      "rollFrom": "character-78",
+      "rollState": "걷기 모션 (roll fallback)",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "idleFrames": 8,
+      "walkFrames": 8,
+      "attackFrames": 8,
+      "rollFrames": 8
+    },
+    {
+      "id": "mage",
+      "job": "mage",
+      "title": "주인공: 법사",
+      "idleFrom": "character-76",
+      "idleState": "Idle",
+      "walkFrom": "character-74",
+      "walkState": "걷기 모션",
+      "attackFrom": "character-75",
+      "attackState": "공격 모션",
+      "rollFrom": "character-74",
+      "rollState": "걷기 모션 (roll fallback)",
+      "frames": [
+        "south",
+        "west",
+        "east",
+        "north",
+        "south-east",
+        "north-east",
+        "north-west",
+        "south-west"
+      ],
+      "idleFrames": 8,
+      "walkFrames": 8,
+      "attackFrames": 8,
+      "rollFrames": 8
+    }
+  ]
+}

@@ -248,7 +248,7 @@ export async function loadJobImages(job: JobId): Promise<LoadedImages> {
     actions[action] = {} as Record<CardinalDir, HTMLImageElement>;
     for (const dir of CARDINAL_DIRS) {
       const bundled = art.actions[action]?.[dir];
-      // Prefer copied jobs assets under /common/characters
+      // Prefer PixelLab sync under /common/characters
       const commonSrc = `/common/characters/${job}/${action}/${pixDir[dir]}.png`;
       const src = commonSrc;
       loads.push(

@@ -22,7 +22,6 @@ import {
   gameSettings,
   gearImageKey,
   inAttackRange,
-  JOB_ART,
   jobLabel,
   jobSpeed,
   monsterAggro,
@@ -35,6 +34,7 @@ import {
   tileDef,
   mapObjectDef,
   preloadAllTodieAssets,
+  loadMapLayerAssets,
   pickupOrAutoEquip,
   randDropCount,
   rollLootDrop,
@@ -1017,8 +1017,8 @@ export default function TodieGame() {
     const mobImages: MonsterImages = assetsRef.current?.mobs ?? {};
     const skillFxImages: SkillFxImages = assetsRef.current?.skillFx ?? {};
     const hitFxImages: HitFxImages = assetsRef.current?.hitFx ?? {};
-    const tileImages = assetsRef.current?.tiles ?? {};
-    const objectImages = assetsRef.current?.objects ?? {};
+    let tileImages = assetsRef.current?.tiles ?? {};
+    let objectImages = assetsRef.current?.objects ?? {};
     let worldMap = assetsRef.current?.map ?? null;
 
 
@@ -1090,11 +1090,22 @@ export default function TodieGame() {
     };
     toastFnRef.current = showToast;
 
-    /** 스테이지2/3 전용 맵이 스튜디오에 저장돼 있으면 갈아끼우고, 없으면 기존 맵 유지 */
+    /** 스테이지 전용 맵 + 타일/오브젝트 이미지 재로드 (팔레트가 달라도 표시되게) */
     const reloadStageMap = async (stage: number) => {
       try {
         const m = await loadTodieMap(stage);
+        const layers = await loadMapLayerAssets(m);
         worldMap = m;
+        tileImages = {...tileImages, ...layers.tiles};
+        objectImages = {...objectImages, ...layers.objects};
+        if (assetsRef.current) {
+          assetsRef.current = {
+            ...assetsRef.current,
+            map: m,
+            tiles: tileImages,
+            objects: objectImages,
+          };
+        }
       } catch {
         /* keep current map */
       }
@@ -3403,7 +3414,7 @@ export default function TodieGame() {
               >
                 <img
                   className="todie__gate-job-sprite"
-                  src={JOB_ART[job].actions.idle?.down ?? ''}
+                  src={`/common/characters/${job}/idle/south.png`}
                   alt=""
                   draggable={false}
                 />
@@ -3559,12 +3570,13 @@ export default function TodieGame() {
           syncBag();
         }}
         onEnhance={(stoneIndex, target) => {
-          const targetItem =
-            target.source === 'equip'
-              ? equippedRef.current[target.slot]
-              : bagRef.current[target.index];
-          if (!targetItem) {
-            toastFnRef.current('강화 대상이 아니에요');
+          if (target.source !== 'equip') {
+            toastFnRef.current('장착한 장비만 강화할 수 있어요');
+            return null;
+          }
+          const targetItem = equippedRef.current[target.slot];
+          if (!targetItem || targetItem.kind !== 'gear') {
+            toastFnRef.current('장착한 장비가 없어요');
             return null;
           }
           const res = applyEnhanceStone(

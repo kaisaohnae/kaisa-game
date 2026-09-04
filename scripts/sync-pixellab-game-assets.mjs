@@ -1,7 +1,8 @@
 /**
  * Sync game assets:
  * - Monsters: pixellab-characters → public/common/monsters/{en_title}/{walk|attack|idle}
- * - Characters: existing jobs sprites → public/common/characters/{warrior|mage}/{idle|walk|attack|roll}
+ * - Protagonists: pixellab 「주인공: 검사/법사」 Idle·걷기·공격 → public/common/characters/{warrior|mage}
+ *   (roll은 PixelLab에 없으면 walk 복제)
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -25,18 +26,6 @@ const DIRS = [
   'north-west',
   'south-west',
 ];
-
-/** game cardinal file suffix → PixelLab / common folder dir name */
-const JOB_DIR_TO_PIX = {
-  down: 'south',
-  downRight: 'south-east',
-  right: 'east',
-  upRight: 'north-east',
-  up: 'north',
-  upLeft: 'north-west',
-  left: 'west',
-  downLeft: 'south-west',
-};
 
 /** Korean title → English folder / en_title */
 const EN_TITLE_BY_KO = {
@@ -130,25 +119,6 @@ function copyPixFrames(characterName, destDir) {
   return n;
 }
 
-/**
- * Copy jobs/{job}/actions/{action}_{cardinal}.png → common/characters/{job}/{action}/{pixDir}.png
- * @param {string} job
- * @param {string} action
- */
-function copyJobAction(job, action) {
-  const srcDir = path.join(ROOT, 'src/games/todie/jobs', job, 'actions');
-  const destDir = path.join(ROOT, 'public/common/characters', job, action);
-  fs.mkdirSync(destDir, {recursive: true});
-  let n = 0;
-  for (const [cardinal, pix] of Object.entries(JOB_DIR_TO_PIX)) {
-    const src = path.join(srcDir, `${action}_${cardinal}.png`);
-    if (!fs.existsSync(src)) continue;
-    fs.copyFileSync(src, path.join(destDir, `${pix}.png`));
-    n += 1;
-  }
-  return n;
-}
-
 // ── Monsters ──────────────────────────────────────────────
 const monstersRoot = path.join(ROOT, 'public/common/monsters');
 fs.rmSync(monstersRoot, {recursive: true, force: true});
@@ -223,30 +193,92 @@ fs.writeFileSync(
   `${JSON.stringify({version: 1, monsters: monsterEntries}, null, 2)}\n`,
 );
 
-// ── Characters: existing jobs → common/characters ─────────
+// ── Protagonists: PixelLab 주인공 → common/characters ─────
 const charsRoot = path.join(ROOT, 'public/common/characters');
 fs.rmSync(charsRoot, {recursive: true, force: true});
 fs.mkdirSync(charsRoot, {recursive: true});
 
-for (const job of ['warrior', 'mage']) {
-  const counts = {
-    idle: copyJobAction(job, 'idle'),
-    walk: copyJobAction(job, 'walk'),
-    attack: copyJobAction(job, 'attack'),
-    roll: copyJobAction(job, 'roll'),
-  };
+const protagonists = settings.protagonists ?? {
+  warrior: {title: '주인공: 검사', folder: 'warrior'},
+  mage: {title: '주인공: 법사', folder: 'mage'},
+};
+
+/** @type {object[]} */
+const characterEntries = [];
+/** @type {object[]} */
+const characterMissing = [];
+
+for (const [jobKey, cfg] of Object.entries(protagonists)) {
+  const title = cfg.title ?? '';
+  const folder = cfg.folder ?? jobKey;
+  const walk = pickState(title, settings.states.walk);
+  const attack = pickState(title, settings.states.attack);
+  const idle = pickState(title, idleStates);
+  if (!walk || !attack || !idle) {
+    characterMissing.push({
+      job: jobKey,
+      title,
+      walk: walk?.name ?? null,
+      attack: attack?.name ?? null,
+      idle: idle?.name ?? null,
+      available: (byTitle.get(title) ?? []).map((r) => r.stateName),
+    });
+    continue;
+  }
+  const idleN = copyPixFrames(idle.name, path.join(charsRoot, folder, 'idle'));
+  const walkN = copyPixFrames(walk.name, path.join(charsRoot, folder, 'walk'));
+  const atkN = copyPixFrames(attack.name, path.join(charsRoot, folder, 'attack'));
+  // roll 스테이트 없음 → walk 복제
+  const rollN = copyPixFrames(walk.name, path.join(charsRoot, folder, 'roll'));
+  characterEntries.push({
+    id: folder,
+    job: cfg.job ?? jobKey,
+    title,
+    idleFrom: idle.name,
+    idleState: idle.stateName,
+    walkFrom: walk.name,
+    walkState: walk.stateName,
+    attackFrom: attack.name,
+    attackState: attack.stateName,
+    rollFrom: walk.name,
+    rollState: `${walk.stateName} (roll fallback)`,
+    frames: DIRS,
+    idleFrames: idleN,
+    walkFrames: walkN,
+    attackFrames: atkN,
+    rollFrames: rollN,
+  });
   console.log(
-    `character OK ${job} idle=${counts.idle} walk=${counts.walk} attack=${counts.attack} roll=${counts.roll}`,
+    `character OK ${folder} ← ${title} (idle=${idle.name}, walk=${walk.name}, atk=${attack.name}, roll=${walk.name})`,
   );
 }
 
+fs.writeFileSync(
+  path.join(charsRoot, 'catalog.json'),
+  `${JSON.stringify({version: 1, characters: characterEntries}, null, 2)}\n`,
+);
+fs.writeFileSync(
+  path.join(ROOT, 'src/games/todie/settings/characters.catalog.json'),
+  `${JSON.stringify({version: 1, characters: characterEntries}, null, 2)}\n`,
+);
+
 if (missing.length) {
-  console.log('\nMISSING (skipped):');
+  console.log('\nMISSING monsters (skipped):');
   for (const m of missing) {
     console.log(
       `- ${m.title} [resolved=${m.resolved}] states=${(m.available || []).join(',') || '∅'}`,
     );
   }
 }
+if (characterMissing.length) {
+  console.log('\nMISSING protagonists (skipped):');
+  for (const m of characterMissing) {
+    console.log(
+      `- ${m.job} ${m.title} states=${(m.available || []).join(',') || '∅'}`,
+    );
+  }
+}
 
-console.log(`\nDone: ${monsterEntries.length} monsters, characters from jobs/, missing ${missing.length}`);
+console.log(
+  `\nDone: ${monsterEntries.length} monsters, ${characterEntries.length} protagonists from pixellab, missing monsters=${missing.length} protagonists=${characterMissing.length}`,
+);

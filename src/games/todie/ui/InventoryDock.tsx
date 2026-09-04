@@ -351,7 +351,7 @@ export function InventoryDock({
 
       {enhanceFrom != null && (
         <div className="todie__enhance-banner">
-          강화할 장비를 클릭하세요 · 강화석 다시 클릭하면 취소
+          장착한 장비를 클릭하세요 · 강화석 다시 클릭하면 취소
         </div>
       )}
 
@@ -435,7 +435,7 @@ export function InventoryDock({
                       setEnhanceFrom(null);
                     }
                   } else {
-                    onToast('강화 대상이 아니에요');
+                    onToast('장착한 장비가 없어요');
                   }
                 }}
                 onDoubleClick={(e) => {
@@ -502,10 +502,7 @@ export function InventoryDock({
                   }${it.tier ? ` is-tier-${it.tier}` : ''}${blocked ? ' is-blocked' : ''}${
                     hotbarLock ? ' is-hotbar-lock' : ''
                   }${extractable ? ' is-extractable' : ''}${
-                    enhanceFrom != null &&
-                    (i === enhanceFrom || (it.kind === 'gear' && (!it.job || it.job === job)))
-                      ? ' is-enhance-target'
-                      : ''
+                    enhanceFrom != null && i === enhanceFrom ? ' is-enhance-target' : ''
                   }`}
                   draggable={it.kind !== 'empty'}
                   onMouseEnter={(e) => showTip(it, e.currentTarget)}
@@ -518,23 +515,17 @@ export function InventoryDock({
                         onToast('강화 취소');
                       } else {
                         setEnhanceFrom(i);
-                        onToast('강화할 장비를 클릭하세요');
+                        onToast(
+                          worn > 0
+                            ? '장착한 장비를 클릭하세요'
+                            : '먼저 장비를 장착하세요',
+                        );
                       }
                       return;
                     }
                     if (enhanceFrom != null) {
                       e.stopPropagation();
-                      if (it.kind === 'gear' && (!it.job || it.job === job)) {
-                        const stoneIdx = enhanceFrom;
-                        const outcome = onEnhance(stoneIdx, {source: 'bag', index: i});
-                        if (outcome?.applied) triggerEnhanceFx(outcome.success, outcome.newLevel);
-                        const stone = bag[stoneIdx];
-                        if (!stone || stone.kind !== 'enhanceStone' || stone.qty <= 0) {
-                          setEnhanceFrom(null);
-                        }
-                      } else {
-                        onToast('강화 대상이 아니에요');
-                      }
+                      onToast('장착한 장비만 강화할 수 있어요');
                       return;
                     }
                     if (!extractable) return;
@@ -598,7 +589,11 @@ export function InventoryDock({
                         onToast('강화 취소');
                       } else {
                         setEnhanceFrom(i);
-                        onToast('강화할 장비를 클릭하세요');
+                        onToast(
+                          worn > 0
+                            ? '장착한 장비를 클릭하세요'
+                            : '먼저 장비를 장착하세요',
+                        );
                       }
                       return;
                     }

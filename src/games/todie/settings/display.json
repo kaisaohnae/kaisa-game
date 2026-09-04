@@ -5,13 +5,13 @@
     "note": "4-dir CraftPix-like pixel. npm run todie:sprites"
   },
   "character": {
-    "worldSize": 96,
+    "worldSize": 168,
     "previewSize": 168,
     "anchorX": 0.5,
     "anchorY": 0.55,
     "facingOffsetRad": 0,
     "imageSmoothing": false,
-    "note": "common/characters from jobs/ (idle+walk+attack+roll)"
+    "note": "common/characters from PixelLab 주인공 Idle+걷기+공격 (roll=walk fallback)"
   },
   "attackSwing": {
     "slash": 0.32,

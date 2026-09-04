@@ -28,15 +28,30 @@ export type TodieAssetBundle = {
   map: TodieMapJson;
 };
 
-/** Preload every job action/skill + gear/consumable/mob/tile/map before gameplay starts. */
-export async function preloadAllTodieAssets(stage = 1): Promise<TodieAssetBundle> {
-  const map = await loadTodieMap(stage);
+/** Load tile canvases + object sprites referenced by a stage map. */
+export async function loadMapLayerAssets(map: TodieMapJson): Promise<{
+  tiles: PreparedTiles;
+  objects: Partial<Record<string, HTMLImageElement>>;
+}> {
   const libTiles = map.palette.filter((id) => isLibraryTileId(id));
   const libProps = map.objects
     .filter((o) => !isBuiltinMapObject(o.kind))
     .map((o) => ({kind: o.kind, frame: o.frame}));
+  const [tileImgs, objects] = await Promise.all([
+    loadTileImages(libTiles),
+    loadMapObjectImages(libProps),
+  ]);
+  return {
+    tiles: prepareTileCanvases(tileImgs, map.tileSize, libTiles),
+    objects,
+  };
+}
 
-  const [warrior, mage, gear, consumables, mobs, skillFx, hitFx, tileImgs, objects] = await Promise.all([
+/** Preload every job action/skill + gear/consumable/mob/tile/map before gameplay starts. */
+export async function preloadAllTodieAssets(stage = 1): Promise<TodieAssetBundle> {
+  const map = await loadTodieMap(stage);
+
+  const [warrior, mage, gear, consumables, mobs, skillFx, hitFx, mapLayers] = await Promise.all([
     loadJobImages('warrior'),
     loadJobImages('mage'),
     loadGearImages(),
@@ -44,13 +59,10 @@ export async function preloadAllTodieAssets(stage = 1): Promise<TodieAssetBundle
     loadMonsterImages(),
     loadSkillFxImages(),
     loadHitFxImages(),
-    loadTileImages(libTiles),
-    loadMapObjectImages(libProps),
+    loadMapLayerAssets(map),
   ]);
 
   void JOB_ART;
-
-  const tiles = prepareTileCanvases(tileImgs, map.tileSize, libTiles);
 
   return {
     jobs: {warrior, mage},
@@ -59,8 +71,8 @@ export async function preloadAllTodieAssets(stage = 1): Promise<TodieAssetBundle
     mobs,
     skillFx,
     hitFx,
-    tiles,
-    objects,
+    tiles: mapLayers.tiles,
+    objects: mapLayers.objects,
     map,
   };
 }

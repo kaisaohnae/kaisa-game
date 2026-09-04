@@ -176,7 +176,7 @@ export function buildItemHelp(item: Item, playerJob: JobId): ItemHelpInfo | null
               )}% · 스테이지 4 · ${enhanceGain}`
             : `강화 · +${enhanceLevel} → +${enhanceLevel + 1} 확률 ${Math.round(
                 enhanceSuccessChance(enhanceLevel + 1) * 100,
-              )}% · ${enhanceGain} (강화석 우클릭 후 클릭)`;
+              )}% · ${enhanceGain} (강화석 클릭 후 장착 장비 클릭)`;
     const gradeLine = meta ? `등급 · ${meta.label}${enhanceLevel > 0 ? ` +${enhanceLevel}` : ''}` : null;
     const lines = [
       `슬롯 · ${slotLabel}`,

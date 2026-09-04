@@ -113,7 +113,7 @@ export type {SkillFxImages, SkillFxBehavior} from './skillFx';
 export {loadHitFxImages, pickHitFxImage, hitFxPublicPaths} from './hitFx';
 export type {HitFxImages, HitFxKind} from './hitFx';
 export type {GearSlot, Item, Equipment, ItemKind, EnhanceOutcome} from './equip';
-export {preloadAllTodieAssets} from './preload';
+export {preloadAllTodieAssets, loadMapLayerAssets} from './preload';
 export type {JobId, ActionId, CardinalDir, RuntimeSkill, SkillBalance} from './types';
 export type {LoadedImages} from './jobAssets';
 export type {TodieAssetBundle} from './preload';

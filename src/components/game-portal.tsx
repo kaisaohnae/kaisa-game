@@ -6,17 +6,13 @@ import {GAME_CARD_ICONS} from '@/assets/kids-icons';
 import {getPortalGames} from '@/games';
 import type {GameLevel} from '@/games';
 import {useT} from '@/i18n/locale-context';
-import warriorCardIcon from '@/games/todie/jobs/warrior/actions/idle_down.png';
 
 const CAR_RUN_CARD_ICON = '/car-run/vehicles/Police_animation/1.png';
 const PLANE_SHOOT_CARD_ICON = '/plane-shoot/planes/jet-blue.png';
+const TODIE_CARD_ICON = '/common/characters/warrior/idle/south.png';
 
 function starsLabel(level: GameLevel) {
   return '★'.repeat(level);
-}
-
-function pngSrc(mod: string | {src: string}) {
-  return typeof mod === 'string' ? mod : mod.src;
 }
 
 export default function GamePortal() {
@@ -34,7 +30,7 @@ export default function GamePortal() {
                   {game.id === 'todie' ? (
                     <img
                       className="game-portal__char-icon"
-                      src={pngSrc(warriorCardIcon)}
+                      src={TODIE_CARD_ICON}
                       alt=""
                       draggable={false}
                     />
