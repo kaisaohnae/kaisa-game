@@ -1,6 +1,7 @@
 import itemsJson from '../settings/items.json';
 import dropsJson from '../settings/drops.json';
 import displayJson from '../settings/display.json';
+import equipJson from '../settings/equip.json';
 import {jobLabel} from './settings';
 import type {JobId} from './types';
 import type {Equipment, GearSlot, Item} from './equip';
@@ -500,13 +501,19 @@ export function extractGearToEnhanceStone(
   index: number,
   job: JobId,
   equipped: Equipment,
-): {ok: boolean; qty: number; itemName: string} | null {
+): {ok: boolean; qty: number; itemName: string; success: boolean} | null {
   const item = bag[index];
   if (!item || item.kind !== 'gear') return null;
   if (!isExtractableGear(item, job, bag, equipped)) return null;
   const qty = enhanceStoneValueFor(item.tier) * Math.max(1, item.qty);
   const itemName = item.name;
+  const chance =
+    (equipJson as {extract?: {successChance?: number}}).extract?.successChance ?? 0.5;
+  const success = Math.random() < chance;
   clearItem(item);
+  if (!success) {
+    return {ok: true, qty: 0, itemName, success: false};
+  }
   const meta = (itemsJson.consumables as Record<string, {name: string; color: string}>)
     .enhanceStone ?? {name: '강화석', color: '#80cbc4'};
   putItemInBag(bag, {
@@ -521,7 +528,7 @@ export function extractGearToEnhanceStone(
     tier: null,
     enhance: 0,
   });
-  return {ok: true, qty, itemName};
+  return {ok: true, qty, itemName, success: true};
 }
 
 export function gearIconUrl(job: JobId, gearId: string, tier?: GearTier | null): string | null {

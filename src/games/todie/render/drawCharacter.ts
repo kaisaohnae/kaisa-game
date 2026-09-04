@@ -123,7 +123,7 @@ export function drawJobCharacter(
   drawMythicBackGlow(ctx, mythicCount, size);
 
   // ground shadow
-  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.fillStyle = 'rgba(0,0,0,0.18)';
   ctx.beginPath();
   ctx.ellipse(0, size * 0.28, size * 0.26, size * 0.1, 0, 0, Math.PI * 2);
   ctx.fill();

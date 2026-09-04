@@ -150,7 +150,7 @@ function ItemBubble({
       {info.help && <p className="todie__item-bubble-desc">{info.help}</p>}
       {extractable && (
         <p className="todie__item-bubble-desc todie__item-bubble-extract">
-          클릭하면 추출 가능한 아이템을 전체 강화석으로 추출해요
+          클릭하면 추출 가능한 아이템을 전체 강화석으로 추출해요 (성공 확률 50%)
         </p>
       )}
       <span className="todie__item-bubble-tail" aria-hidden />

@@ -106,6 +106,9 @@ const MAX_ROLLS_EQUIV = bal.player.staminaRegenRolls;
 const GROUND_TTL = drops.groundTtlSec;
 const OWNED_TTL = (drops as {alreadyOwnedTtlSec?: number}).alreadyOwnedTtlSec ?? 1;
 const PICKUP_R = drops.pickupRadius;
+const POTION_HOLD_CAP = (drops as {potionHoldCap?: number}).potionHoldCap ?? 200;
+const POTION_OVERFLOW_TTL =
+  (drops as {potionOverflowTtlSec?: number}).potionOverflowTtlSec ?? 0.4;
 
 type Job = JobId;
 
@@ -116,6 +119,8 @@ type GroundDrop = {
   item: Item;
   life: number;
   maxLife: number;
+  /** true면 줍기 불가(곧 소멸) */
+  noPickup?: boolean;
 };
 
 type Mob = {
@@ -1199,11 +1204,20 @@ export default function TodieGame() {
       }
     };
 
+    const countPotionsInBag = () =>
+      inventory.reduce((sum, it) => sum + (it.kind === 'potion' ? it.qty : 0), 0);
+
     const spawnGroundDrop = (x: number, y: number, item: Item, scatter = 42) => {
       const ang = Math.random() * Math.PI * 2;
       const dist = rand(18, scatter);
       const owned = ownsSameUniqueGear(inventory, equippedRef.current, item);
-      const ttl = owned ? OWNED_TTL : GROUND_TTL;
+      let ttl = owned ? OWNED_TTL : GROUND_TTL;
+      let noPickup = false;
+      // 물약 200개 이상 보유 시: 드랍은 보이지만 바로 소멸(줍기/사용 없음)
+      if (item.kind === 'potion' && countPotionsInBag() >= POTION_HOLD_CAP) {
+        ttl = POTION_OVERFLOW_TTL;
+        noPickup = true;
+      }
       groundDrops.push({
         uid: nextDropUid++,
         x: x + Math.cos(ang) * dist,
@@ -1211,6 +1225,7 @@ export default function TodieGame() {
         item,
         life: ttl,
         maxLife: ttl,
+        noPickup,
       });
     };
 
@@ -1374,6 +1389,20 @@ export default function TodieGame() {
       for (const d of groundDrops) {
         const near = Math.hypot(d.x - player.x, d.y - player.y) <= PICKUP_R;
         if (!near) {
+          keep.push(d);
+          continue;
+        }
+        if (d.noPickup) {
+          keep.push(d);
+          continue;
+        }
+        if (
+          d.item.kind === 'potion' &&
+          countPotionsInBag() >= POTION_HOLD_CAP
+        ) {
+          d.noPickup = true;
+          d.life = Math.min(d.life, POTION_OVERFLOW_TTL);
+          d.maxLife = Math.min(d.maxLife, POTION_OVERFLOW_TTL);
           keep.push(d);
           continue;
         }
@@ -1935,7 +1964,7 @@ export default function TodieGame() {
         : 1;
 
       // soft ground shadow
-      c.fillStyle = 'rgba(0,0,0,0.3)';
+      c.fillStyle = 'rgba(0,0,0,0.18)';
       c.beginPath();
       c.ellipse(0, size * 0.38, size * 0.32, size * 0.1, 0, 0, Math.PI * 2);
       c.fill();
@@ -3332,15 +3361,20 @@ export default function TodieGame() {
           }
           let stones = 0;
           let count = 0;
+          let failed = 0;
           for (const idx of targets) {
             const res = extractGearToEnhanceStone(bag, idx, startJob, equippedRef.current);
             if (res) {
-              stones += res.qty;
               count += 1;
+              if (res.success) stones += res.qty;
+              else failed += 1;
             }
           }
           if (count > 0) {
-            toastFnRef.current(`아이템 ${count}개 → 강화석 x${stones} 추출!`);
+            const parts = [`아이템 ${count}개 추출`];
+            if (stones > 0) parts.push(`강화석 x${stones}`);
+            if (failed > 0) parts.push(`실패 ${failed}`);
+            toastFnRef.current(parts.join(' · '));
           } else {
             toastFnRef.current('추출할 수 있는 아이템이 없어요');
           }

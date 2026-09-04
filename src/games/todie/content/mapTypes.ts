@@ -191,6 +191,7 @@ export function parseMapJson(data: unknown): TodieMapJson {
   if (!raw || raw.version !== 1 || !Array.isArray(raw.cells) || !Array.isArray(raw.palette)) {
     throw new Error('invalid map json');
   }
+  const rawPalette = raw.palette;
   const cols = Number(raw.cols) || MAP_COLS;
   const rows = Number(raw.rows) || MAP_ROWS;
   const need = cols * rows;
@@ -202,11 +203,11 @@ export function parseMapJson(data: unknown): TodieMapJson {
     ...objects.map((o) => o.id + 1),
     1,
   );
-  let palette = raw.palette.filter((p): p is TileId => typeof p === 'string' && isValidMapTileId(p));
+  let palette = rawPalette.filter((p): p is TileId => typeof p === 'string' && isValidMapTileId(p));
   if (!palette.length) palette = [DEFAULT_MAP_TILE];
   // Remap cells if old palette entries were stripped
   const remapped = cells.map((ci) => {
-    const id = raw.palette[ci];
+    const id = rawPalette[ci];
     if (typeof id === 'string' && isValidMapTileId(id)) {
       const pi = palette.indexOf(id);
       return pi >= 0 ? pi : 0;

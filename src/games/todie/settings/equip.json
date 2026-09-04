@@ -47,6 +47,9 @@
     "accessory"
   ],
   "alreadyOwnedToast": "이미 가지고 있는 장비예요",
+  "extract": {
+    "successChance": 0.5
+  },
   "enhance": {
     "maxLevel": 10,
     "highTierUpTo": 5,
