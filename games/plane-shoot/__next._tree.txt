@@ -1,0 +1,9 @@
+:HL["/_next/static/chunks/3x5s5uqbf-fz6.css","style"]
+:HL["/_next/static/media/07454f8ad8aaac57-s.p.2kjei9psvcorz.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/_next/static/media/5c285b27cdda1fe8-s.p.2_mbdogr7ni8i.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/_next/static/media/5d52bd6c4cb3f315-s.p.0ez3bnoxb63ra.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/_next/static/chunks/2a-zk27xzh24z.css","style"]
+:HL["/_next/static/chunks/3gtvjcdu4qf8v.css","style"]
+:HL["/_next/static/chunks/0-petmkp94epa.css","style"]
+:HL["/_next/static/chunks/32pzx45560x71.css","style"]
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"games","param":null,"prefetchHints":0,"slots":{"children":{"name":"id","param":{"type":"d","key":"plane-shoot","siblings":null},"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"Sf-HDZYqmfPk94TED0xN8"}
