@@ -7,4 +7,4 @@
 :HL["/_next/static/chunks/1bmp_f_c6clu0.css","style"]
 :HL["/_next/static/chunks/0-petmkp94epa.css","style"]
 :HL["/_next/static/chunks/3f6vj9ati8jd8.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"games","param":null,"prefetchHints":0,"slots":{"children":{"name":"id","param":{"type":"d","key":"memory-cards","siblings":null},"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"E99Nneblq3nEwM3q2KmmG"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"games","param":null,"prefetchHints":0,"slots":{"children":{"name":"id","param":{"type":"d","key":"memory-cards","siblings":null},"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"lHKHljTKs7Cpp374khEr1"}
