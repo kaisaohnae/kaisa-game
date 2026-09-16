@@ -11,10 +11,31 @@ export function projectPath(rel) {
   return path.join(ROOT, rel.replace(/\//g, path.sep));
 }
 
-export async function fetchBuffer(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`download failed ${res.status} ${url}`);
-  return Buffer.from(await res.arrayBuffer());
+export async function fetchBuffer(url, {retries = 4} = {}) {
+  let lastErr;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        const err = new Error(`download failed ${res.status} ${url}`);
+        // CDN / gateway blips (esp. Backblaze 5xx) — retry
+        if (res.status >= 500 && attempt < retries) {
+          await new Promise((r) => setTimeout(r, 800 * (attempt + 1)));
+          lastErr = err;
+          continue;
+        }
+        throw err;
+      }
+      return Buffer.from(await res.arrayBuffer());
+    } catch (e) {
+      lastErr = e instanceof Error ? e : new Error(String(e));
+      if (attempt < retries) {
+        await new Promise((r) => setTimeout(r, 800 * (attempt + 1)));
+        continue;
+      }
+    }
+  }
+  throw lastErr ?? new Error(`download failed ${url}`);
 }
 
 /**

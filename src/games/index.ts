@@ -18,12 +18,21 @@ import {HangulStudyGame} from './level4/hangul-study';
 import {AddPlayGame} from './level5/add-play';
 import {SubPlayGame} from './level5/sub-play';
 import {TodieGame} from './todie';
+import {HihiGame} from './hihi';
 
 /**
  * 포털 표시 순서 = 배열 순서 (나중에 추가된 게임이 앞).
  * 새 게임은 맨 위에 추가.
  */
 export const GAMES: GameModule[] = [
+  {
+    id: 'hihi',
+    title: 'hihi',
+    description: 'Regional open-world dating chat',
+    level: 5,
+    hidden: true,
+    Component: HihiGame,
+  },
   {
     id: 'plane-shoot',
     title: 'Plane Shoot',

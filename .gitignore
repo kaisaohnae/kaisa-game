@@ -41,3 +41,5 @@ next-env.d.ts
 # PixelLab characters (large; sync via studio)
 /public/pixellab-characters/
 /public/pixellab-library/
+# temp hide for production builds (scripts/build-next.mjs)
+/.studio-build-exclude/

@@ -10,6 +10,7 @@ import {useT} from '@/i18n/locale-context';
 const CAR_RUN_CARD_ICON = '/car-run/vehicles/Police_animation/1.png';
 const PLANE_SHOOT_CARD_ICON = '/plane-shoot/planes/jet-blue.png';
 const TODIE_CARD_ICON = '/common/characters/warrior/idle/south.png';
+const HIHI_CARD_ICON = '/common/characters/mage/idle/south.png';
 
 function starsLabel(level: GameLevel) {
   return '★'.repeat(level);
@@ -27,7 +28,14 @@ export default function GamePortal() {
             <li key={game.id} className="game-portal__item">
               <Link href={`/games/${game.id}/`} className="game-portal__card">
                 <span className="game-portal__emoji" aria-hidden="true">
-                  {game.id === 'todie' ? (
+                  {game.id === 'hihi' ? (
+                    <img
+                      className="game-portal__char-icon"
+                      src={HIHI_CARD_ICON}
+                      alt=""
+                      draggable={false}
+                    />
+                  ) : game.id === 'todie' ? (
                     <img
                       className="game-portal__char-icon"
                       src={TODIE_CARD_ICON}

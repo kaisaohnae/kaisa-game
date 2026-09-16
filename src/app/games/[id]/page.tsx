@@ -27,7 +27,7 @@ export default async function GamePage({params}: PageProps) {
   if (!game) notFound();
 
   const Game = game.Component;
-  const isImmersive = id === 'car-run' || id === 'plane-shoot';
+  const isImmersive = id === 'car-run' || id === 'plane-shoot' || id === 'hihi';
 
   return (
     <>

@@ -20,6 +20,7 @@ import {
   setPrompt,
 } from './prompts.mjs';
 import {loadCatalog, listPendingLibrary, syncLibrary} from './library-sync.mjs';
+import {importHihiCharacters} from './hihi-import.mjs';
 import {StudioRunner} from './runner.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -288,6 +289,135 @@ const server = http.createServer(async (req, res) => {
       return json(res, {ok: true, id});
     }
 
+    if (url.pathname === '/api/hihi-characters' && req.method === 'GET') {
+      const catalogPath = path.join(ROOT, 'public', 'hihi', 'characters.catalog.json');
+      if (!fs.existsSync(catalogPath)) {
+        return json(res, {version: 1, characters: []});
+      }
+      const data = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
+      return json(res, data);
+    }
+
+    if (url.pathname === '/api/hihi-characters' && req.method === 'POST') {
+      const body = await readJson(req);
+      if (!body || body.version !== 1 || !Array.isArray(body.characters)) {
+        return json(res, {error: 'invalid hihi characters payload'}, 400);
+      }
+      const result = importHihiCharacters(body.characters);
+      return json(res, result);
+    }
+
+    if (url.pathname === '/api/hihi-map' && req.method === 'GET') {
+      const id = sanitizeMapId(url.searchParams.get('id') || 'chat1');
+      if (!id) return json(res, {error: 'invalid map id'}, 400);
+      const mapPath = path.join(ROOT, 'public', 'hihi', 'map', `${id}.json`);
+      if (!fs.existsSync(mapPath)) {
+        return json(res, {error: `${id}.json missing`}, 404);
+      }
+      return json(res, JSON.parse(fs.readFileSync(mapPath, 'utf8')));
+    }
+
+    if (url.pathname === '/api/hihi-maps' && req.method === 'GET') {
+      const dir = path.join(ROOT, 'public', 'hihi', 'map');
+      fs.mkdirSync(dir, {recursive: true});
+      const files = fs.readdirSync(dir).filter((f) => f.endsWith('.json') && f !== 'active.json');
+      const maps = files.map((f) => {
+        const id = f.slice(0, -5);
+        let name = id;
+        let cols = 0;
+        let rows = 0;
+        let updatedAt = 0;
+        try {
+          const stat = fs.statSync(path.join(dir, f));
+          updatedAt = stat.mtimeMs;
+          const data = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
+          if (typeof data.name === 'string') name = data.name;
+          cols = Number(data.cols) || 0;
+          rows = Number(data.rows) || 0;
+        } catch {
+          // ignore
+        }
+        return {id, name, cols, rows, updatedAt};
+      });
+      maps.sort((a, b) => a.id.localeCompare(b.id));
+      let activeMapId = 'chat1';
+      try {
+        const activePath = path.join(dir, 'active.json');
+        if (fs.existsSync(activePath)) {
+          const active = JSON.parse(fs.readFileSync(activePath, 'utf8'));
+          if (typeof active.activeMapId === 'string') activeMapId = active.activeMapId;
+        }
+      } catch {
+        // ignore
+      }
+      return json(res, {maps, activeMapId});
+    }
+
+    if (url.pathname === '/api/hihi-map' && req.method === 'POST') {
+      const body = await readJson(req);
+      if (!body || body.version !== 1 || !Array.isArray(body.cells) || !Array.isArray(body.palette)) {
+        return json(res, {error: 'invalid hihi map payload'}, 400);
+      }
+      const id = 'chat1';
+      const cols = Number(body.cols) || 80;
+      const rows = Number(body.rows) || 80;
+      if (body.cells.length !== cols * rows) {
+        return json(res, {error: `cells length must be ${cols * rows}`}, 400);
+      }
+      const dir = path.join(ROOT, 'public', 'hihi', 'map');
+      fs.mkdirSync(dir, {recursive: true});
+      const mapPath = path.join(dir, `${id}.json`);
+      const objects = Array.isArray(body.objects) ? body.objects : [];
+      const payload = {
+        version: 1,
+        name: id,
+        worldSize: Number(body.worldSize) || 8000,
+        tileSize: Number(body.tileSize) || 100,
+        cols,
+        rows,
+        palette: body.palette,
+        cells: body.cells,
+        objects,
+        nextObjectId: Number(body.nextObjectId) || objects.length + 1,
+      };
+      fs.writeFileSync(mapPath, JSON.stringify(payload));
+      fs.writeFileSync(
+        path.join(dir, 'active.json'),
+        `${JSON.stringify({version: 1, activeMapId: id}, null, 2)}\n`,
+      );
+      return json(res, {
+        ok: true,
+        localOnly: true,
+        id,
+        path: `public/hihi/map/${id}.json`,
+        cells: payload.cells.length,
+        objects: objects.length,
+      });
+    }
+
+    if (url.pathname === '/api/hihi-map/active' && req.method === 'POST') {
+      const body = await readJson(req);
+      const id = sanitizeMapId(body?.activeMapId || body?.id);
+      if (!id) return json(res, {error: 'invalid map id'}, 400);
+      const dir = path.join(ROOT, 'public', 'hihi', 'map');
+      const mapPath = path.join(dir, `${id}.json`);
+      if (!fs.existsSync(mapPath)) return json(res, {error: `${id}.json missing`}, 404);
+      fs.mkdirSync(dir, {recursive: true});
+      fs.writeFileSync(
+        path.join(dir, 'active.json'),
+        `${JSON.stringify({version: 1, activeMapId: id}, null, 2)}\n`,
+      );
+      return json(res, {ok: true, activeMapId: id});
+    }
+
+    if (url.pathname === '/api/hihi-map' && req.method === 'DELETE') {
+      const id = sanitizeMapId(url.searchParams.get('id'));
+      if (!id || id === 'chat1') return json(res, {error: 'cannot delete this map'}, 400);
+      const mapPath = path.join(ROOT, 'public', 'hihi', 'map', `${id}.json`);
+      if (fs.existsSync(mapPath)) fs.unlinkSync(mapPath);
+      return json(res, {ok: true, id});
+    }
+
     return json(res, {error: 'not found'}, 404);
   } catch (err) {
     return json(res, {error: err instanceof Error ? err.message : String(err)}, 500);
@@ -314,6 +444,7 @@ async function startServer() {
       console.log(`PixelLab Studio → http://127.0.0.1:${PORT}`);
       console.log(`Open UI       → http://localhost:5555/studio/`);
       console.log(`Map editor    → http://localhost:5555/studio/map/`);
+      console.log(`Hihi map      → http://localhost:5555/studio/hihi-map/`);
       if (!API_KEY) {
         console.log('PIXELLAB_API_KEY missing — paste key in /studio/ settings');
       }
@@ -405,16 +536,18 @@ function listeningPids(port) {
 }
 
 function loadEnvLocal() {
-  const envPath = path.join(ROOT, '.env.local');
-  if (!fs.existsSync(envPath)) return;
-  for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
-    const t = line.trim();
-    if (!t || t.startsWith('#')) continue;
-    const i = t.indexOf('=');
-    if (i < 0) continue;
-    const k = t.slice(0, i).trim();
-    const v = t.slice(i + 1).trim();
-    if (!process.env[k]) process.env[k] = v;
+  for (const name of ['.env', '.env.local']) {
+    const envPath = path.join(ROOT, name);
+    if (!fs.existsSync(envPath)) continue;
+    for (const line of fs.readFileSync(envPath, 'utf8').split('\n')) {
+      const t = line.trim();
+      if (!t || t.startsWith('#')) continue;
+      const i = t.indexOf('=');
+      if (i < 0) continue;
+      const k = t.slice(0, i).trim();
+      const v = t.slice(i + 1).trim();
+      if (!process.env[k]) process.env[k] = v;
+    }
   }
 }
 

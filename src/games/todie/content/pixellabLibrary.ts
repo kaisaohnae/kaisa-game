@@ -1,3 +1,5 @@
+import {isHihiOnlyCharacterTitle} from '@/lib/hihi-characters';
+
 /** Shared PixelLab libraries — common objects/tiles + characters */
 
 export type LibObjectEntry = {
@@ -43,7 +45,7 @@ export function emptyPixellabCatalog(): PixellabLibraryCatalog {
   return {version: 1, objects: [], tiles: [], characters: []};
 }
 
-export async function fetchPixellabCatalog(): Promise<PixellabLibraryCatalog> {
+export async function fetchPixellabCatalog(opts?: {includeHihiOnly?: boolean}): Promise<PixellabLibraryCatalog> {
   try {
     const [commonRes, charsRes] = await Promise.all([
       fetch(`${PIXELLAB_COMMON_CATALOG_URL}?t=${Date.now()}`, {cache: 'no-store'}),
@@ -56,22 +58,23 @@ export async function fetchPixellabCatalog(): Promise<PixellabLibraryCatalog> {
       : Array.isArray(common.characters)
         ? common.characters
         : [];
+    const mapped = rawChars.map((raw) => {
+      const c = raw as Partial<LibCharacterEntry> & {desc?: string};
+      return {
+        name: String(c.name ?? ''),
+        title: String(c.title ?? c.desc ?? ''),
+        remoteId: String(c.remoteId ?? ''),
+        frames: Array.isArray(c.frames) ? c.frames : [],
+        syncedAt: String(c.syncedAt ?? ''),
+        stateName: c.stateName,
+        groupId: c.groupId,
+      };
+    });
     return {
       version: 1,
       objects: Array.isArray(common.objects) ? common.objects : [],
       tiles: Array.isArray(common.tiles) ? common.tiles : [],
-      characters: rawChars.map((raw) => {
-        const c = raw as Partial<LibCharacterEntry> & {desc?: string};
-        return {
-          name: String(c.name ?? ''),
-          title: String(c.title ?? c.desc ?? ''),
-          remoteId: String(c.remoteId ?? ''),
-          frames: Array.isArray(c.frames) ? c.frames : [],
-          syncedAt: String(c.syncedAt ?? ''),
-          stateName: c.stateName,
-          groupId: c.groupId,
-        };
-      }),
+      characters: opts?.includeHihiOnly ? mapped : mapped.filter(c => !isHihiOnlyCharacterTitle(c.title)),
     };
   } catch {
     return emptyPixellabCatalog();

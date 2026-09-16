@@ -1,0 +1,860 @@
+.hihi {
+  --bg: #0f1c24;
+  --panel: rgba(14, 32, 40, 0.88);
+  --panel-solid: #142832;
+  --line: rgba(255, 214, 170, 0.16);
+  --accent: #ff8fab;
+  --accent2: #7dd3c7;
+  --text: #fff6e8;
+  --muted: rgba(255, 246, 232, 0.62);
+  --field: #1a333e;
+  --field-border: rgba(125, 211, 199, 0.22);
+  min-height: 100dvh;
+  height: 100dvh;
+  background:
+    radial-gradient(circle at 18% 8%, rgba(255, 143, 171, 0.16), transparent 42%),
+    radial-gradient(circle at 82% 0%, rgba(125, 211, 199, 0.14), transparent 36%),
+    linear-gradient(160deg, #0b151b, #16303a 55%, #0f1c24);
+  color: var(--text);
+  font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+.hihi--scroll {
+  height: auto;
+  overflow-y: auto;
+}
+
+.hihi__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.hihi__brand {
+  font-size: 1.4rem;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+}
+
+.hihi__meta {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.hihi__hint {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.hihi__body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr minmax(300px, 340px);
+  min-height: 0;
+}
+
+.hihi__canvas-wrap {
+  position: relative;
+  min-height: 520px;
+  background: #12303a;
+}
+
+.hihi__canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+.hihi__minimap-wrap {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.hihi__minimap {
+  width: 320px;
+  height: 320px;
+  display: block;
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 2px rgba(255, 224, 130, 0.45),
+    0 10px 24px rgba(0, 0, 0, 0.45);
+  cursor: grab;
+  pointer-events: auto;
+  touch-action: none;
+  background: #0d2a33;
+}
+
+.hihi__minimap:active {
+  cursor: grabbing;
+}
+
+.hihi__minimap.is-disabled {
+  cursor: default;
+  opacity: 0.92;
+}
+
+@media (max-width: 999px) {
+  .hihi__minimap-wrap {
+    top: 8px;
+    right: 8px;
+  }
+}
+
+@media (min-width: 501px) and (max-width: 999px) {
+  .hihi__minimap {
+    width: 160px !important;
+    height: 160px !important;
+  }
+}
+
+@media (max-width: 500px) {
+  .hihi__minimap {
+    width: 120px !important;
+    height: 120px !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .hihi__minimap {
+    width: 100px !important;
+    height: 100px !important;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .hihi__minimap {
+    pointer-events: none !important;
+  }
+}
+
+.hihi__hud {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.hihi__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--line);
+  font-size: 0.8rem;
+  width: fit-content;
+}
+
+.hihi__chip--action {
+  pointer-events: auto;
+  cursor: pointer;
+  color: #0c1c24;
+  background: rgba(125, 211, 199, 0.92);
+  border-color: rgba(125, 211, 199, 0.95);
+  font-weight: 700;
+}
+
+.hihi__select-hint {
+  position: absolute;
+  left: 12px;
+  bottom: 14px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--line);
+  font-size: 0.75rem;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.hihi__side {
+  background: linear-gradient(180deg, rgba(12, 28, 36, 0.96), rgba(10, 22, 28, 0.98));
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  box-shadow: inset 1px 0 0 rgba(255, 246, 232, 0.06);
+}
+
+.hihi__side-head {
+  padding: 10px 10px 0;
+}
+
+.hihi__leave {
+  width: 100%;
+}
+
+.hihi__auth-text {
+  margin-top: auto;
+  padding-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.hihi__auth-text button {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.hihi__auth-text button:hover {
+  color: var(--text);
+}
+
+.hihi__tabs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  padding: 10px 10px 0;
+}
+
+.hihi__tabs button {
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  padding: 10px 8px;
+  cursor: pointer;
+  border-radius: 12px 12px 0 0;
+  font-weight: 600;
+}
+
+.hihi__tabs button.is-on {
+  color: var(--text);
+  background: rgba(255, 143, 171, 0.12);
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.hihi__panel {
+  flex: 1;
+  overflow: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 143, 171, 0.45) transparent;
+}
+
+.hihi__panel::-webkit-scrollbar,
+.hihi__form::-webkit-scrollbar,
+.hihi__chat-log::-webkit-scrollbar,
+.hihi__avatar-grid::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.hihi__panel::-webkit-scrollbar-thumb,
+.hihi__form::-webkit-scrollbar-thumb,
+.hihi__chat-log::-webkit-scrollbar-thumb,
+.hihi__avatar-grid::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(255, 143, 171, 0.55), rgba(125, 211, 199, 0.4));
+  border-radius: 999px;
+}
+
+.hihi__panel::-webkit-scrollbar-track,
+.hihi__form::-webkit-scrollbar-track,
+.hihi__chat-log::-webkit-scrollbar-track,
+.hihi__avatar-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.hihi__field,
+.hihi__panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.hihi__field-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.hihi__field-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.hihi__form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-right: 4px;
+}
+
+.hihi__form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 12px;
+}
+
+.hihi__form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.hihi__field input,
+.hihi__field select,
+.hihi__field textarea,
+.hihi__panel input,
+.hihi__panel select,
+.hihi__panel textarea {
+  border: 1px solid var(--field-border);
+  background: var(--field);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font: inherit;
+  outline: none;
+  color-scheme: dark;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.hihi__field input:focus,
+.hihi__field select:focus,
+.hihi__field textarea:focus,
+.hihi__panel input:focus,
+.hihi__panel select:focus,
+.hihi__panel textarea:focus {
+  border-color: rgba(255, 143, 171, 0.55);
+  box-shadow: 0 0 0 3px rgba(255, 143, 171, 0.15);
+}
+
+.hihi__panel .hihi__chat-form input,
+.hihi__panel .hihi__chat-form input:focus {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 8px 10px;
+}
+
+.hihi__field select,
+.hihi__panel select {
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--accent2) 50%),
+    linear-gradient(135deg, var(--accent2) 50%, transparent 50%),
+    linear-gradient(to right, transparent, transparent);
+  background-position:
+    calc(100% - 18px) calc(50% - 3px),
+    calc(100% - 12px) calc(50% - 3px),
+    0 0;
+  background-size: 6px 6px, 6px 6px, 100% 100%;
+  background-repeat: no-repeat;
+  padding-right: 36px;
+}
+
+.hihi__field select option,
+.hihi__panel select option {
+  background: #1a333e;
+  color: #fff6e8;
+}
+
+.hihi__field textarea,
+.hihi__panel textarea {
+  min-height: 84px;
+  resize: vertical;
+}
+
+.hihi__radio-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.hihi__radio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 10px;
+  border-radius: 14px;
+  background: var(--field);
+  border: 1px solid var(--field-border);
+  cursor: pointer;
+  color: var(--text);
+  font-weight: 700;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.hihi__radio input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hihi__radio.is-on {
+  border-color: rgba(255, 143, 171, 0.7);
+  background: rgba(255, 143, 171, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(255, 143, 171, 0.25);
+}
+
+.hihi__btn {
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, var(--accent), #ffb4a2);
+  color: #2a0f18;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.hihi__btn--ghost {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+.hihi__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.hihi__rooms {
+  display: grid;
+  gap: 8px;
+}
+
+.hihi__room {
+  text-align: left;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  border-radius: 14px;
+  padding: 12px;
+  cursor: pointer;
+}
+
+.hihi__room strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.hihi__room span {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.hihi-chat {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  flex: 1;
+}
+
+.hihi-chat__whisper-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: linear-gradient(120deg, rgba(255, 143, 171, 0.2), rgba(125, 211, 199, 0.12));
+  font-size: 0.82rem;
+}
+
+.hihi-chat__whisper-bar button {
+  border: 0;
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--accent2);
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+}
+
+.hihi__chat-log {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 240px;
+  max-height: none;
+  padding: 4px 6px 8px 2px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 143, 171, 0.45) transparent;
+  mask-image: linear-gradient(180deg, transparent, #000 12px, #000 calc(100% - 8px), transparent);
+}
+
+.hihi-chat__more {
+  align-self: center;
+  border: 0;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.hihi-chat__empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 36px 12px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+}
+
+.hihi-chat__bubble {
+  position: relative;
+  max-width: 92%;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.86rem;
+  line-height: 1.45;
+  animation: hihi-chat-in 0.18s ease;
+}
+
+@keyframes hihi-chat-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.hihi-chat__bubble.is-mine {
+  align-self: flex-end;
+  background: linear-gradient(145deg, rgba(255, 143, 171, 0.32), rgba(255, 180, 162, 0.18));
+  border-bottom-right-radius: 6px;
+}
+
+.hihi-chat__bubble.is-other {
+  align-self: flex-start;
+  background: rgba(125, 211, 199, 0.1);
+  border-bottom-left-radius: 6px;
+}
+
+.hihi-chat__bubble.is-system {
+  align-self: center;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-align: center;
+  padding: 4px 8px;
+}
+
+.hihi-chat__bubble.is-whisper {
+  box-shadow: inset 0 0 0 1px rgba(125, 211, 199, 0.45);
+}
+
+.hihi-chat__bubble.is-pending {
+  opacity: 0.65;
+}
+
+.hihi-chat__bubble.is-failed {
+  box-shadow: inset 0 0 0 1px #ff8f8f;
+}
+
+.hihi-chat__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.hihi-chat__meta b {
+  color: var(--accent2);
+}
+
+.hihi-chat__del {
+  margin-top: 4px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.72rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.hihi__chat-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  padding: 8px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(255, 214, 170, 0.14);
+}
+
+.hihi__chat-form input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  padding: 8px 10px;
+  font: inherit;
+  outline: none;
+  color-scheme: dark;
+}
+
+.hihi__chat-form input::placeholder {
+  color: rgba(255, 246, 232, 0.38);
+}
+
+.hihi__chat-form input:focus {
+  box-shadow: none;
+  border: 0;
+}
+
+.hihi__chat-send {
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 12px;
+  padding: 9px 14px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  color: #2a0f18;
+  background: linear-gradient(135deg, #ff8fab, #ffb4a2);
+  box-shadow: 0 4px 14px rgba(255, 143, 171, 0.28);
+  transition: transform 0.12s ease, opacity 0.12s ease, box-shadow 0.12s ease;
+}
+
+.hihi__chat-send:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(255, 143, 171, 0.36);
+}
+
+.hihi__chat-send:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.hihi__center {
+  margin: auto;
+  width: min(560px, 92vw);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hihi__center--plain {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 28px 12px 40px;
+}
+
+.hihi__center h1 {
+  margin: 0;
+  font-size: 2rem;
+  letter-spacing: 0.12em;
+}
+
+.hihi__center p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.hihi__error {
+  color: #ffb4b4;
+  font-size: 0.85rem;
+}
+
+.hihi__avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 10px;
+  padding: 4px 2px 8px;
+}
+
+.hihi__avatar-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 0;
+  border-radius: 14px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 0 0 1px transparent;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition: box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.hihi__avatar-card.is-on {
+  background: rgba(255, 143, 171, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(255, 143, 171, 0.45);
+}
+
+.hihi__avatar-card.is-primary {
+  box-shadow: inset 0 0 0 1.5px rgba(125, 211, 199, 0.75);
+  background: rgba(125, 211, 199, 0.1);
+}
+
+.hihi__avatar-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.hihi__avatar-pick img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  image-rendering: pixelated;
+  background: rgba(0, 0, 0, 0.28);
+  border-radius: 10px;
+}
+
+.hihi__avatar-pick span {
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+.hihi__avatar-use {
+  border: 0;
+  border-radius: 999px;
+  padding: 5px 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
+.hihi__avatar-use.is-on {
+  background: linear-gradient(135deg, var(--accent2), #9be7c4);
+  color: #0f1c24;
+}
+
+.hihi__profile-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 2px;
+  flex: 1;
+  min-height: 0;
+}
+
+.hihi__profile-card strong {
+  font-size: 1.05rem;
+}
+
+.hihi__profile-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+
+.hihi__profile-row b {
+  color: var(--text);
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .hihi__body {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(360px, 50vh) 1fr;
+  }
+
+  .hihi__form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* —— virtual joystick (Todie-like) —— */
+.hihi__joystick-zone {
+  position: absolute;
+  left: 18px;
+  bottom: 24px;
+  z-index: 15;
+  width: 160px;
+  height: 160px;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.hihi__joystick-base {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(255, 246, 232, 0.08);
+  border: 2px solid rgba(255, 143, 171, 0.4);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.hihi__joystick-knob {
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 143, 171, 0.7), rgba(125, 211, 199, 0.35));
+  border: 2px solid rgba(255, 246, 232, 0.55);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+@media (max-width: 500px) {
+  .hihi__joystick-zone {
+    left: 10px;
+    bottom: 14px;
+    width: 120px;
+    height: 120px;
+  }
+  .hihi__joystick-knob {
+    width: 44px;
+    height: 44px;
+  }
+}

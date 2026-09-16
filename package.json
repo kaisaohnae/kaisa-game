@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "next dev -p 5555",
-    "build": "next build",
+    "build": "node scripts/build-next.mjs",
+    "build:with-studio": "node scripts/build-next.mjs --with-studio",
     "start": "next start -p 5555",
     "lint": "next lint",
     "todie:sprites": "node src/games/todie/scripts/gen-dir-sprites.mjs && node src/games/todie/scripts/install-painted-art.mjs",

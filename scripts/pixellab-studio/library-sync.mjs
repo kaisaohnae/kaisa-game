@@ -557,6 +557,8 @@ export async function syncLibrary(client, opts = {}) {
   }
 
   onProgress('Fetching characters…');
+  /** @type {string[]} */
+  const failed = [];
   for (const row of remoteChars) {
     const remoteId = row.id;
     if (!remoteId) continue;
@@ -574,36 +576,49 @@ export async function syncLibrary(client, opts = {}) {
       continue;
     }
     onProgress(`Character ${remoteId.slice(0, 8)}…`);
-    const detail = await client.getCharacter(remoteId);
-    const name = existing?.name ?? nextName('character', catalog.characters);
-    const frames = await downloadCharacterFrames(detail, name);
-    if (!frames.length) {
-      onProgress(`skip character ${remoteId}: no rotations`);
-      continue;
-    }
-    const entry = {
-      name,
-      title: characterTitle(detail),
-      remoteId,
-      stateName: characterStateName(detail),
-      groupId: detail.group_id ? String(detail.group_id) : undefined,
-      frames,
-      syncedAt: now,
-    };
-    if (existing) {
-      const i = catalog.characters.findIndex((c) => c.remoteId === remoteId);
-      catalog.characters[i] = entry;
-      summary.updated.push(name);
-    } else {
-      catalog.characters.push(entry);
-      knownChars.set(remoteId, entry);
-      summary.added.push(name);
+    try {
+      const detail = await client.getCharacter(remoteId);
+      const name = existing?.name ?? nextName('character', catalog.characters);
+      const frames = await downloadCharacterFrames(detail, name);
+      if (!frames.length) {
+        onProgress(`skip character ${remoteId}: no rotations`);
+        continue;
+      }
+      const entry = {
+        name,
+        title: characterTitle(detail),
+        remoteId,
+        stateName: characterStateName(detail),
+        groupId: detail.group_id ? String(detail.group_id) : undefined,
+        frames,
+        syncedAt: now,
+      };
+      if (existing) {
+        const i = catalog.characters.findIndex((c) => c.remoteId === remoteId);
+        catalog.characters[i] = entry;
+        summary.updated.push(name);
+      } else {
+        catalog.characters.push(entry);
+        knownChars.set(remoteId, entry);
+        summary.added.push(name);
+      }
+      // Persist progress so a later CDN failure does not lose earlier imports
+      saveCatalog(catalog);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      failed.push(`${remoteId}: ${msg}`);
+      onProgress(`fail character ${remoteId.slice(0, 8)}: ${msg}`);
     }
   }
 
   saveCatalog(catalog);
   onProgress('Done');
-  return {ok: true, mode, summary, catalog};
+  return {
+    ok: failed.length === 0,
+    mode,
+    summary: {...summary, failed},
+    catalog,
+  };
 }
 
 /** Public URL helpers for catalog entries */

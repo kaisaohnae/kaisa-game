@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "name": "chat1",
+  "worldSize": 8000,
+  "tileSize": 100,
+  "spawnX": 4000,
+  "spawnY": 4000,
+  "maxPlayers": 80,
+  "parkEvery": 7,
+  "colors": {
+    "bg": "#0d2a33",
+    "tileA": "#13404c",
+    "tileB": "#163f4a",
+    "park": "#1a4a3a",
+    "parkAccent": "rgba(125, 211, 199, 0.18)",
+    "border": "rgba(255, 214, 170, 0.12)"
+  },
+  "minimap": {
+    "size": 168,
+    "selfColor": "#ff8fab",
+    "otherColor": "#7dd3c7",
+    "viewColor": "#ffe082",
+    "label": "hihi"
+  }
+}
