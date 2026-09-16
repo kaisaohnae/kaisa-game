@@ -1,0 +1,600 @@
+{
+  "version": 1,
+  "characters": [
+    {
+      "name": "f-green-uniform",
+      "title": "여자: 초록교복",
+      "gender": "F",
+      "groupId": "99d7c8c9-cbea-414b-bbec-45cd75f0421b",
+      "remoteId": "acee424d-3494-4206-a3d9-27939cec0707",
+      "enabled": true,
+      "actions": {
+        "idle": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ],
+        "walk": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      "sources": {
+        "idle": "character-129",
+        "walk": "character-96"
+      },
+      "previewFrame": "south"
+    },
+    {
+      "name": "m-green-uniform",
+      "title": "남자: 초록교복",
+      "gender": "M",
+      "groupId": "ad81484c-4307-4a30-bdc3-e48f82e4f8e1",
+      "remoteId": "fd95e247-3767-4397-b010-93a6119b255c",
+      "enabled": true,
+      "actions": {
+        "idle": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ],
+        "walk": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      "sources": {
+        "idle": "character-128",
+        "walk": "character-97"
+      },
+      "previewFrame": "south"
+    },
+    {
+      "name": "m-delinquent",
+      "title": "남자: 까칠",
+      "gender": "M",
+      "groupId": "4f386d47-74e7-4ada-a393-e199f8cd7083",
+      "remoteId": "09ef0378-59d4-4bba-bae8-9d43bba5b4ce",
+      "enabled": true,
+      "actions": {
+        "idle": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ],
+        "walk": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      "sources": {
+        "idle": "character-127",
+        "walk": "character-98"
+      },
+      "previewFrame": "south"
+    },
+    {
+      "name": "m-chubby",
+      "title": "남자: 통통",
+      "gender": "M",
+      "groupId": "93411e1b-4c70-4918-b38f-9099976cc739",
+      "remoteId": "1c66e311-2365-4f2c-868e-867d160f017a",
+      "enabled": true,
+      "actions": {
+        "idle": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ],
+        "walk": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      "sources": {
+        "idle": "character-126",
+        "walk": "character-99"
+      },
+      "previewFrame": "south"
+    },
+    {
+      "name": "m-middle-aged",
+      "title": "남자: 중년",
+      "gender": "M",
+      "groupId": "b273d42a-ffe1-45f5-9639-104752c49679",
+      "remoteId": "5730c156-d540-4c66-ac69-91a8b20b6c43",
+      "enabled": true,
+      "actions": {
+        "idle": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ],
+        "walk": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      "sources": {
+        "idle": "character-125",
+        "walk": "character-100"
+      },
+      "previewFrame": "south"
+    },
+    {
+      "name": "m-angler",
+      "title": "남자: 낚시꾼",
+      "gender": "M",
+      "groupId": "f23a9c82-33c1-4f32-9c41-da396dfff260",
+      "remoteId": "12535735-9c2b-478a-b55a-5f0bf40cf892",
+      "enabled": true,
+      "actions": {
+        "idle": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ],
+        "walk": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      "sources": {
+        "idle": "character-124",
+        "walk": "character-101"
+      },
+      "previewFrame": "south"
+    },
+    {
+      "name": "f-cinderella",
+      "title": "여자: 신데렐라",
+      "gender": "F",
+      "groupId": "84788564-8e2c-4e34-a51d-ce046ff93d3b",
+      "remoteId": "fc0f15af-fcc3-4308-a1ee-c5175e81af0b",
+      "enabled": true,
+      "actions": {
+        "idle": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ],
+        "walk": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      "sources": {
+        "idle": "character-123",
+        "walk": "character-102"
+      },
+      "previewFrame": "south"
+    },
+    {
+      "name": "m-hunter",
+      "title": "남자: 사냥꾼",
+      "gender": "M",
+      "groupId": "af2e2b49-f7d6-4120-8427-b19135a4ee84",
+      "remoteId": "64ef0d05-bb4b-4581-bc91-73b454d3dac7",
+      "enabled": true,
+      "actions": {
+        "idle": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ],
+        "walk": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      "sources": {
+        "idle": "character-122",
+        "walk": "character-103"
+      },
+      "previewFrame": "south"
+    },
+    {
+      "name": "m-developer",
+      "title": "남자: 개발자",
+      "gender": "M",
+      "groupId": "735b39dc-ded4-4d46-b591-4f60d3c6b7b5",
+      "remoteId": "706b53c3-d439-419b-b0fd-a2d0ad5a5bf9",
+      "enabled": true,
+      "actions": {
+        "idle": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ],
+        "walk": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      "sources": {
+        "idle": "character-121",
+        "walk": "character-104"
+      },
+      "previewFrame": "south"
+    },
+    {
+      "name": "f-swimsuit",
+      "title": "여자: 수영복",
+      "gender": "F",
+      "groupId": "13f0c490-0779-4b2a-a2c7-4cb6a7cfba66",
+      "remoteId": "9adaf220-4f7c-4145-8339-31a1ddda110d",
+      "enabled": true,
+      "actions": {
+        "idle": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ],
+        "walk": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      "sources": {
+        "idle": "character-120",
+        "walk": "character-105"
+      },
+      "previewFrame": "south"
+    },
+    {
+      "name": "f-office-worker",
+      "title": "여자: 회사원",
+      "gender": "F",
+      "groupId": "1fa05f96-27cb-4980-a966-35121e852e7b",
+      "remoteId": "f619defd-faa1-4bad-afa5-340f8944817c",
+      "enabled": true,
+      "actions": {
+        "idle": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ],
+        "walk": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      "sources": {
+        "idle": "character-119",
+        "walk": "character-106"
+      },
+      "previewFrame": "south"
+    },
+    {
+      "name": "f-chef",
+      "title": "여자: 요리사",
+      "gender": "F",
+      "groupId": "916d6e4a-272c-4bbb-a046-d6692225613c",
+      "remoteId": "2e6830ec-a945-4a75-96a6-525bc70a28bc",
+      "enabled": true,
+      "actions": {
+        "idle": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ],
+        "walk": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      "sources": {
+        "idle": "character-118",
+        "walk": "character-107"
+      },
+      "previewFrame": "south"
+    },
+    {
+      "name": "f-straight-hair",
+      "title": "여자: 생머리",
+      "gender": "F",
+      "groupId": "72b52f6a-1436-4637-9c65-44c7ca31e26e",
+      "remoteId": "1bd67faf-462d-481c-a163-c6b90b4d7a58",
+      "enabled": true,
+      "actions": {
+        "idle": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ],
+        "walk": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      "sources": {
+        "idle": "character-117",
+        "walk": "character-108"
+      },
+      "previewFrame": "south"
+    },
+    {
+      "name": "f-school-uniform",
+      "title": "여자: 교복",
+      "gender": "F",
+      "groupId": "21eea29e-40e1-4093-8287-02e3d3219b59",
+      "remoteId": "5d4b541a-05eb-4ffd-993c-cd930892cf9c",
+      "enabled": true,
+      "actions": {
+        "idle": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ],
+        "walk": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      "sources": {
+        "idle": "character-116",
+        "walk": "character-109"
+      },
+      "previewFrame": "south"
+    },
+    {
+      "name": "m-chef",
+      "title": "남자: 요리사",
+      "gender": "M",
+      "groupId": "0c5599ea-69e9-43ce-9d4e-397d394d8cf4",
+      "remoteId": "3685ea62-8805-48e9-bb76-e7a8bc8b2d32",
+      "enabled": true,
+      "actions": {
+        "idle": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ],
+        "walk": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      "sources": {
+        "idle": "character-115",
+        "walk": "character-110"
+      },
+      "previewFrame": "south"
+    },
+    {
+      "name": "m-swimsuit",
+      "title": "남자: 수영복",
+      "gender": "M",
+      "groupId": "5bd859e4-139e-44d9-bffd-3b62a9014dca",
+      "remoteId": "38157c03-52f2-4053-a3c9-c3bbe6f9c8f0",
+      "enabled": true,
+      "actions": {
+        "idle": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ],
+        "walk": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      "sources": {
+        "idle": "character-114",
+        "walk": "character-111"
+      },
+      "previewFrame": "south"
+    },
+    {
+      "name": "f-chubby",
+      "title": "여자: 통통",
+      "gender": "F",
+      "groupId": "f1a373c4-15f3-4934-b32c-ecbf8f2a3e8b",
+      "remoteId": "70a3c42f-193a-4882-8102-7849a0098698",
+      "enabled": true,
+      "actions": {
+        "idle": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ],
+        "walk": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      "sources": {
+        "idle": "character-113",
+        "walk": "character-112"
+      },
+      "previewFrame": "south"
+    }
+  ]
+}
