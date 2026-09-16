@@ -11,6 +11,16 @@ const NAV = [
     label: 'Todie 맵',
     match: (p: string) => p.startsWith('/studio/map'),
   },
+  {
+    href: '/studio/hihi/',
+    label: 'Hihi 캐릭터',
+    match: (p: string) => p === '/studio/hihi' || p.startsWith('/studio/hihi/'),
+  },
+  {
+    href: '/studio/hihi-map/',
+    label: 'Hihi 맵',
+    match: (p: string) => p.startsWith('/studio/hihi-map'),
+  },
 ] as const;
 
 export default function StudioNav() {

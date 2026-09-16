@@ -1,0 +1,99 @@
+.hihi-studio__stats {
+  margin: 8px 0 4px;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.hihi-studio__stats b {
+  color: #111827;
+}
+
+.hihi-studio__tip {
+  color: #be185d;
+}
+
+.hihi-studio__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 12px 0 16px;
+}
+
+.hihi-studio__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  gap: 12px;
+}
+
+.hihi-studio__card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 14px;
+  padding: 10px;
+  background: #fff;
+}
+
+.hihi-studio__card.is-on {
+  border-color: #ff8fab;
+  box-shadow: 0 0 0 2px rgba(255, 143, 171, 0.35);
+}
+
+.hihi-studio__pick {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+}
+
+.hihi-studio__card img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  background: #f3f4f6;
+  border-radius: 10px;
+  image-rendering: pixelated;
+}
+
+.hihi-studio__card strong {
+  font-size: 0.9rem;
+}
+
+.hihi-studio__card span,
+.hihi-studio__card em {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-style: normal;
+}
+
+.hihi-studio__card em {
+  color: #db2777;
+  font-weight: 700;
+}
+
+.hihi-studio__gender {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.hihi-studio__gender button {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  padding: 6px;
+  background: #f9fafb;
+  cursor: pointer;
+}
+
+.hihi-studio__gender button.is-on {
+  background: #ffe4ec;
+  border-color: #ff8fab;
+  font-weight: 700;
+}

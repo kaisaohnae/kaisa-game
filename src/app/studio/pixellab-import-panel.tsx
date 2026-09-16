@@ -9,6 +9,7 @@ import {
   libraryTileUrl,
   type PixellabLibraryCatalog,
 } from '@/games/todie/content/pixellabLibrary';
+import {isHihiOnlyCharacterTitle} from '@/lib/hihi-characters';
 
 type PendingItem = {
   remoteId: string;
@@ -55,7 +56,9 @@ export default function PixelLabImportPanel({headers, online, hasApiKey, onLog}:
       version: 1,
       objects: data.objects ?? [],
       tiles: data.tiles ?? [],
-      characters: data.characters ?? [],
+      characters: (data.characters ?? []).filter(
+        (c: {title?: string}) => !isHihiOnlyCharacterTitle(c.title)
+      ),
     });
   }, [headers]);
 
@@ -71,14 +74,18 @@ export default function PixelLabImportPanel({headers, online, hasApiKey, onLog}:
     setPending({
       objects: data.pending?.objects ?? [],
       tiles: data.pending?.tiles ?? [],
-      characters: data.pending?.characters ?? [],
+      characters: (data.pending?.characters ?? []).filter(
+        (p: PendingItem) => !isHihiOnlyCharacterTitle(p.title || p.desc)
+      ),
     });
     if (data.catalog) {
       setCatalog({
         version: 1,
         objects: data.catalog.objects ?? [],
         tiles: data.catalog.tiles ?? [],
-        characters: data.catalog.characters ?? [],
+        characters: (data.catalog.characters ?? []).filter(
+          (c: {title?: string}) => !isHihiOnlyCharacterTitle(c.title)
+        ),
       });
     }
     setPendingLoaded(true);
@@ -126,7 +133,14 @@ export default function PixelLabImportPanel({headers, online, hasApiKey, onLog}:
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'sync failed');
-      setCatalog(data.catalog ?? emptyPixellabCatalog());
+      setCatalog({
+        version: data.catalog?.version ?? 1,
+        objects: data.catalog?.objects ?? [],
+        tiles: data.catalog?.tiles ?? [],
+        characters: (data.catalog?.characters ?? []).filter(
+          (c: {title?: string}) => !isHihiOnlyCharacterTitle(c.title)
+        ),
+      });
       setSelected(new Set());
       const s = data.summary ?? {};
       onLog(`완료 · 추가 ${(s.added ?? []).length}`);
@@ -162,7 +176,14 @@ export default function PixelLabImportPanel({headers, online, hasApiKey, onLog}:
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'resync failed');
-      setCatalog(data.catalog ?? emptyPixellabCatalog());
+      setCatalog({
+        version: data.catalog?.version ?? 1,
+        objects: data.catalog?.objects ?? [],
+        tiles: data.catalog?.tiles ?? [],
+        characters: (data.catalog?.characters ?? []).filter(
+          (c: {title?: string}) => !isHihiOnlyCharacterTitle(c.title)
+        ),
+      });
       const s = data.summary ?? {};
       onLog(`재연동 완료 · 갱신 ${(s.updated ?? []).length}`);
       for (const name of s.updated ?? []) onLog(`↻ ${name}`);
