@@ -7,4 +7,4 @@
 :HL["/_next/static/chunks/1bmp_f_c6clu0.css","style"]
 :HL["/_next/static/chunks/40zglex9an-ad.css","style"]
 :HL["/_next/static/chunks/2rlx7670its_-.css","style"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"games","param":null,"prefetchHints":0,"slots":{"children":{"name":"id","param":{"type":"d","key":"plane-shoot","siblings":null},"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"SHQIwOQ7e4WtMEtwkG4gO"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"games","param":null,"prefetchHints":0,"slots":{"children":{"name":"id","param":{"type":"d","key":"plane-shoot","siblings":null},"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}}}},"staleTime":300,"buildId":"GGFmU1wt3O3DRTEcmBk4n"}
