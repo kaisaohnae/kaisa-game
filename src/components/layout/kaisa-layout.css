@@ -1,0 +1,108 @@
+/* Shared page width, gutters and footer proportions across Kaisa sites. */
+html:root {
+  --layout-max: 1100px;
+  --layout-gutter: clamp(24px, 5vw, 64px);
+}
+html body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+html body .site-layout {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+html body .site-layout #content,
+html body .site-layout__body { flex: 1 0 auto; min-height: auto; }
+html body .site-main { flex: 1 0 auto; min-height: auto; padding-bottom: 64px; }
+html body .blog-main { flex: 1 0 auto; min-height: auto; padding-bottom: 64px; }
+html body .site-shell {
+  width: 100%;
+  box-sizing: border-box;
+  padding-inline: var(--layout-gutter);
+}
+html body .site-shell__inner {
+  width: 100%;
+  max-width: var(--layout-max);
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+html body .kaisa-header__shell { padding-inline: var(--layout-gutter); }
+html body .kaisa-header__top { max-width: var(--layout-max); }
+html body .game-portal {
+  padding-inline: var(--layout-gutter);
+  padding-bottom: 64px;
+}
+html body .game-portal__stage { max-width: var(--layout-max); }
+#footer.site-footer {
+  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 40px 0;
+  margin: 0;
+  border-top: 1px solid var(--color-border);
+  font-family: var(--font-body), sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+}
+#footer .site-footer__inner {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+#footer .site-footer__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+#footer .site-footer__auth { display: flex; align-items: center; min-height: 21px; }
+#footer .auth-chip { display: flex; align-items: center; gap: 12px; font-size: 13px; line-height: 1.6; }
+#footer .site-footer__aside { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+#footer .site-footer__langs { display: flex; align-items: center; gap: 10px; }
+#footer .site-footer__lang {
+  appearance: none;
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  height: auto;
+  text-shadow: none;
+  cursor: pointer;
+  opacity: 1;
+  text-decoration: none;
+}
+#footer .site-footer__lang:hover { color: var(--color-text); }
+#footer .site-footer__lang--active { color: var(--color-text); text-decoration: underline; text-underline-offset: 3px; }
+#footer .site-footer__copy { margin: 0; font-size: 12px; line-height: 1.6; letter-spacing: 0.05em; color: var(--color-text-muted); }
+#footer .site-footer__copy-link { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+#footer .site-footer__link { font-size: 13px; line-height: 1.2; color: var(--color-text); text-decoration: none; }
+#footer .site-footer__link:hover, #footer .site-footer__copy-link:hover { color: var(--color-accent); }
+@media (max-width: 768px) {
+  html:root { --layout-gutter: 24px; }
+  #footer .site-footer__inner { align-items: flex-start; }
+}
+@media (max-width: 480px) {
+  #footer .site-footer__inner { flex-direction: column; gap: 20px; }
+  #footer .site-footer__aside { align-items: flex-start; }
+}
+
+@media (max-width: 768px) {
+  html body { padding-top: var(--kaisa-mobile-menu-height, 0px); }
+}

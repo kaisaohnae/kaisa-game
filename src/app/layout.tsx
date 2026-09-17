@@ -1,8 +1,11 @@
+import {LOCALE_BOOTSTRAP_SCRIPT} from '@/i18n/locale-cookie';
 import type {Metadata, Viewport} from 'next';
 import {DM_Sans, Fredoka, Nunito} from 'next/font/google';
 import '@/app/globals.css';
 import '@/components/layout/site-layout.css';
 import '@/ui-kit/kit.css';
+import '@/components/layout/kaisa-layout.css';
+import ThemeProvider from '@/components/layout/theme-provider';
 import GoogleAnalytics from '@/components/google-analytics';
 import GoogleAdsense from '@/components/google-adsense';
 import {LocaleProvider} from '@/i18n/locale-context';
@@ -69,13 +72,15 @@ export const viewport: Viewport = {
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
-    <html lang="en" className={`${fredoka.variable} ${nunito.variable} ${dmSans.variable}`}>
+    <html suppressHydrationWarning lang="ko" className={`${fredoka.variable} ${nunito.variable} ${dmSans.variable}`}>
       <head>
+        <script id="kaisa-locale-init" dangerouslySetInnerHTML={{__html: LOCALE_BOOTSTRAP_SCRIPT}} />
+        <script id="kaisa-init-8" dangerouslySetInnerHTML={{__html: "(function(){try{var t=document.cookie.split(';').map(function(c){return c.trim();}).find(function(c){return c.indexOf('kaisa-shared-theme=')===0;});document.documentElement.setAttribute('data-theme',t==='kaisa-shared-theme=dark'?'dark':'light');}catch(e){}})();"}} />
         <GoogleAdsense />
       </head>
       <body>
         <GoogleAnalytics />
-        <LocaleProvider>{children}</LocaleProvider>
+        <LocaleProvider><ThemeProvider />{children}</LocaleProvider>
       </body>
     </html>
   );

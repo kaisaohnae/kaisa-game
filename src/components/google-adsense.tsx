@@ -1,10 +1,13 @@
+import Script from 'next/script';
+
 const ADSENSE_CLIENT = 'ca-pub-2641553863829571';
 
-/** Renders inside root <head> — use native async script (not next/script beforeInteractive). */
+/** Load ads after hydration so third-party head mutations cannot reorder the initial tree. */
 export default function GoogleAdsense() {
   return (
-    <script
-      async
+    <Script
+      id="kaisa-google-adsense"
+      strategy="afterInteractive"
       src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
       crossOrigin="anonymous"
     />

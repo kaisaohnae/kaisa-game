@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import React, {useEffect, useRef, useState} from 'react';
 import './todie.css';
 import {
@@ -3468,9 +3467,6 @@ export default function TodieGame() {
   if (!started) {
     return (
       <div className="todie todie--gate">
-        <Link href="/" className="game-page__back todie__gate-home">
-          🏠 홈으로
-        </Link>
         <button
           type="button"
           className="todie__fresh todie__gate-fresh"

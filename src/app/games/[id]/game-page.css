@@ -93,3 +93,28 @@
     font-size: 14px;
   }
 }
+
+/* One return control shared by every game, including fullscreen games. */
+.game-page .game-page__header {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  z-index: 80;
+  display: block;
+}
+.game-page .game-page__back {
+  width: 40px;
+  height: 40px;
+  min-height: 40px;
+  padding: 0;
+  border: 1px solid rgba(128, 128, 128, 0.3);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  color: #444;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.2s, transform 0.2s;
+}
+.game-page .game-page__back:hover { background: #fff; }
+.game-page .game-page__back:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+[data-theme='dark'] .game-page .game-page__back { background: rgba(40, 40, 44, 0.9); color: #eee; }
+[data-theme='dark'] .game-page .game-page__back:hover { background: #444; }

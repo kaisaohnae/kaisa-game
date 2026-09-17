@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import GameBackButton from '@/components/game-back-button';
 import {notFound} from 'next/navigation';
 import JsonLd from '@/components/seo/json-ld';
 import {getGame, getGameIds} from '@/games';
@@ -35,11 +35,7 @@ export default async function GamePage({params}: PageProps) {
       <main
         className={`game-page${isImmersive ? ` game-page--${id}` : ''}`}
       >
-        <header className="game-page__header">
-          <Link href="/" className="game-page__back">
-            🏠 홈으로
-          </Link>
-        </header>
+        <GameBackButton />
         <section className="game-page__stage">
           <Game />
         </section>

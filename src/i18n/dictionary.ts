@@ -1,6 +1,14 @@
 export type LocaleEntry = Partial<Record<'ko' | 'zh' | 'hi', string>>;
 
 export const dictionary: Record<string, LocaleEntry> = {
+  "Back to games": { ko: "게임 목록으로 돌아가기", zh: "返回游戏列表", hi: "गेम सूची पर वापस जाएँ" },
+  "Difficulty": { ko: "난이도", zh: "难度", hi: "कठिनाई" },
+  "Works": { ko: "작업" },
+  "Tools": { ko: "툴" },
+  "Blog": { ko: "블로그" },
+  "Posts": { ko: "포스트" },
+  "Switch to light mode": { "ko": "라이트 모드로 전환", "zh": "切换浅色模式", "hi": "लाइट मोड में बदलें" },
+  "Switch to dark mode": { "ko": "다크 모드로 전환", "zh": "切换深色模式", "hi": "डार्क मोड में बदलें" },
   "Games": {
     "ko": "게임",
     "zh": "游戏",
