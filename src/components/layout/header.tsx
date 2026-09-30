@@ -18,7 +18,6 @@ export default function Header() {
   const headerRef = useRef<HTMLElement>(null);
   useHeaderMenuSpacing(headerRef, open);
   const active = activeKaisaNav('game', pathname);
-  const isWorks = active === 'works';
   useEffect(() => {
     const onScroll = () => document.body.classList.toggle('scrolled', window.scrollY > 8);
     window.addEventListener('scroll', onScroll, {passive: true});
@@ -46,7 +45,7 @@ export default function Header() {
     </li>
   ));
   return (
-    <header id="header" ref={headerRef} className={`kaisa-header ${isWorks ? 'kaisa-header--works' : ''} ${open ? 'kaisa-header--open' : ''}`}>
+    <header id="header" ref={headerRef} className={`kaisa-header ${open ? 'kaisa-header--open' : ''}`}>
       <div className="kaisa-header__shell">
         <div className="kaisa-header__top">
           <a href={KAISA_HOME_URL} className="kaisa-header__logo" aria-label="Kaisa Home"><IconLogo width={100} height={42} /></a>
