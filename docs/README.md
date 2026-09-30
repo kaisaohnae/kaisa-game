@@ -108,7 +108,7 @@ npm run build
 ### 초기화 
 ```
 git config --global user.name "kaisa"
-git config --global user.email "kaisa@kaisa.co.kr"
+git config --global user.email "7083620@hanmail.net"
 rm -rf .git
 git init
 git add .

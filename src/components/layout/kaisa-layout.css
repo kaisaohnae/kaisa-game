@@ -18,6 +18,9 @@ html body .site-layout {
 }
 html body .site-layout #content,
 html body .site-layout__body { flex: 1 0 auto; min-height: auto; }
+/* Placeholder while the page content is not rendered yet (static HTML / before hydration):
+   keeps the footer below the fold instead of jumping up under the header. */
+html body .site-layout #content.content--pending { min-height: 100vh; min-height: 100dvh; }
 html body .site-main { flex: 1 0 auto; min-height: auto; padding-bottom: 64px; }
 html body .blog-main { flex: 1 0 auto; min-height: auto; padding-bottom: 64px; }
 html body .site-shell {

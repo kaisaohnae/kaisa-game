@@ -77,8 +77,8 @@ export default function Footer() {
                 );
               })}
             </div>
-            <a href="mailto:kaisa@kaisa.co.kr" className="site-footer__link">
-              kaisa@kaisa.co.kr
+            <a href="mailto:7083620@hanmail.net" className="site-footer__link">
+              7083620@hanmail.net
             </a>
           </div>
         </div>
